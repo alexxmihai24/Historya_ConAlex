@@ -37,8 +37,11 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\generate-pwa-icons
 1. Crea un proyecto en Supabase.
 2. Copia `.env.example` como `.env.local`.
 3. Añade la URL del proyecto y su clave **publishable**.
-4. Aplica `supabase/migrations/20260826_initial_schema.sql` desde el SQL Editor o mediante la CLI de Supabase.
-5. En Authentication → URL Configuration, añade la URL local y la URL de producción a los *redirect URLs*.
+4. Aplica **las dos migraciones en orden** desde el SQL Editor o con la CLI de Supabase:
+   1. `supabase/migrations/20260826_initial_schema.sql`
+   2. `supabase/migrations/20260827_content_metadata_and_answer_check.sql`
+5. Ejecuta `supabase/seed.sql` para cargar el contenido. Se genera desde `src/data/topics/` con `npm run seed`; no lo edites a mano.
+6. En Authentication → URL Configuration, añade la URL local y la URL de producción a los *redirect URLs*.
 
 No subas `.env.local` al repositorio. La clave `service_role`/secret no debe usarse nunca en el navegador ni empezar por `VITE_`.
 

@@ -9,6 +9,16 @@
 
 begin;
 
+-- 0. Comprobación previa ------------------------------------------------------
+-- Sin la segunda migración, el insert de topics falla con un 42703 poco claro
+-- («column period_label does not exist»). Mejor avisar de qué falta y por qué.
+do $$ begin
+  if not exists (select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'topics' and column_name = 'period_label') then
+    raise exception 'Falta la migración 20260827_content_metadata_and_answer_check.sql. Ejecuta las migraciones de supabase/migrations/ en orden antes que este seed.';
+  end if;
+end $$;
+
 -- 1. Épocas ------------------------------------------------------------------
 insert into public.eras (slug, title, sort_order, start_year, end_year, published) values
   ('antiguedad', 'Antigüedad', 0, -3500, 476, true),
