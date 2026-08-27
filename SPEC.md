@@ -65,8 +65,7 @@ lección + glosario + debates + bibliografía + banco de preguntas.
 ### No implementado
 
 - **Proyecto real de Supabase.** `.env.local` contiene la URL de ejemplo (`your-project.supabase.co`), así que la aplicación funciona siempre con el contenido local.
-- Carga del contenido desde la base de datos. Hoy hay **dos fuentes**: `src/data/topics/` (actualizada) y `supabase/seed.sql` (por detrás).
-- Columnas de glosario, debates y bibliografía en el esquema. `useLesson` las devuelve vacías en la ruta Supabase.
+- **Contenido cargado en la base de datos.** Las migraciones están aplicadas, pero las tablas están vacías: falta ejecutar `supabase/seed.sql` en el SQL Editor.
 - Panel de administración para autores o editores.
 - Recuperación de contraseña y edición de nombre/avatar.
 - Búsqueda de contenido y filtros por país o materia.
@@ -106,9 +105,10 @@ src/
 public/                    Manifest, service worker e iconos PWA
 scripts/
   generate-pwa-icons.ps1   Generador reproducible de iconos PNG
+  generate-seed.mjs        Genera supabase/seed.sql desde src/data/topics/
 supabase/
   migrations/              Esquema inicial y metadatos de contenido
-  seed.sql                 Contenido para la base de datos (por detrás de src/data/topics/)
+  seed.sql                 GENERADO desde src/data/topics/ con `npm run seed`. No editar a mano.
 ```
 
 ## 7. Rutas de frontend
@@ -135,6 +135,8 @@ interface TopicModule {
 - `sections[].body` guarda los párrafos separados por una línea en blanco. `StudyView` los divide al renderizar.
 - `debates[]` recoge una controversia con las posiciones enfrentadas (`school` + `argument`) y el estado de la cuestión.
 - `sources[]` distingue `kind: 'primaria'` (textos de la época) de `kind: 'estudio'` (historiografía moderna).
+- `color` debe ser uno de `gold`, `blue`, `terracotta`, `green`, `plum` o `red`: son las clases `.visual-*` del CSS y el `check` de `accent_color` en el esquema. `npm run seed` falla si no lo es.
+- En la base de datos todo esto viaja dentro de `lessons.body`, un array de bloques tipados (`section`, `concepts`, `debates`, `timeline`, `sources`). No hicieron falta columnas nuevas.
 - Los `id` de pregunta siguen el patrón `<slug>-<n>` para evitar colisiones entre temas.
 
 ### Cómo añadir un tema
@@ -143,6 +145,7 @@ interface TopicModule {
 2. Importarlo en `src/data/history.ts` y añadirlo al array `modules`.
 3. Si estaba en `_pendientes.ts`, quitarlo de allí.
 4. `npm run build` para comprobar tipos y compilación.
+5. `npm run seed` para regenerar `supabase/seed.sql`.
 
 ## 9. Modelo de datos de Supabase
 
@@ -228,8 +231,7 @@ Después, ejecutar las migraciones de `supabase/migrations/` en orden y luego `s
 1. Crear el proyecto de Supabase y sustituir la URL de `.env.local`.
 2. Aplicar migraciones y configurar Auth con confirmación de correo y URLs permitidas.
 3. Probar registro, login y RLS con dos usuarios distintos.
-4. Añadir columnas de glosario, debates y bibliografía al esquema.
-5. Generar `seed.sql` desde `src/data/topics/` para que exista una única fuente de contenido.
+4. Ejecutar `supabase/seed.sql` para cargar el contenido.
 
 ### Fase 3 · Diseño
 

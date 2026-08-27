@@ -12,7 +12,7 @@ export const feudalismo: TopicModule = {
     level: 'Universidad',
     progress: 0,
     visual: '⚔',
-    color: 'moss',
+    color: 'red',
     summary:
       'Entre los siglos IX y XII, Europa occidental funcionó sin Estados capaces de garantizar justicia, defensa y fiscalidad de forma centralizada. Lo que ocupó ese vacío fue un entramado de relaciones personales de dependencia y de poderes locales sobre la tierra y sobre las personas. Llamar «feudalismo» a ese entramado es cómodo, pero la propia palabra ha sido objeto de una de las polémicas más duras de la historiografía del siglo XX.',
     keyDates: [

@@ -7,6 +7,9 @@ import { TOPIC_SELECT, mapEducationLevel, type RawTopicRow, type EducationLevel 
 export type LessonBlock =
   | { type: 'section'; title: string; text: string; callout?: string | null }
   | { type: 'timeline'; items: Array<{ date: string; event: string }> }
+  | { type: 'concepts'; items: Concept[] }
+  | { type: 'debates'; items: Debate[] }
+  | { type: 'sources'; items: Source[] }
 
 export interface StudySectionUI {
   title: string
@@ -41,11 +44,17 @@ export interface LessonView {
 function blocksToSections(body: LessonBlock[]) {
   const sections: StudySectionUI[] = []
   const keyDates: TimelineItemUI[] = []
+  const concepts: Concept[] = []
+  const debates: Debate[] = []
+  const sources: Source[] = []
   for (const block of body) {
     if (block.type === 'section') sections.push({ title: block.title, body: block.text, callout: block.callout ?? undefined })
     else if (block.type === 'timeline') keyDates.push(...block.items)
+    else if (block.type === 'concepts') concepts.push(...block.items)
+    else if (block.type === 'debates') debates.push(...block.items)
+    else if (block.type === 'sources') sources.push(...block.items)
   }
-  return { sections, keyDates }
+  return { sections, keyDates, concepts, debates, sources }
 }
 
 function mapDemoLesson(slug: string): LessonView | null {
@@ -98,7 +107,7 @@ export function useLesson(slug: string) {
         .maybeSingle()
       if (lessonError) throw lessonError
       const lesson = lessonRow as unknown as { id: string; body: LessonBlock[] } | null
-      const { sections, keyDates } = blocksToSections(lesson?.body ?? [])
+      const { sections, keyDates, concepts, debates, sources } = blocksToSections(lesson?.body ?? [])
       topic.value = {
         id: row.slug,
         lessonId: lesson?.id ?? null,
@@ -113,10 +122,9 @@ export function useLesson(slug: string) {
         summary: row.summary,
         sections,
         keyDates,
-        // ponytail: el esquema aún no guarda glosario; añadir columna `concepts` a lessons cuando haga falta desde Supabase.
-        concepts: [],
-        debates: [],
-        sources: [],
+        concepts,
+        debates,
+        sources,
       }
     } catch (err) {
       console.error('useLesson: no se pudo cargar la lección desde Supabase', err)
