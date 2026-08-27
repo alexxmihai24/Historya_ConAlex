@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">Historia Con Alex</title>
+  <rect width="512" height="512" rx="112" fill="#234c3e"/>
+  <circle cx="256" cy="256" r="174" fill="none" stroke="#e1aa44" stroke-width="13"/>
+  <path fill="#f8f4eb" d="M170 145h55v79h62v-79h55v222h-55v-91h-62v91h-55z"/>
+  <path fill="#e1aa44" d="M150 390h212v18H150z"/>
+  <path fill="#e1aa44" d="m163 127 93-42 93 42-8 18-85-34-85 34z"/>
+</svg>
