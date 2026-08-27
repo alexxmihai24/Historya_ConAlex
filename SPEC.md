@@ -1,7 +1,7 @@
 # Especificación del producto · Historia Con Alex
 
 **Última actualización:** 27 de agosto de 2026
-**Estado:** contenido en reescritura a nivel universitario. Interfaz funcional. Supabase preparado pero **no configurado**.
+**Estado:** contenido en reescritura a nivel universitario. Interfaz funcional. **Supabase conectado y con el contenido cargado.**
 
 ## 1. Visión
 
@@ -59,13 +59,12 @@ lección + glosario + debates + bibliografía + banco de preguntas.
 - Perfil conectado a datos reales (progreso, historial de quizzes) y cierre de sesión.
 - Formularios de registro e inicio de sesión sobre Supabase Auth.
 - Migraciones con RLS, perfiles, contenido, progreso y resultados; funciones RPC que no exponen la respuesta correcta.
+- **Backend en marcha:** las dos migraciones aplicadas y el contenido cargado (12 temas, 157 preguntas). Verificado con `npm run check:backend`.
 - PWA instalable: manifest, iconos Android/iPhone, service worker y caché offline.
 - Diseño responsive desde 320 px.
 
 ### No implementado
 
-- **Proyecto real de Supabase.** `.env.local` contiene la URL de ejemplo (`your-project.supabase.co`), así que la aplicación funciona siempre con el contenido local.
-- **Contenido cargado en la base de datos.** Las migraciones están aplicadas, pero las tablas están vacías: falta ejecutar `supabase/seed.sql` en el SQL Editor.
 - Panel de administración para autores o editores.
 - Recuperación de contraseña y edición de nombre/avatar.
 - Búsqueda de contenido y filtros por país o materia.
@@ -106,6 +105,7 @@ public/                    Manifest, service worker e iconos PWA
 scripts/
   generate-pwa-icons.ps1   Generador reproducible de iconos PNG
   generate-seed.mjs        Genera supabase/seed.sql desde src/data/topics/
+  check-backend.mjs        Comprobación de humo contra el Supabase real
 supabase/
   migrations/              Esquema inicial y metadatos de contenido
   seed.sql                 GENERADO desde src/data/topics/ con `npm run seed`. No editar a mano.
@@ -203,6 +203,8 @@ user_roles (separada de profiles)
 npm install
 npm run dev     # servidor de desarrollo
 npm run build   # vue-tsc + vite build
+npm run seed          # regenera supabase/seed.sql desde src/data/topics/
+npm run check:backend # comprueba contenido, RLS y corrección del quiz en Supabase
 ```
 
 ### Variables de entorno
@@ -228,10 +230,11 @@ Después, ejecutar las migraciones de `supabase/migrations/` en orden y luego `s
 
 ### Fase 2 · Backend
 
-1. Crear el proyecto de Supabase y sustituir la URL de `.env.local`.
-2. Aplicar migraciones y configurar Auth con confirmación de correo y URLs permitidas.
-3. Probar registro, login y RLS con dos usuarios distintos.
-4. Ejecutar `supabase/seed.sql` para cargar el contenido.
+1. ~~Crear el proyecto de Supabase y sustituir la URL de `.env.local`.~~ Hecho.
+2. ~~Aplicar las dos migraciones y ejecutar el seed.~~ Hecho.
+3. Configurar Auth: confirmación de correo y URLs de redirección permitidas.
+4. Probar registro, login y RLS con dos usuarios distintos.
+5. Volver a ejecutar `npm run seed` y el SQL cada vez que se añadan temas.
 
 ### Fase 3 · Diseño
 

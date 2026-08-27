@@ -83,7 +83,12 @@ export function useQuiz() {
     try {
       const { data, error } = await supabase!.rpc('check_quiz_answer', { p_question_id: questionId, p_option_id: optionId })
       if (error) throw error
-      const result = data as unknown as { is_correct: boolean; correct_option_id: string; explanation: string }
+      // check_quiz_answer está declarada `returns table`, así que PostgREST devuelve
+      // un array de una fila, no un objeto. Tratarlo como objeto dejaba is_correct
+      // en undefined y daba toda respuesta por incorrecta, sin explicación.
+      const rows = (Array.isArray(data) ? data : [data]) as Array<{ is_correct: boolean; correct_option_id: string; explanation: string }>
+      const result = rows[0]
+      if (!result) throw new Error('check_quiz_answer no ha devuelto ninguna fila')
       return { isCorrect: result.is_correct, correctOptionId: result.correct_option_id, explanation: result.explanation }
     } catch (err) {
       console.error('useQuiz: no se pudo comprobar la respuesta', err)
