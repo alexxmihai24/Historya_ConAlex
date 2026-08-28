@@ -28,7 +28,7 @@ Historia Con Alex es una plataforma web en español para estudiantes y personas 
 Un archivo por tema en `src/data/topics/`, con la forma `TopicModule` definida en `src/data/types.ts`:
 lección + glosario + debates + bibliografía + banco de preguntas.
 
-**Escritos a nivel universitario (13 temas, 203 preguntas):**
+**Escritos a nivel universitario (15 temas, 235 preguntas):**
 
 | Tema | Época | Preguntas |
 | --- | --- | --- |
@@ -43,10 +43,12 @@ lección + glosario + debates + bibliografía + banco de preguntas.
 | `islam` — Nacimiento y expansión del islam | Edad Media | 16 |
 | `feudalismo` — La Europa feudal | Edad Media | 15 |
 | `andalus` — Al-Ándalus y los reinos cristianos | Edad Media | 16 |
+| `plena-edad-media` — Ciudades, comercio y universidades | Edad Media | 16 |
+| `crisis-siglo-xiv` — Peste negra y crisis bajomedieval | Edad Media | 16 |
 | `renacimiento` — Renacimiento y Humanismo | Edad Moderna | 16 |
 | `revoluciones-liberales` — Liberalismo, nacionalismo y unificaciones | Edad Contemporánea | 16 |
 
-**Por escribir:** quedan unos 21 temas: plena Edad Media, crisis del siglo XIV, descubrimientos, reforma, absolutismo, revolución científica, Ilustración, Revolución francesa, industrialización, imperialismo, I Guerra Mundial, revolución rusa, entreguerras, II Guerra Mundial, Guerra Fría, España siglo XX, mundo actual, y el bloque no europeo.
+**Por escribir:** quedan unos 19 temas: descubrimientos, reforma, absolutismo, revolución científica, Ilustración, Revolución francesa, industrialización, imperialismo, I Guerra Mundial, revolución rusa, entreguerras, II Guerra Mundial, Guerra Fría, España siglo XX, mundo actual, y el bloque no europeo.
 
 Ya no queda ningún tema con el texto corto de la demo inicial: `_pendientes.ts` se ha eliminado.
 
@@ -61,7 +63,7 @@ Ya no queda ningún tema con el texto corto de la demo inicial: `_pendientes.ts`
 - Perfil conectado a datos reales (progreso, historial de quizzes) y cierre de sesión.
 - Formularios de registro e inicio de sesión sobre Supabase Auth.
 - Migraciones con RLS, perfiles, contenido, progreso y resultados; funciones RPC que no exponen la respuesta correcta.
-- **Backend en marcha:** las dos migraciones aplicadas y el contenido cargado. Verificado con `npm run check:backend`. El seed regenerado con `helenismo` (13 temas, 203 preguntas) está pendiente de ejecutarse en el SQL Editor.
+- **Backend en marcha:** las dos migraciones aplicadas y el contenido cargado. Verificado con `npm run check:backend`. El seed regenerado con `plena-edad-media` y `crisis-siglo-xiv` (15 temas, 235 preguntas) está pendiente de ejecutarse en el SQL Editor.
 - PWA instalable: manifest, iconos Android/iPhone, service worker y caché offline.
 - Diseño responsive desde 320 px.
 
