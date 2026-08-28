@@ -3,6 +3,7 @@ import { prehistoria } from './topics/prehistoria'
 import { mesopotamia } from './topics/mesopotamia'
 import { egipto } from './topics/egipto'
 import { grecia } from './topics/grecia'
+import { helenismo } from './topics/helenismo'
 import { romaRepublica } from './topics/roma-republica'
 import { romaImperio } from './topics/roma-imperio'
 import { bizancio } from './topics/bizancio'
@@ -15,7 +16,7 @@ import { revolucionesLiberales } from './topics/revoluciones-liberales'
 export type { Era, EducationLevel, StudySection, Concept, Topic, QuizQuestion, TopicModule } from './types'
 
 /** Orden de lectura de la biblioteca. Un módulo por tema. */
-const modules: TopicModule[] = [prehistoria, mesopotamia, egipto, grecia, romaRepublica, romaImperio, bizancio, islam, feudalismo, andalus, renacimiento, revolucionesLiberales]
+const modules: TopicModule[] = [prehistoria, mesopotamia, egipto, grecia, helenismo, romaRepublica, romaImperio, bizancio, islam, feudalismo, andalus, renacimiento, revolucionesLiberales]
 
 export const topics: Topic[] = modules.map((module) => module.topic)
 
