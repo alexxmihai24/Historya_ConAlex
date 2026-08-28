@@ -9,12 +9,13 @@ import { bizancio } from './topics/bizancio'
 import { islam } from './topics/islam'
 import { feudalismo } from './topics/feudalismo'
 import { andalus } from './topics/andalus'
-import { pendientes } from './topics/_pendientes'
+import { renacimiento } from './topics/renacimiento'
+import { revolucionesLiberales } from './topics/revoluciones-liberales'
 
 export type { Era, EducationLevel, StudySection, Concept, Topic, QuizQuestion, TopicModule } from './types'
 
 /** Orden de lectura de la biblioteca. Un módulo por tema. */
-const modules: TopicModule[] = [prehistoria, mesopotamia, egipto, grecia, romaRepublica, romaImperio, bizancio, islam, feudalismo, andalus, ...pendientes]
+const modules: TopicModule[] = [prehistoria, mesopotamia, egipto, grecia, romaRepublica, romaImperio, bizancio, islam, feudalismo, andalus, renacimiento, revolucionesLiberales]
 
 export const topics: Topic[] = modules.map((module) => module.topic)
 

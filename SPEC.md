@@ -1,6 +1,6 @@
 # Especificación del producto · Historia Con Alex
 
-**Última actualización:** 27 de agosto de 2026
+**Última actualización:** 28 de agosto de 2026
 **Estado:** contenido en reescritura a nivel universitario. Interfaz funcional. **Supabase conectado y con el contenido cargado.**
 
 ## 1. Visión
@@ -28,7 +28,7 @@ Historia Con Alex es una plataforma web en español para estudiantes y personas 
 Un archivo por tema en `src/data/topics/`, con la forma `TopicModule` definida en `src/data/types.ts`:
 lección + glosario + debates + bibliografía + banco de preguntas.
 
-**Escritos a nivel universitario (10 temas, 157 preguntas):**
+**Escritos a nivel universitario (12 temas, 187 preguntas):**
 
 | Tema | Época | Preguntas |
 | --- | --- | --- |
@@ -42,11 +42,12 @@ lección + glosario + debates + bibliografía + banco de preguntas.
 | `islam` — Nacimiento y expansión del islam | Edad Media | 16 |
 | `feudalismo` — La Europa feudal | Edad Media | 15 |
 | `andalus` — Al-Ándalus y los reinos cristianos | Edad Media | 16 |
+| `renacimiento` — Renacimiento y Humanismo | Edad Moderna | 16 |
+| `revoluciones-liberales` — Liberalismo, nacionalismo y unificaciones | Edad Contemporánea | 16 |
 
-**Con el texto corto de la demo inicial**, pendientes de reescritura, en `src/data/topics/_pendientes.ts`:
-`renacimiento`, `revoluciones`.
+**Por escribir:** quedan unos 22 temas: helenismo, plena Edad Media, crisis del siglo XIV, descubrimientos, reforma, absolutismo, revolución científica, Ilustración, Revolución francesa, industrialización, imperialismo, I Guerra Mundial, revolución rusa, entreguerras, II Guerra Mundial, Guerra Fría, España siglo XX, mundo actual, y el bloque no europeo.
 
-**Por escribir:** quedan unos 23 temas: helenismo, plena Edad Media, crisis del siglo XIV, descubrimientos, reforma, absolutismo, revolución científica, Ilustración, Revolución francesa, industrialización, revoluciones liberales, imperialismo, I Guerra Mundial, revolución rusa, entreguerras, II Guerra Mundial, Guerra Fría, España siglo XX, mundo actual, y el bloque no europeo.
+Ya no queda ningún tema con el texto corto de la demo inicial: `_pendientes.ts` se ha eliminado.
 
 ## 4. Estado técnico
 
@@ -59,7 +60,7 @@ lección + glosario + debates + bibliografía + banco de preguntas.
 - Perfil conectado a datos reales (progreso, historial de quizzes) y cierre de sesión.
 - Formularios de registro e inicio de sesión sobre Supabase Auth.
 - Migraciones con RLS, perfiles, contenido, progreso y resultados; funciones RPC que no exponen la respuesta correcta.
-- **Backend en marcha:** las dos migraciones aplicadas y el contenido cargado (12 temas, 157 preguntas). Verificado con `npm run check:backend`.
+- **Backend en marcha:** las dos migraciones aplicadas y el contenido cargado. Verificado con `npm run check:backend`. El seed regenerado con `revoluciones-liberales` (12 temas, 187 preguntas) está pendiente de ejecutarse en el SQL Editor.
 - PWA instalable: manifest, iconos Android/iPhone, service worker y caché offline.
 - Diseño responsive desde 320 px.
 
@@ -94,7 +95,6 @@ src/
     history.ts             Agregador: reúne los módulos y expone topics, quizQuestions y eras
     topics/
       <slug>.ts            Un archivo por tema: lección + glosario + debates + fuentes + preguntas
-      _pendientes.ts       Temas aún con el texto corto de la demo inicial
   composables/             useTopics, useLesson, useQuiz, useProgress
   lib/supabase.ts          Cliente Supabase: solo URL y clave publishable
   router/index.ts          Rutas de la aplicación
@@ -138,14 +138,14 @@ interface TopicModule {
 - `color` debe ser uno de `gold`, `blue`, `terracotta`, `green`, `plum` o `red`: son las clases `.visual-*` del CSS y el `check` de `accent_color` en el esquema. `npm run seed` falla si no lo es.
 - En la base de datos todo esto viaja dentro de `lessons.body`, un array de bloques tipados (`section`, `concepts`, `debates`, `timeline`, `sources`). No hicieron falta columnas nuevas.
 - Los `id` de pregunta siguen el patrón `<slug>-<n>` para evitar colisiones entre temas.
+- `npm run seed` despublica los temas que ya no están en `src/data/topics/`. Sin eso, un tema renombrado seguiría visible en la biblioteca: los `insert` solo actualizan.
 
 ### Cómo añadir un tema
 
 1. Crear `src/data/topics/<slug>.ts` copiando la estructura de `egipto.ts`.
 2. Importarlo en `src/data/history.ts` y añadirlo al array `modules`.
-3. Si estaba en `_pendientes.ts`, quitarlo de allí.
-4. `npm run build` para comprobar tipos y compilación.
-5. `npm run seed` para regenerar `supabase/seed.sql`.
+3. `npm run build` para comprobar tipos y compilación.
+4. `npm run seed` para regenerar `supabase/seed.sql` y ejecutarlo en el SQL Editor.
 
 ## 9. Modelo de datos de Supabase
 
@@ -224,9 +224,8 @@ Después, ejecutar las migraciones de `supabase/migrations/` en orden y luego `s
 
 ### Fase 1 · Contenido (en curso)
 
-1. Reescribir los dos temas de `_pendientes.ts`.
-2. Completar el temario por bloques cronológicos, siguiendo el orden de la sección 3.
-3. Script para obtener cronologías de Wikidata e imágenes con licencia clara de Europeana o Wikimedia Commons, y así dejar de escribir fechas a mano. **Acordado con el cliente: después del contenido.**
+1. Completar el temario por bloques cronológicos, siguiendo el orden de la sección 3.
+2. Script para obtener cronologías de Wikidata e imágenes con licencia clara de Europeana o Wikimedia Commons, y así dejar de escribir fechas a mano. **Acordado con el cliente: después del contenido.**
 
 ### Fase 2 · Backend
 

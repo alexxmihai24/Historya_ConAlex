@@ -73,10 +73,8 @@ async function loadModules() {
   const isModule = (value) => value && typeof value === 'object' && value.topic && Array.isArray(value.questions)
   for (const file of files) {
     const imported = await import(pathToFileURL(join(topicsDir, file)).href)
-    // Un archivo exporta un TopicModule suelto, o un array de ellos (_pendientes.ts).
     for (const value of Object.values(imported)) {
       if (isModule(value)) modules.push(value)
-      else if (Array.isArray(value)) modules.push(...value.filter(isModule))
     }
   }
   return modules
@@ -159,6 +157,13 @@ function render(modules) {
     out.push('  glyph = excluded.glyph, accent_color = excluded.accent_color, published = excluded.published;')
     out.push('')
   }
+
+  out.push('-- 3b. Temas retirados --------------------------------------------------------')
+  out.push('-- Los insert de arriba solo actualizan: un tema renombrado o eliminado del')
+  out.push('-- repositorio seguiría publicado. Se despublica en lugar de borrarlo para no')
+  out.push('-- perder el progreso de quien ya lo hubiera leído.')
+  out.push(`update public.topics set published = false where slug not in (${modules.map((m) => sql(m.topic.id)).join(', ')});`)
+  out.push('')
 
   out.push('-- 4. Lecciones ---------------------------------------------------------------')
   out.push('-- El cuerpo va como array de bloques tipados: section, concepts, debates,')
