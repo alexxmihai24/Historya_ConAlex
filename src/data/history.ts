@@ -13,12 +13,14 @@ import { andalus } from './topics/andalus'
 import { plenaEdadMedia } from './topics/plena-edad-media'
 import { crisisSigloXiv } from './topics/crisis-siglo-xiv'
 import { renacimiento } from './topics/renacimiento'
+import { descubrimientos } from './topics/descubrimientos'
+import { reforma } from './topics/reforma'
 import { revolucionesLiberales } from './topics/revoluciones-liberales'
 
 export type { Era, EducationLevel, StudySection, Concept, Topic, QuizQuestion, TopicModule } from './types'
 
 /** Orden de lectura de la biblioteca. Un módulo por tema. */
-const modules: TopicModule[] = [prehistoria, mesopotamia, egipto, grecia, helenismo, romaRepublica, romaImperio, bizancio, islam, feudalismo, andalus, plenaEdadMedia, crisisSigloXiv, renacimiento, revolucionesLiberales]
+const modules: TopicModule[] = [prehistoria, mesopotamia, egipto, grecia, helenismo, romaRepublica, romaImperio, bizancio, islam, feudalismo, andalus, plenaEdadMedia, crisisSigloXiv, renacimiento, descubrimientos, reforma, revolucionesLiberales]
 
 export const topics: Topic[] = modules.map((module) => module.topic)
 
