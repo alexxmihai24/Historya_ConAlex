@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="https://unpkg.com/d3@7.9.0/dist/d3.min.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" crossorigin="anonymous"></script>
+<script src="historya-data.js"></script>
+<script src="globe.js"></script>
+<style>
+  body { margin: 0; background: #06080e; }
+  a { color: #ff8256; text-decoration: none; }
+  a:hover { color: #ffb49c; }
+  @keyframes hy-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+  @keyframes hy-pop { from { opacity: 0; transform: scale(.97); } to { opacity: 1; transform: none; } }
+  @keyframes hy-drift { 0% { transform: translate3d(0,0,0) scale(1); } 50% { transform: translate3d(-2.5%,2%,0) scale(1.04); } 100% { transform: translate3d(0,0,0) scale(1); } }
+  @keyframes hy-breathe { 0%,100% { opacity: .55; } 50% { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { * { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+</style>
+</helmet>
+
+<div style="min-height:100vh;width:max-content;min-width:100%;position:relative;color:#eef2f8;font-family:Archivo,sans-serif;background:#06080e;-webkit-font-smoothing:antialiased">
+
+  <div style="position:fixed;inset:-14%;pointer-events:none;z-index:0;background:radial-gradient(40% 32% at 10% 2%, rgba(255,74,28,.22) 0%, transparent 64%),radial-gradient(36% 30% at 94% 8%, rgba(126,86,255,.22) 0%, transparent 62%),radial-gradient(48% 40% at 58% 102%, rgba(24,150,196,.24) 0%, transparent 64%);animation:hy-drift 32s ease-in-out infinite;will-change:transform"></div>
+  <div style="position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(rgba(255,255,255,.055) 1px, transparent 1px);background-size:3px 3px;opacity:.55"></div>
+
+  <div style="position:relative;z-index:1;padding:38px 44px 78px;display:flex;flex-direction:column;gap:22px">
+
+    <header style="display:flex;align-items:flex-end;justify-content:space-between;gap:32px">
+      <div>
+        <div style="display:flex;align-items:center;gap:11px">
+          <span style="width:9px;height:9px;border-radius:999px;background:#ff4a1c;box-shadow:0 0 16px 4px rgba(255,74,28,.65);display:block;animation:hy-breathe 3.4s ease-in-out infinite"></span>
+          <span style="font:700 10px/1 Archivo,sans-serif;letter-spacing:.26em;text-transform:uppercase;color:rgba(238,242,248,.58)">Historya con Alex · PWA</span>
+        </div>
+        <div style="font:400 48px/1 'Instrument Serif',serif;letter-spacing:-.01em;margin-top:14px">{{ screenTitle }}</div>
+      </div>
+      <div style="font:500 10px/1.8 'IBM Plex Mono',monospace;letter-spacing:.04em;text-transform:uppercase;color:rgba(238,242,248,.4);text-align:right">1280 · 390<br>Natural Earth 110m</div>
+    </header>
+
+    <div style="display:flex;gap:8px">
+      <sc-for list="{{ screens }}" as="s" hint-placeholder-count="4">
+        <div onClick="{{ s.go }}" style="padding:11px 18px;border-radius:999px;cursor:pointer;border:1px solid {{ s.border }};background:{{ s.bg }};color:{{ s.fg }};box-shadow:{{ s.glow }};display:flex;align-items:center;gap:10px;transition:border-color .22s ease,background .22s ease,box-shadow .22s ease">
+          <span style="font:500 9px/1 'IBM Plex Mono',monospace;opacity:.65">{{ s.n }}</span>
+          <span style="font:700 10px/1 Archivo,sans-serif;letter-spacing:.16em;text-transform:uppercase">{{ s.label }}</span>
+        </div>
+      </sc-for>
+    </div>
+
+    <!-- ============================================ 1 · GLOBO -->
+    <sc-if value="{{ isGlobe }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;flex-direction:column;gap:40px;animation:hy-in .34s cubic-bezier(.2,.8,.2,1) both">
+
+        <section data-screen-label="Escritorio — Home con el globo" style="width:1280px;height:768px;position:relative;overflow:hidden;border-radius:30px;border:1px solid rgba(170,200,255,.16);background:radial-gradient(90% 80% at 12% 24%, rgba(20,64,90,.55) 0%, transparent 62%),linear-gradient(158deg, #0a1420 0%, #070a12 62%, #0c0810 100%);box-shadow:0 40px 120px rgba(0,0,0,.6)">
+
+          <x-import component-from-global-scope="historya-globe" from="./globe.js" mode="{{ globeMode }}" spin="{{ spinAttr }}" selected="{{ selAttr }}" covered="{{ coveredList }}" style="position:absolute;left:-186px;top:-84px;width:940px;height:940px" hint-size="940px,940px"></x-import>
+
+          <nav style="position:absolute;left:26px;right:26px;top:22px;display:flex;align-items:center;justify-content:space-between;gap:18px;z-index:3">
+            <div style="display:flex;align-items:center;gap:11px;padding:10px 18px 10px 14px;border-radius:999px;border:1px solid rgba(170,200,255,.16);background:rgba(10,14,22,.62);backdrop-filter:blur(14px)">
+              <span style="width:22px;height:22px;border-radius:7px;background:linear-gradient(150deg,#ff8256,#e8380f);box-shadow:0 0 18px rgba(255,74,28,.5);display:block"></span>
+              <span style="font:400 19px/1 'Instrument Serif',serif;letter-spacing:.01em">Historya</span>
+              <span style="font:700 9px/1 Archivo,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#ff8256">con Alex</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:4px;padding:6px;border-radius:999px;border:1px solid rgba(170,200,255,.14);background:rgba(10,14,22,.6);backdrop-filter:blur(14px)">
+              <sc-for list="{{ navItems }}" as="i" hint-placeholder-count="4">
+                <span onClick="{{ i.go }}" style="padding:9px 15px;border-radius:999px;cursor:pointer;font:700 9px/1 Archivo,sans-serif;letter-spacing:.16em;text-transform:uppercase;background:{{ i.bg }};color:{{ i.fg }};transition:background .2s ease,color .2s ease">{{ i.label }}</span>
+              </sc-for>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="padding:11px 18px;border-radius:999px;cursor:pointer;font:700 9px/1 Archivo,sans-serif;letter-spacing:.16em;text-transform:uppercase;border:1px solid rgba(170,200,255,.2);color:rgba(238,242,248,.8);background:rgba(10,14,22,.5)" style-hover="border-color:rgba(255,130,86,.6);color:#fff">Acceder</span>
+              <span style="padding:12px 20px;border-radius:999px;cursor:pointer;font:700 9px/1 Archivo,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#fff;background:linear-gradient(180deg,#ff6a3d,#e8380f);box-shadow:0 8px 26px rgba(255,74,28,.4)" style-hover="box-shadow:0 10px 34px rgba(255,74,28,.6)">Empezar</span>
+            </div>
+          </nav>
+
+          <div style="position:absolute;left:44px;bottom:38px;z-index:3;pointer-events:none">
+            <div style="font:700 9px/1 Archivo,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:rgba(238,242,248,.5)">Bajo el cursor</div>
+            <div style="font:400 46px/1 'Instrument Serif',serif;margin-top:12px;color:{{ readoutColor }};transition:color .25s ease">{{ readout }}</div>
+            <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:rgba(238,242,248,.42);margin-top:14px">{{ countryCount }} países · {{ coveredCount }} encendidos · arrastra para girar</div>
+          </div>
+
+          <div style="position:absolute;right:26px;top:96px;bottom:26px;width:472px;z-index:2;border-radius:26px;border:1px solid rgba(170,200,255,.16);background:linear-gradient(180deg, rgba(14,20,30,.86) 0%, rgba(8,11,18,.94) 100%);backdrop-filter:blur(18px);box-shadow:0 30px 80px rgba(0,0,0,.5);overflow:hidden">
+
+            <sc-if value="{{ showIntro }}" hint-placeholder-val="{{ true }}">
+              <div style="padding:30px 30px 26px;height:100%;box-sizing:border-box;display:flex;flex-direction:column;animation:hy-in .3s cubic-bezier(.2,.8,.2,1) both">
+                <div style="font:700 9px/1 Archivo,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#ff8256">Explora el mundo</div>
+                <h1 style="font:400 56px/.98 'Instrument Serif',serif;letter-spacing:-.015em;margin:18px 0 0">Gira el globo.<br><em style="font-style:italic;color:#ffb49c">Elige un país.</em></h1>
+                <p style="font:400 14px/1.65 Archivo,sans-serif;color:rgba(238,242,248,.68);margin:16px 0 0;max-width:40ch;text-wrap:pretty">Cada país abre su línea de tiempo, sus hitos y su quiz. Ocho brillan ya con lección completa; el resto está en camino.</p>
+
+                <sc-if value="{{ alexOn }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:flex;gap:13px;align-items:flex-start;margin-top:22px;padding:16px;border-radius:18px;border:1px solid rgba(170,200,255,.14);background:rgba(255,255,255,.035)">
+                    <div style="width:42px;height:42px;flex:none;border-radius:14px;background:linear-gradient(150deg,#ffb066,#ff5a28);display:flex;align-items:center;justify-content:center;font:600 12px/1 'IBM Plex Mono',monospace;color:#1a0a04;box-shadow:0 0 22px rgba(255,120,60,.4)">AL</div>
+                    <div>
+                      <div style="font:700 9px/1 Archivo,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#ff8256">Alex te guía</div>
+                      <p style="font:400 13px/1.55 Archivo,sans-serif;margin:8px 0 0;color:rgba(238,242,248,.8)">«No hace falta orden. Pincha donde te dé curiosidad y yo te digo por dónde seguir.»</p>
+                    </div>
+                  </div>
+                </sc-if>
+
+                <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:20px">
+                  <sc-for list="{{ eraLegend }}" as="e" hint-placeholder-count="4">
+                    <div style="display:flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;border:1px solid rgba(170,200,255,.14);background:rgba(255,255,255,.03)">
+                      <span style="width:7px;height:7px;border-radius:999px;flex:none;background:{{ e.c }};box-shadow:{{ e.g }}"></span>
+                      <span style="font:600 9px/1 Archivo,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:rgba(238,242,248,.72)">{{ e.name }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+
+                <div style="font:700 9px/1 Archivo,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:rgba(238,242,248,.45);margin:24px 0 0">Empieza por aquí</div>
+                <div style="display:flex;flex-direction:column;gap:6px;margin-top:12px">
+                  <sc-for list="{{ starters }}" as="c" hint-placeholder-count="5">
+                    <div onClick="{{ c.onPick }}" style="display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:14px;cursor:pointer;border:1px solid transparent;transition:background .2s ease,border-color .2s ease,transform .2s ease" style-hover="background:rgba(255,255,255,.05);border-color:rgba(255,130,86,.35);transform:translateX(5px)">
+                      <span style="font:500 10px/1 'IBM Plex Mono',monospace;color:rgba(238,242,248,.4);width:18px">{{ c.n }}</span>
+                      <span style="width:8px;height:8px;border-radius:999px;flex:none;background:{{ c.color }};box-shadow:{{ c.glow }}"></span>
+                      <span style="font:400 22px/1 'Instrument Serif',serif;flex:1">{{ c.name }}</span>
+                      <span style="font:500 9px/1 'IBM Plex Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:rgba(238,242,248,.42)">{{ c.meta }}</span>
+                      <span style="font:400 15px/1 'Instrument Serif',serif;color:#ff8256">→</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ showCountry }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:26px 30px 24px;height:100%;box-sizing:border-box;display:flex;flex-direction:column;animation:hy-in .34s cubic-bezier(.2,.8,.2,1) both">
+                <div onClick="{{ back }}" style="font:700 9px/1 Archivo,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:rgba(238,242,248,.5);cursor:pointer;align-self:flex-start;padding:8px 12px;border-radius:999px;border:1px solid rgba(170,200,255,.16)" style-hover="color:#fff;border-color:rgba(255,130,86,.5)">← Volver al globo</div>
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-top:18px">
+                  <div>
+                    <div style="font:700 9px/1 Archivo,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#ff8256">Ficha de país</div>
+                    <h1 style="font:400 60px/.94 'Instrument Serif',serif;letter-spacing:-.02em;margin:12px 0 0">{{ sel }}</h1>
+                  </div>
+                  <historya-outline country="{{ sel }}" tone="ember" style="width:84px;height:84px;flex:none;filter:drop-shadow(0 0 16px rgba(255,74,28,.55))"></historya-outline>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:20px">
+                  <sc-for list="{{ selStats }}" as="s" hint-placeholder-count="3">
+                    <div style="flex:1;padding:13px 14px;border-radius:16px;border:1px solid rgba(170,200,255,.14);background:rgba(255,255,255,.035)">
+                      <div style="font:500 20px/1 'IBM Plex Mono',monospace">{{ s.v }}</div>
+                      <div style="font:600 8px/1 Archivo,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(238,242,248,.5);margin-top:8px">{{ s.k }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+                <p style="font:400 14px/1.65 Archivo,sans-serif;color:rgba(238,242,248,.72);margin:18px 0 0;text-wrap:pretty">{{ selResumen }}</p>
+                <div style="font:700 9px/1 Archivo,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:rgba(238,242,248,.45);margin:22px 0 0">Hitos clave</div>
+                <div style="margin-top:10px;flex:1;min-height:0;overflow:auto">
+                  <sc-for list="{{ selHitos }}" as="h" hint-placeholder-count="4">
+                    <div style="display:flex;gap:14px;padding:11px 0;border-bottom:1px solid rgba(170,200,255,.1);align-items:baseline">
+                      <span style="font:500 11px/1.3 'IBM Plex Mono',monospace;width:92px;flex:none;color:#ffb49c">{{ h.date }}</span>
+                      <span style="font:400 13px/1.5 Archivo,sans-serif;color:rgba(238,242,248,.78)">{{ h.event }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:16px">
+                  <span onClick="{{ goFicha }}" style="flex:1;text-align:center;padding:14px;border-radius:999px;cursor:pointer;font:700 10px/1 Archivo,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#fff;background:linear-gradient(180deg,#ff6a3d,#e8380f);box-shadow:0 8px 26px rgba(255,74,28,.4)" style-hover="box-shadow:0 10px 34px rgba(255,74,28,.6)">Abrir ficha completa</span>
+                  <span onClick="{{ goQuiz }}" style="padding:14px 18px;border-radius:999px;cursor:pointer;font:700 10px/1 Archivo,sans-serif;letter-spacing:.16em;text-transform:uppercase;border:1px solid rgba(170,200,255,.2);color:rgba(238,242,248,.85)" style-hover="border-color:rgba(255,130,86,.6);color:#fff">Quiz</span>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ showEmpty }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:26px 30px;height:100%;box-sizing:border-box;display:flex;flex-direction:column;animation:hy-in .34s cubic-bezier(.2,.8,.2,1) both">
+                <div onClick="{{ back }}" style="font:700 9px/1 Archivo,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:rgba(238,242,248,.5);cursor:pointer;align-self:flex-start;padding:8px 12px;border-radius:999px;border:1px solid rgba(170,200,255,.16)" style-hover="color:#fff">← Volver al globo</div>
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-top:20px">
+                  <div>
+                    <div style="font:700 9px/1 Archivo,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:rgba(238,242,248,.45)">Sin lección todavía</div>
+                    <h1 style="font:400 54px/.94 'Instrument Serif',serif;letter-spacing:-.02em;margin:12px 0 0">{{ sel }}</h1>
+                  </div>
+                  <historya-outline country="{{ sel }}" tone="light" style="width:78px;height:78px;flex:none;opacity:.28"></historya-outline>
+                </div>
+                <p style="font:400 14px/1.65 Archivo,sans-serif;color:rgba(238,242,248,.7);margin:22px 0 0">Todavía no hemos escrito la historia de {{ sel }}. Alex está en ello — dime que te interesa y sube en la lista.</p>
+                <span style="align-self:flex-start;margin-top:20px;padding:13px 20px;border-radius:999px;cursor:pointer;font:700 10px/1 Archivo,sans-serif;letter-spacing:.16em;text-transform:uppercase;border:1px solid rgba(170,200,255,.22);color:rgba(238,242,248,.9)" style-hover="border-color:rgba(255,130,86,.6)">Avísame cuando esté</span>
+                <div style="font:700 9px/1 Archivo,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:rgba(238,242,248,.45);margin:30px 0 12px">Mientras tanto</div>
+                <div style="display:flex;flex-wrap:wrap;gap:8px">
+                  <sc-for list="{{ starters }}" as="c" hint-placeholder-count="5">
+                    <span onClick="{{ c.onPick }}" style="padding:9px 14px;border-radius:999px;cursor:pointer;font:600 9px/1 Archivo,sans-serif;letter-spacing:.14em;text-transform:uppercase;border:1px solid rgba(170,200,255,.18);background:rgba(255,255,255,.03);color:rgba(238,242,248,.8)" style-hover="border-color:rgba(255,130,86,.55);color:#fff">{{ c.name }}</span>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </section>
+
+        <div style="display:flex;gap:44px;align-items:flex-start">
+          <section data-screen-label="Móvil — Home con el globo" style="width:390px;height:844px;flex:none;position:relative;overflow:hidden;border-radius:44px;border:1px solid rgba(170,200,255,.18);background:radial-gradient(85% 60% at 50% 42%, rgba(20,64,90,.6) 0%, transparent 66%),linear-gradient(170deg,#0a1420,#070a12);box-shadow:0 40px 100px rgba(0,0,0,.6)">
+            <x-import component-from-global-scope="historya-globe" from="./globe.js" mode="{{ globeMode }}" spin="off" selected="{{ selAttr }}" covered="{{ coveredList }}" style="position:absolute;left:-96px;top:210px;width:582px;height:582px" hint-size="582px,582px"></x-import>
+
+            <div style="position:absolute;left:0;right:0;top:0;padding:16px 20px 0;z-index:3">
+              <div style="display:flex;align-items:center;justify-content:space-between;font:500 9px/1 'IBM Plex Mono',monospace;color:rgba(238,242,248,.55)">
+                <span>9:41</span><span>PWA · offline</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-top:18px">
+                <div style="display:flex;align-items:center;gap:9px">
+                  <span style="width:20px;height:20px;border-radius:6px;background:linear-gradient(150deg,#ff8256,#e8380f);box-shadow:0 0 16px rgba(255,74,28,.5);display:block"></span>
+                  <span style="font:400 18px/1 'Instrument Serif',serif">Historya</span>
+                </div>
+                <span style="width:34px;height:34px;border-radius:999px;border:1px solid rgba(170,200,255,.2);background:rgba(10,14,22,.6);display:flex;align-items:center;justify-content:center;cursor:pointer">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(238,242,248,.85)" stroke-width="2.4"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4.2-4.2"></path></svg>
+                </span>
+              </div>
+              <div style="font:700 8px/1 Archivo,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#ff8256;margin-top:26px">{{ coveredCount }} países encendidos</div>
+              <h2 style="font:400 40px/.96 'Instrument Serif',serif;letter-spacing:-.02em;margin:12px 0 0">Gira el globo.<br><em style="font-style:italic;color:#ffb49c">Elige un país.</em></h2>
+            </div>
+
+            <div style="position:absolute;left:20px;right:20px;bottom:96px;z-index:3;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;pointer-events:none">
+              <div>
+                <div style="font:700 8px/1 Archivo,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:rgba(238,242,248,.5)">Seleccionado</div>
+                <div style="font:400 28px/1 'Instrument Serif',serif;margin-top:8px;color:{{ readoutColor }}">{{ readout }}</div>
+              </div>
+              <span onClick="{{ goFicha }}" style="pointer-events:auto;padding:12px 16px;border-radius:999px;cursor:pointer;font:700 9px/1 Archivo,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#fff;background:linear-gradient(180deg,#ff6a3d,#e8380f);box-shadow:0 8px 24px rgba(255,74,28,.45);flex:none">Ver historia</span>
+            </div>
+
+            <div style="position:absolute;left:0;right:0;bottom:82px;z-index:4;border-radius:28px 28px 0 0;border-top:1px solid rgba(170,200,255,.2);padding:20px 20px 24px;transform:{{ sheetY }};transition:transform .38s cubic-bezier(.2,.8,.2,1);background:linear-gradient(180deg, rgba(16,22,32,.96), rgba(8,11,18,.99));backdrop-filter:blur(18px);box-shadow:0 -20px 60px rgba(0,0,0,.6)">
+              <div style="width:38px;height:4px;border-radius:999px;background:rgba(238,242,248,.25);margin:0 auto 16px"></div>
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+                <div>
+                  <div style="font:700 8px/1 Archivo,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#ff8256">{{ sheetKicker }}</div>
+                  <div style="font:400 36px/.96 'Instrument Serif',serif;margin-top:10px">{{ sel }}</div>
+                </div>
+                <div style="display:flex;gap:10px;align-items:flex-start">
+                  <historya-outline country="{{ sel }}" tone="ember" style="width:48px;height:48px;flex:none;filter:drop-shadow(0 0 12px rgba(255,74,28,.5))"></historya-outline>
+                  <span onClick="{{ back }}" style="width:26px;height:26px;border-radius:999px;border:1px solid rgba(170,200,255,.22);display:flex;align-items:center;justify-content:center;font:400 13px/1 'Instrument Serif',serif;cursor:pointer;flex:none">×</span>
+                </div>
+              </div>
+              <div style="height:1px;background:rgba(170,200,255,.12);margin:16px 0"></div>
+              <sc-for list="{{ sheetHitos }}" as="h" hint-placeholder-count="3">
+                <div style="display:flex;gap:12px;padding:7px 0;align-items:baseline">
+                  <span style="font:500 10px/1.3 'IBM Plex Mono',monospace;width:76px;flex:none;color:#ffb49c">{{ h.date }}</span>
+                  <span style="font:400 12px/1.45 Archivo,sans-serif;color:rgba(238,242,248,.75)">{{ h.event }}</span>
+                </div>
+              </sc-for>
+              <div style="display:flex;gap:8px;margin-top:16px">
+                <span onClick="{{ goFicha }}" style="flex:1;text-align:center;padding:13px;border-radius:999px;cursor:pointer;font:700 9px/1 Archivo,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#fff;background:linear-gradient(180deg,#ff6a3d,#e8380f)">Abrir ficha</span>
+                <span onClick="{{ goQuiz }}" style="padding:13px 16px;border-radius:999px;cursor:pointer;font:700 9px/1 Archivo,sans-serif;letter-spacing:.14em;text-transform:uppercase;border:1px solid rgba(170,200,255,.22);color:rgba(238,242,248,.85)">Quiz</span>
+              </div>
+            </div>
+
+            <div style="position:absolute;left:16px;right:16px;bottom:16px;z-index:5;height:58px;border-radius:999px;border:1px solid rgba(170,200,255,.16);background:rgba(10,14,22,.82);backdrop-filter:blur(16px);display:grid;grid-template-columns:repeat(4,1fr);padding:0 6px;box-shadow:0 14px 40px rgba(0,0,0,.5)">
+              <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+                <div onClick="{{ t.go }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;color:{{ t.color }};border-radius:999px;background:{{ t.bg }};margin:5px 0;transition:background .2s ease,color .2s ease">
+                  <span style="font:400 13px/1 'Instrument Serif',serif">{{ t.mark }}</span>
+                  <span style="font:600 8px/1 Archivo,sans-serif;letter-spacing:.14em;text-transform:uppercase">{{ t.label }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+
+          <sc-if value="{{ notesOn }}" hint-placeholder-val="{{ true }}">
+            <aside style="flex:1;min-width:0;max-width:520px;padding-top:6px">
+              <div style="font:700 9px/1 Archivo,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#ff8256">Cómo encaja en tu Vue</div>
+              <h3 style="font:400 34px/1.05 'Instrument Serif',serif;letter-spacing:-.015em;margin:14px 0 0">Un canvas, un rAF,<br><em style="font-style:italic;color:#ffb49c">cero dependencias nuevas.</em></h3>
+              <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px">
+                <sc-for list="{{ notes }}" as="n" hint-placeholder-count="4">
+                  <div style="padding:16px 18px;border-radius:18px;border:1px solid rgba(170,200,255,.13);background:rgba(255,255,255,.03)">
+                    <div style="font:500 9px/1 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#ffb49c">{{ n.k }}</div>
+                    <p style="font:400 12.5px/1.6 Archivo,sans-serif;margin:9px 0 0;color:rgba(238,242,248,.68)">{{ n.v }}</p>
+                  </div>
+                </sc-for>
+              </div>
+            </aside>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============================================ 2 · FICHA -->
+    <sc-if value="{{ isFicha }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;gap:44px;align-items:flex-start;animation:hy-in .34s cubic-bezier(.2,.8,.2,1) both">
+
+        <section data-screen-label="Escritorio — Ficha de país" style="width:1280px;flex:none;border-radius:30px;overflow:hidden;border:1px solid rgba(170,200,255,.16);background:linear-gradient(180deg,#0a0e18 0%,#070a12 100%);box-shadow:0 40px 120px rgba(0,0,0,.6)">
+
+          <div style="position:relative;padding:26px 38px 30px;overflow:hidden;background:radial-gradient(80% 120% at 88% 10%, rgba(126,86,255,.55) 0%, transparent 60%),linear-gradient(122deg,#c22a08 0%,#ff5a28 46%,#ff9152 100%)">
+            <div style="position:absolute;right:-70px;top:-90px;width:420px;height:420px;opacity:.2;pointer-events:none">
+              <historya-outline country="{{ ficha.name }}" tone="light" style="width:100%;height:100%"></historya-outline>
+            </div>
+            <div style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(rgba(0,0,0,.16) 1px, transparent 1px);background-size:4px 4px;opacity:.5"></div>
+            <div style="position:relative;display:flex;align-items:center;justify-content:space-between;gap:20px">
+              <span onClick="{{ goGlobe }}" style="padding:9px 15px;border-radius:999px;cursor:pointer;font:700 9px/1 Archivo,sans-serif;letter-spacing:.18em;text-transform:uppercase;border:1px solid rgba(255,255,255,.4);color:#fff;background:rgba(0,0,0,.15)" style-hover="background:rgba(0,0,0,.35)">← Globo</span>
+              <div style="display:flex;gap:4px;padding:5px;border-radius:999px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.22)">
+                <sc-for list="{{ fichaTabs }}" as="f" hint-placeholder-count="4">
+                  <span style="padding:8px 14px;border-radius:999px;font:700 9px/1 Archivo,sans-serif;letter-spacing:.14em;text-transform:uppercase;background:{{ f.bg }};color:{{ f.fg }};cursor:pointer">{{ f.label }}</span>
+                </sc-for>
+              </div>
+            </div>
+            <div style="position:relative;display:flex;align-items:flex-end;justify-content:space-between;gap:30px;margin-top:26px">
+              <div>
+                <div style="font:700 9px/1 Archivo,sans-serif;letter-spacing:.26em;text-transform:uppercase;color:rgba(255,255,255,.85)">{{ ficha.kicker }}</div>
+                <h1 style="font:400 104px/.86 'Instrument Serif',serif;letter-spacing:-.03em;margin:16px 0 0;color:#fff;text-shadow:0 8px 40px rgba(0,0,0,.3)">{{ ficha.name }}</h1>
+                <p style="font:400 16px/1.55 Archivo,sans-serif;margin:18px 0 0;max-width:54ch;color:rgba(255,255,255,.9);text-wrap:pretty">{{ ficha.resumen }}</p>
+              </div>
+              <div style="width:146px;height:146px;flex:none;border-radius:24px;border:1px solid rgba(255,255,255,.45);padding:14px;box-sizing:border-box;background:rgba(0,0,0,.18)">
+                <historya-outline country="{{ ficha.name }}" tone="light" style="width:100%;height:100%"></historya-outline>
+              </div>
+            </div>
+            <div style="position:relative;display:flex;gap:8px;margin-top:26px">
+              <sc-for list="{{ ficha.stats }}" as="s" hint-placeholder-count="4">
+                <div style="flex:1;padding:14px 16px;border-radius:16px;background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.25)">
+                  <div style="font:500 22px/1 'IBM Plex Mono',monospace;color:#fff">{{ s.v }}</div>
+                  <div style="font:600 8px/1 Archivo,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:9px">{{ s.k }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display:flex">
+            <div style="flex:1;min-width:0;padding:30px 34px 36px;border-right:1px solid rgba(170,200,255,.12)">
+              <div style="font:700 9px/1 Archivo,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:rgba(238,242,248,.45)">Línea de tiempo de eras</div>
+              <div style="display:flex;gap:8px;margin-top:14px">
+                <sc-for list="{{ selEras }}" as="e" hint-placeholder-count="4">
+                  <div style="flex:1;min-width:0;padding:14px 15px 15px;border-radius:16px;border:1px solid {{ e.border }};background:{{ e.bg }};transition:background .3s ease,border-color .3s ease">
+                    <div style="width:7px;height:7px;border-radius:999px;background:{{ e.dotColor }};box-shadow:{{ e.glow }}"></div>
+                    <div style="font:400 20px/1.05 'Instrument Serif',serif;margin-top:12px;color:{{ e.fg }}">{{ e.name }}</div>
+                    <div style="font:500 9px/1.3 'IBM Plex Mono',monospace;letter-spacing:.03em;margin-top:9px;color:rgba(238,242,248,.45)">{{ e.range }}</div>
+                    <div style="font:700 8px/1 Archivo,sans-serif;letter-spacing:.16em;text-transform:uppercase;margin-top:12px;color:{{ e.markColor }}">{{ e.mark }}</div>
+                  </div>
+                </sc-for>
+              </div>
+
+              <div style="display:flex;align-items:center;gap:14px;margin-top:24px;padding:12px 18px 12px 12px;border-radius:20px;border:1px solid rgba(170,200,255,.14);background:rgba(255,255,255,.035)">
+                <div onClick="{{ togglePlay }}" style="width:46px;height:46px;flex:none;border-radius:999px;background:linear-gradient(180deg,#ff6a3d,#e8380f);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font:600 12px/1 'IBM Plex Mono',monospace;box-shadow:0 0 26px rgba(255,74,28,.45)">{{ playIcon }}</div>
+                <div style="flex:1;min-width:0">
+                  <div style="font:700 8px/1 Archivo,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:rgba(238,242,248,.5)">Narración de Alex · {{ ficha.audio }}</div>
+                  <div style="display:flex;align-items:flex-end;gap:3px;height:26px;margin-top:9px">
+                    <sc-for list="{{ bars }}" as="b" hint-placeholder-count="34">
+                      <span style="width:3px;flex:none;border-radius:2px;background:{{ b.c }};height:{{ b.h }}%;box-shadow:{{ b.g }};transition:height .3s ease,background .3s ease"></span>
+                    </sc-for>
+                  </div>
+                </div>
+                <div style="font:500 9px/1 'IBM Plex Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:rgba(238,242,248,.5);flex:none">{{ playLabel }}</div>
+              </div>
+
+              <div style="font:700 9px/1 Archivo,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:rgba(238,242,248,.45);margin:28px 0 0">Hitos clave</div>
+              <div style="margin-top:12px;position:relative;padding-left:18px">
+                <div style="position:absolute;left:3px;top:8px;bottom:14px;width:1px;background:linear-gradient(180deg,#ff4a1c,rgba(255,74,28,0))"></div>
+                <sc-for list="{{ ficha.hitos }}" as="h" hint-placeholder-count="6">
+                  <div style="display:flex;gap:16px;padding:12px 0;align-items:baseline;position:relative">
+                    <span style="position:absolute;left:-18px;top:17px;width:7px;height:7px;border-radius:999px;background:#ff4a1c;box-shadow:0 0 12px rgba(255,74,28,.8)"></span>
+                    <span style="font:500 13px/1.2 'IBM Plex Mono',monospace;width:104px;flex:none;color:#ffb49c">{{ h.date }}</span>
+                    <span style="font:400 14px/1.5 Archivo,sans-serif;color:rgba(238,242,248,.78)">{{ h.event }}</span>
+                  </div>
+                </sc-for>
+              </div>
+
+              <div style="font:700 9px/1 Archivo,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:rgba(238,242,248,.45);margin:26px 0 0">Lecciones de {{ ficha.name }}</div>
+              <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+                <sc-for list="{{ ficha.topics }}" as="t" hint-placeholder-count="2">
+                  <div style="border-radius:20px;border:1px solid rgba(170,200,255,.14);background:rgba(255,255,255,.035);padding:18px 20px;display:flex;align-items:center;gap:18px;cursor:pointer;transition:transform .2s cubic-bezier(.2,.8,.2,1),border-color .2s ease,background .2s ease" style-hover="transform:translateY(-3px);border-color:rgba(255,130,86,.4);background:rgba(255,255,255,.06)">
+                    <span style="width:4px;height:46px;flex:none;border-radius:999px;background:{{ t.color }};box-shadow:{{ t.glow }}"></span>
+                    <div style="flex:1;min-width:0">
+                      <div style="font:400 24px/1.1 'Instrument Serif',serif">{{ t.title }}</div>
+                      <div style="font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.05em;text-transform:uppercase;color:rgba(238,242,248,.45);margin-top:9px">{{ t.meta }}</div>
+                    </div>
+                    <span style="padding:7px 12px;border-radius:999px;font:600 8px/1 Archivo,sans-serif;letter-spacing:.14em;text-transform:uppercase;border:1px solid rgba(170,200,255,.2);color:rgba(238,242,248,.7);flex:none">{{ t.level }}</span>
+                    <span style="font:400 17px/1 'Instrument Serif',serif;color:#ff8256;flex:none">→</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="width:430px;flex:none;padding:30px 34px 36px;display:flex;flex-direction:column;gap:22px">
+              <div>
+                <div style="font:700 9px/1 Archivo,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:rgba(238,242,248,.45)">Mapa histórico</div>
+                <div style="border-radius:20px;overflow:hidden;border:1px solid rgba(170,200,255,.16);margin-top:14px;background:rgba(255,255,255,.02)">
+                  <historya-map highlight="{{ ficha.mapCountries }}" style="width:100%;height:230px;display:block"></historya-map>
+                  <div style="padding:15px 17px 17px;border-top:1px solid rgba(170,200,255,.14)">
+                    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+                      <span style="font:400 19px/1.15 'Instrument Serif',serif">{{ ficha.mapLabel }}</span>
+                      <span style="font:500 12px/1 'IBM Plex Mono',monospace;color:#ffb49c;flex:none">{{ ficha.mapYear }}</span>
+                    </div>
+                    <p style="font:400 12px/1.55 Archivo,sans-serif;color:rgba(238,242,248,.62);margin:10px 0 0">{{ ficha.mapNote }}</p>
+                    <div style="font:500 8px/1.4 'IBM Plex Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:rgba(238,242,248,.38);margin-top:12px">Extensión aproximada sobre fronteras actuales</div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="position:relative;overflow:hidden;border-radius:22px;padding:24px;border:1px solid rgba(255,130,86,.28);background:radial-gradient(120% 100% at 100% 0%, rgba(255,90,40,.32) 0%, transparent 62%),linear-gradient(160deg,#15121f,#0a0c14)">
+                <div style="font:700 9px/1 Archivo,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#ff8256">Quiz de {{ ficha.name }}</div>
+                <div style="font:400 38px/1 'Instrument Serif',serif;margin-top:14px">{{ ficha.quizCount }} preguntas<br><em style="font-style:italic;color:#ffb49c">contrarreloj</em></div>
+                <div style="display:flex;gap:7px;margin-top:18px;flex-wrap:wrap">
+                  <sc-for list="{{ quizBadges }}" as="b" hint-placeholder-count="3">
+                    <span style="padding:7px 11px;border-radius:999px;font:600 8px/1 Archivo,sans-serif;letter-spacing:.14em;text-transform:uppercase;border:1px solid rgba(170,200,255,.2);color:rgba(238,242,248,.75)">{{ b.label }}</span>
+                  </sc-for>
+                </div>
+                <span onClick="{{ goQuiz }}" style="display:block;text-align:center;margin-top:20px;padding:14px;border-radius:999px;cursor:pointer;font:700 10px/1 Archivo,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#fff;background:linear-gradient(180deg,#ff6a3d,#e8380f);box-shadow:0 10px 30px rgba(255,74,28,.45)" style-hover="box-shadow:0 12px 40px rgba(255,74,28,.65)">Jugar ahora</span>
+              </div>
+
+              <sc-if value="{{ alexOn }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;gap:13px;padding:18px;border-radius:20px;border:1px solid rgba(170,200,255,.13);background:rgba(255,255,255,.03)">
+                  <div style="width:44px;height:44px;flex:none;border-radius:14px;background:linear-gradient(150deg,#ffb066,#ff5a28);display:flex;align-items:center;justify-content:center;font:600 12px/1 'IBM Plex Mono',monospace;color:#1a0a04">AL</div>
+                  <div>
+                    <div style="font:700 8px/1 Archivo,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#ff8256">Alex te sugiere</div>
+                    <p style="font:400 13px/1.55 Archivo,sans-serif;margin:8px 0 0;color:rgba(238,242,248,.75)">{{ ficha.alex }}</p>
+                  </div>
+                </div>
+              </sc-if>
+
+              <div>
+                <div style="font:700 9px/1 Archivo,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:rgba(238,242,248,.45)">Salta a otro país</div>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px">
+                  <sc-for list="{{ starters }}" as="c" hint-placeholder-count="5">
+                    <span onClick="{{ c.onPick }}" style="display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:999px;cursor:pointer;font:600 9px/1 Archivo,sans-serif;letter-spacing:.14em;text-transform:uppercase;border:1px solid rgba(170,200,255,.18);background:rgba(255,255,255,.03);color:rgba(238,242,248,.78);transition:border-color .2s ease,color .2s ease" style-hover="border-color:rgba(255,130,86,.55);color:#fff">
+                      <span style="width:6px;height:6px;border-radius:999px;background:{{ c.color }}"></span>{{ c.name }}
+                    </span>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section data-screen-label="Móvil — Ficha de país" style="width:390px;flex:none;height:844px;border-radius:44px;overflow:hidden;border:1px solid rgba(170,200,255,.18);display:flex;flex-direction:column;background:linear-gradient(180deg,#0a0e18,#070a12);box-shadow:0 40px 100px rgba(0,0,0,.6)">
+          <div style="flex:none;position:relative;overflow:hidden;padding:18px 20px 22px;background:radial-gradient(90% 120% at 90% 0%, rgba(126,86,255,.5) 0%, transparent 62%),linear-gradient(130deg,#c22a08,#ff5a28 52%,#ff9152)">
+            <div style="position:absolute;right:-40px;bottom:-70px;width:230px;height:230px;opacity:.22">
+              <historya-outline country="{{ ficha.name }}" tone="light" style="width:100%;height:100%"></historya-outline>
+            </div>
+            <div style="position:relative;display:flex;align-items:center;justify-content:space-between;font:500 9px/1 'IBM Plex Mono',monospace;color:rgba(255,255,255,.85)">
+              <span onClick="{{ goGlobe }}" style="cursor:pointer">← Globo</span><span>9:41</span>
+            </div>
+            <div style="position:relative;font:700 8px/1 Archivo,sans-serif;letter-spacing:.24em;text-transform:uppercase;margin-top:24px;color:rgba(255,255,255,.9)">{{ ficha.kicker }}</div>
+            <h1 style="position:relative;font:400 54px/.9 'Instrument Serif',serif;letter-spacing:-.025em;margin:12px 0 0;color:#fff">{{ ficha.name }}</h1>
+            <div style="position:relative;display:flex;gap:6px;margin-top:20px">
+              <sc-for list="{{ ficha.stats }}" as="s" hint-placeholder-count="4">
+                <div style="flex:1;padding:10px 11px;border-radius:13px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.24)">
+                  <div style="font:500 15px/1 'IBM Plex Mono',monospace;color:#fff">{{ s.v }}</div>
+                  <div style="font:600 7px/1.1 Archivo,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:6px">{{ s.k }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="flex:1;min-height:0;overflow:auto;padding:20px">
+            <p style="font:400 14px/1.6 Archivo,sans-serif;color:rgba(238,242,248,.72);margin:0;text-wrap:pretty">{{ ficha.resumen }}</p>
+            <div style="display:flex;gap:6px;margin-top:20px">
+              <sc-for list="{{ selEras }}" as="e" hint-placeholder-count="4">
+                <div style="flex:1;min-width:0;padding:11px 9px;border-radius:13px;border:1px solid {{ e.border }};background:{{ e.bg }}">
+                  <div style="width:6px;height:6px;border-radius:999px;background:{{ e.dotColor }};box-shadow:{{ e.glow }}"></div>
+                  <div style="font:400 13px/1.1 'Instrument Serif',serif;margin-top:9px;color:{{ e.fg }}">{{ e.short }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;margin-top:18px;padding:9px 14px 9px 9px;border-radius:18px;border:1px solid rgba(170,200,255,.14);background:rgba(255,255,255,.035)">
+              <div onClick="{{ togglePlay }}" style="width:40px;height:40px;flex:none;border-radius:999px;background:linear-gradient(180deg,#ff6a3d,#e8380f);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font:600 11px/1 'IBM Plex Mono',monospace;box-shadow:0 0 20px rgba(255,74,28,.4)">{{ playIcon }}</div>
+              <div style="flex:1;min-width:0">
+                <div style="font:700 7px/1 Archivo,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:rgba(238,242,248,.5)">Alex narra · {{ ficha.audio }}</div>
+                <div style="display:flex;align-items:flex-end;gap:2px;height:18px;margin-top:8px">
+                  <sc-for list="{{ barsShort }}" as="b" hint-placeholder-count="20">
+                    <span style="width:3px;flex:none;border-radius:2px;background:{{ b.c }};height:{{ b.h }}%;transition:height .3s ease"></span>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+            <div style="font:700 8px/1 Archivo,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:rgba(238,242,248,.45);margin:24px 0 12px">Hitos clave</div>
+            <sc-for list="{{ ficha.hitosShort }}" as="h" hint-placeholder-count="5">
+              <div style="display:flex;gap:12px;padding:9px 0;border-bottom:1px solid rgba(170,200,255,.1);align-items:baseline">
+                <span style="font:500 10px/1.3 'IBM Plex Mono',monospace;width:80px;flex:none;color:#ffb49c">{{ h.date }}</span>
+                <span style="font:400 12px/1.5 Archivo,sans-serif;color:rgba(238,242,248,.75)">{{ h.event }}</span>
+              </div>
+            </sc-for>
+            <div style="font:700 8px/1 Archivo,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:rgba(238,242,248,.45);margin:24px 0 12px">Mapa histórico</div>
+            <div style="border-radius:18px;overflow:hidden;border:1px solid rgba(170,200,255,.16)">
+              <historya-map highlight="{{ ficha.mapCountries }}" style="width:100%;height:164px;display:block"></historya-map>
+              <div style="padding:13px 15px;border-top:1px solid rgba(170,200,255,.14);display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+                <span style="font:400 15px/1.2 'Instrument Serif',serif">{{ ficha.mapLabel }}</span>
+                <span style="font:500 10px/1 'IBM Plex Mono',monospace;color:#ffb49c;flex:none">{{ ficha.mapYear }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="flex:none;padding:14px 20px 20px;display:flex;gap:8px;border-top:1px solid rgba(170,200,255,.12)">
+            <span style="flex:1;text-align:center;padding:14px;border-radius:999px;cursor:pointer;font:700 9px/1 Archivo,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#fff;background:linear-gradient(180deg,#ff6a3d,#e8380f);box-shadow:0 8px 24px rgba(255,74,28,.4)">Leer la lección</span>
+            <span onClick="{{ goQuiz }}" style="padding:14px 18px;border-radius:999px;cursor:pointer;font:700 9px/1 Archivo,sans-serif;letter-spacing:.14em;text-transform:uppercase;border:1px solid rgba(170,200,255,.22);color:rgba(238,242,248,.85)">Quiz</span>
+          </div>
+        </section>
+      </div>
+    </sc-if>
+
+    <!-- ============================================ 3 · QUIZ -->
+    <sc-if value="{{ isQuiz }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;gap:44px;align-items:flex-start;animation:hy-in .34s cubic-bezier(.2,.8,.2,1) both">
+
+        <section data-screen-label="Escritorio — Quiz contrarreloj" style="width:1280px;flex:none;border-radius:30px;overflow:hidden;border:1px solid rgba(170,200,255,.16);background:radial-gradient(70% 60% at 88% 0%, rgba(126,86,255,.3) 0%, transparent 60%),radial-gradient(60% 50% at 4% 100%, rgba(255,74,28,.24) 0%, transparent 62%),linear-gradient(160deg,#0c1018,#070910 70%,#110a10);box-shadow:0 40px 120px rgba(0,0,0,.6)">
+
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:24px;padding:22px 34px;border-bottom:1px solid rgba(170,200,255,.13)">
+            <div style="display:flex;align-items:center;gap:12px">
+              <span style="width:20px;height:20px;border-radius:6px;background:linear-gradient(150deg,#ff8256,#e8380f);box-shadow:0 0 16px rgba(255,74,28,.5);display:block"></span>
+              <span style="font:400 20px/1 'Instrument Serif',serif">Quiz</span>
+              <span style="font:500 9px/1 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:rgba(238,242,248,.5)">{{ quiz.scope }}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:26px">
+              <div style="display:flex;align-items:center;gap:7px">
+                <sc-for list="{{ quiz.lives }}" as="l" hint-placeholder-count="3">
+                  <span style="width:12px;height:12px;border-radius:999px;display:block;background:{{ l.bg }};box-shadow:{{ l.glow }};transition:background .25s ease,box-shadow .25s ease"></span>
+                </sc-for>
+                <span style="font:600 8px/1 Archivo,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(238,242,248,.5);margin-left:5px">Vidas</span>
+              </div>
+              <div style="display:flex;align-items:baseline;gap:8px">
+                <span style="font:500 22px/1 'IBM Plex Mono',monospace;color:{{ quiz.streakColor }};text-shadow:{{ quiz.streakGlow }}">{{ quiz.streak }}</span>
+                <span style="font:600 8px/1 Archivo,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(238,242,248,.5)">Racha ×{{ quiz.mult }}</span>
+              </div>
+              <div style="display:flex;align-items:baseline;gap:8px">
+                <span style="font:500 22px/1 'IBM Plex Mono',monospace">{{ quiz.score }}</span>
+                <span style="font:600 8px/1 Archivo,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(238,242,248,.5)">Puntos</span>
+              </div>
+              <span onClick="{{ goGlobe }}" style="font:600 8px/1 Archivo,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(238,242,248,.5);cursor:pointer;padding:9px 14px;border-radius:999px;border:1px solid rgba(170,200,255,.16)" style-hover="color:#fff">Salir</span>
+            </div>
+          </div>
+
+          <div style="padding:16px 34px 0;display:flex;align-items:center;gap:16px">
+            <span style="font:500 11px/1 'IBM Plex Mono',monospace;color:rgba(238,242,248,.55);flex:none">{{ quiz.counter }}</span>
+            <div style="flex:1;height:5px;border-radius:999px;background:rgba(255,255,255,.09);overflow:hidden">
+              <div style="height:100%;width:{{ quiz.timePct }};background:{{ quiz.timeColor }};box-shadow:{{ quiz.timeGlow }};transition:width .96s linear,background .3s ease"></div>
+            </div>
+            <span style="font:500 15px/1 'IBM Plex Mono',monospace;flex:none;width:46px;text-align:right;color:{{ quiz.timeColor }}">{{ quiz.timeLeft }}s</span>
+          </div>
+
+          <sc-if value="{{ quiz.playing }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex">
+              <div style="flex:1;min-width:0;padding:28px 34px 36px">
+                <div style="display:flex;gap:7px">
+                  <span style="padding:7px 12px;border-radius:999px;font:600 8px/1 Archivo,sans-serif;letter-spacing:.16em;text-transform:uppercase;border:1px solid rgba(170,200,255,.2);color:rgba(238,242,248,.7)">{{ quiz.q.era }}</span>
+                  <span style="padding:7px 12px;border-radius:999px;font:600 8px/1 Archivo,sans-serif;letter-spacing:.16em;text-transform:uppercase;border:1px solid rgba(170,200,255,.2);color:rgba(238,242,248,.7)">{{ quiz.q.topic }}</span>
+                  <span style="padding:7px 12px;border-radius:999px;font:600 8px/1 Archivo,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#fff;background:linear-gradient(180deg,#ff6a3d,#e8380f);box-shadow:0 6px 20px rgba(255,74,28,.35)">{{ quiz.q.kindLabel }}</span>
+                </div>
+
+                <h2 style="font:400 44px/1.06 'Instrument Serif',serif;letter-spacing:-.02em;margin:22px 0 0;max-width:32ch;text-wrap:pretty">{{ quiz.q.question }}</h2>
+
+                <sc-if value="{{ quiz.isHuecos }}" hint-placeholder-val="{{ false }}">
+                  <p style="font:400 18px/1.65 Archivo,sans-serif;margin:18px 0 0;max-width:52ch;color:rgba(238,242,248,.8)">{{ quiz.q.text }}</p>
+                </sc-if>
+
+                <div style="display:flex;flex-direction:column;gap:9px;margin-top:26px;max-width:740px">
+                  <sc-for list="{{ quiz.options }}" as="o" hint-placeholder-count="4">
+                    <div onClick="{{ o.pick }}" style="display:flex;align-items:center;gap:16px;padding:16px 18px;border-radius:16px;border:1px solid {{ o.border }};background:{{ o.bg }};color:{{ o.fg }};cursor:{{ o.cursor }};box-shadow:{{ o.glow }};transition:background .2s ease,border-color .2s ease,transform .18s ease" style-hover="transform:translateX(5px)">
+                      <span style="width:28px;height:28px;flex:none;border-radius:999px;border:1px solid currentColor;display:flex;align-items:center;justify-content:center;font:500 11px/1 'IBM Plex Mono',monospace">{{ o.key }}</span>
+                      <span style="font:400 16px/1.45 Archivo,sans-serif;flex:1">{{ o.label }}</span>
+                      <span style="font:400 15px/1 'Instrument Serif',serif;flex:none">{{ o.mark }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+
+                <sc-if value="{{ quiz.showFeedback }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:24px;padding:20px 22px;border-radius:20px;border:1px solid {{ quiz.verdictBorder }};background:{{ quiz.verdictBg }};display:flex;gap:22px;align-items:flex-start;animation:hy-pop .24s ease both">
+                    <div style="flex:1">
+                      <div style="font:400 26px/1.15 'Instrument Serif',serif;color:{{ quiz.verdictColor }}">{{ quiz.verdict }}</div>
+                      <p style="font:400 14px/1.6 Archivo,sans-serif;margin:10px 0 0;max-width:62ch;color:rgba(238,242,248,.8)">{{ quiz.q.explanation }}</p>
+                    </div>
+                    <span onClick="{{ quiz.next }}" style="flex:none;padding:14px 20px;border-radius:999px;cursor:pointer;font:700 10px/1 Archivo,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#fff;background:linear-gradient(180deg,#ff6a3d,#e8380f);box-shadow:0 8px 26px rgba(255,74,28,.4)">{{ quiz.nextLabel }}</span>
+                  </div>
+                </sc-if>
+              </div>
+
+              <div style="width:430px;flex:none;border-left:1px solid rgba(170,200,255,.13);padding:28px 32px;display:flex;flex-direction:column;gap:22px">
+                <sc-if value="{{ quiz.isMapa }}" hint-placeholder-val="{{ false }}">
+                  <div>
+                    <div style="font:700 8px/1 Archivo,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:rgba(238,242,248,.5)">Señala en el mapa</div>
+                    <div style="border-radius:18px;overflow:hidden;border:1px solid rgba(170,200,255,.2);margin-top:13px">
+                      <historya-map highlight="{{ quiz.q.highlight }}" pins="{{ quiz.q.pins }}" pin-active="{{ quiz.mapActive }}" style="width:100%;height:244px;display:block"></historya-map>
+                    </div>
+                    <p style="font:400 12px/1.55 Archivo,sans-serif;color:rgba(238,242,248,.55);margin:11px 0 0">Elige la letra que marca el lugar. Los puntos están sobre fronteras actuales.</p>
+                  </div>
+                </sc-if>
+
+                <div>
+                  <div style="font:700 8px/1 Archivo,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:rgba(238,242,248,.5)">Progreso de la partida</div>
+                  <div style="display:flex;gap:5px;margin-top:13px">
+                    <sc-for list="{{ quiz.dots }}" as="d" hint-placeholder-count="3">
+                      <span style="flex:1;height:28px;border-radius:8px;background:{{ d.bg }};box-shadow:{{ d.glow }};transition:background .25s ease"></span>
+                    </sc-for>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;font:500 9px/1 'IBM Plex Mono',monospace;letter-spacing:.05em;text-transform:uppercase;color:rgba(238,242,248,.45);margin-top:12px">
+                    <span>{{ quiz.rightCount }} aciertos</span><span>{{ quiz.wrongCount }} fallos</span>
+                  </div>
+                </div>
+
+                <div>
+                  <div style="font:700 8px/1 Archivo,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:rgba(238,242,248,.5)">Formatos de esta partida</div>
+                  <div style="display:flex;flex-direction:column;gap:9px;margin-top:13px">
+                    <sc-for list="{{ quiz.kinds }}" as="k" hint-placeholder-count="4">
+                      <div style="display:flex;align-items:center;gap:11px;font:400 12.5px/1 Archivo,sans-serif;color:{{ k.fg }}">
+                        <span style="width:8px;height:8px;border-radius:999px;flex:none;background:{{ k.bg }};box-shadow:{{ k.glow }}"></span>{{ k.label }}
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+
+                <sc-if value="{{ alexOn }}" hint-placeholder-val="{{ true }}">
+                  <div style="margin-top:auto;display:flex;gap:12px;padding:16px;border-radius:18px;border:1px solid rgba(170,200,255,.13);background:rgba(255,255,255,.03)">
+                    <div style="width:40px;height:40px;flex:none;border-radius:13px;background:linear-gradient(150deg,#ffb066,#ff5a28);display:flex;align-items:center;justify-content:center;font:600 11px/1 'IBM Plex Mono',monospace;color:#1a0a04">AL</div>
+                    <p style="font:400 12px/1.55 Archivo,sans-serif;color:rgba(238,242,248,.7);margin:0">{{ quiz.alexTip }}</p>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ quiz.finished }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:44px 34px 50px;display:flex;gap:44px;align-items:flex-start;animation:hy-pop .3s ease both">
+              <div style="flex:1">
+                <div style="font:700 9px/1 Archivo,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#ff8256">Partida terminada · {{ quiz.scope }}</div>
+                <h2 style="font:400 62px/.98 'Instrument Serif',serif;letter-spacing:-.03em;margin:18px 0 0;max-width:24ch">{{ quiz.resultTitle }}</h2>
+                <p style="font:400 16px/1.6 Archivo,sans-serif;margin:18px 0 0;max-width:52ch;color:rgba(238,242,248,.72)">{{ quiz.resultBody }}</p>
+                <div style="display:flex;gap:10px;margin-top:28px">
+                  <span onClick="{{ quiz.restart }}" style="padding:15px 22px;border-radius:999px;cursor:pointer;font:700 10px/1 Archivo,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#fff;background:linear-gradient(180deg,#ff6a3d,#e8380f);box-shadow:0 10px 30px rgba(255,74,28,.45)">Jugar de nuevo</span>
+                  <span onClick="{{ goBiblio }}" style="padding:15px 22px;border-radius:999px;cursor:pointer;font:700 10px/1 Archivo,sans-serif;letter-spacing:.16em;text-transform:uppercase;border:1px solid rgba(170,200,255,.22);color:rgba(238,242,248,.85)">Repasar en la biblioteca</span>
+                </div>
+              </div>
+              <div style="width:430px;flex:none;display:flex;flex-direction:column;gap:8px">
+                <sc-for list="{{ quiz.resultStats }}" as="s" hint-placeholder-count="4">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px 20px;border-radius:16px;border:1px solid rgba(170,200,255,.14);background:rgba(255,255,255,.035)">
+                    <span style="font:600 9px/1 Archivo,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(238,242,248,.55)">{{ s.k }}</span>
+                    <span style="font:500 26px/1 'IBM Plex Mono',monospace">{{ s.v }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+        </section>
+
+        <section data-screen-label="Móvil — Quiz" style="width:390px;flex:none;height:844px;border-radius:44px;overflow:hidden;border:1px solid rgba(170,200,255,.18);display:flex;flex-direction:column;background:radial-gradient(80% 50% at 100% 0%, rgba(126,86,255,.32) 0%, transparent 60%),radial-gradient(70% 40% at 0% 100%, rgba(255,74,28,.26) 0%, transparent 62%),linear-gradient(170deg,#0c1018,#070910);box-shadow:0 40px 100px rgba(0,0,0,.6)">
+          <div style="flex:none;padding:16px 20px 0;display:flex;align-items:center;justify-content:space-between;font:500 9px/1 'IBM Plex Mono',monospace;color:rgba(238,242,248,.55)">
+            <span onClick="{{ goGlobe }}" style="cursor:pointer">← Salir</span><span>9:41</span>
+          </div>
+          <div style="flex:none;padding:18px 20px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+            <div style="display:flex;align-items:center;gap:5px">
+              <sc-for list="{{ quiz.lives }}" as="l" hint-placeholder-count="3">
+                <span style="width:11px;height:11px;border-radius:999px;display:block;background:{{ l.bg }};box-shadow:{{ l.glow }}"></span>
+              </sc-for>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:6px">
+              <span style="font:500 17px/1 'IBM Plex Mono',monospace;color:{{ quiz.streakColor }}">{{ quiz.streak }}</span>
+              <span style="font:600 7px/1 Archivo,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:rgba(238,242,248,.5)">racha</span>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:6px">
+              <span style="font:500 17px/1 'IBM Plex Mono',monospace">{{ quiz.score }}</span>
+              <span style="font:600 7px/1 Archivo,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:rgba(238,242,248,.5)">pts</span>
+            </div>
+            <span style="font:500 15px/1 'IBM Plex Mono',monospace;color:{{ quiz.timeColor }}">{{ quiz.timeLeft }}s</span>
+          </div>
+          <div style="flex:none;margin:0 20px;height:4px;border-radius:999px;background:rgba(255,255,255,.09);overflow:hidden">
+            <div style="height:100%;width:{{ quiz.timePct }};background:{{ quiz.timeColor }};box-shadow:{{ quiz.timeGlow }};transition:width .96s linear"></div>
+          </div>
+
+          <div style="flex:1;min-height:0;overflow:auto;padding:20px">
+            <div style="display:flex;gap:6px;align-items:center">
+              <span style="padding:6px 10px;border-radius:999px;font:600 7px/1 Archivo,sans-serif;letter-spacing:.14em;text-transform:uppercase;border:1px solid rgba(170,200,255,.2);color:rgba(238,242,248,.7)">{{ quiz.q.era }}</span>
+              <span style="padding:6px 10px;border-radius:999px;font:600 7px/1 Archivo,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#fff;background:linear-gradient(180deg,#ff6a3d,#e8380f)">{{ quiz.q.kindLabel }}</span>
+              <span style="font:500 9px/1 'IBM Plex Mono',monospace;color:rgba(238,242,248,.45);margin-left:auto">{{ quiz.counter }}</span>
+            </div>
+            <h2 style="font:400 30px/1.1 'Instrument Serif',serif;letter-spacing:-.02em;margin:18px 0 0;text-wrap:pretty">{{ quiz.q.question }}</h2>
+            <sc-if value="{{ quiz.isMapa }}" hint-placeholder-val="{{ false }}">
+              <div style="border-radius:16px;overflow:hidden;border:1px solid rgba(170,200,255,.2);margin-top:16px">
+                <historya-map highlight="{{ quiz.q.highlight }}" pins="{{ quiz.q.pins }}" pin-active="{{ quiz.mapActive }}" style="width:100%;height:148px;display:block"></historya-map>
+              </div>
+            </sc-if>
+            <sc-if value="{{ quiz.isHuecos }}" hint-placeholder-val="{{ false }}">
+              <p style="font:400 15px/1.65 Archivo,sans-serif;margin:14px 0 0;color:rgba(238,242,248,.8)">{{ quiz.q.text }}</p>
+            </sc-if>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:18px">
+              <sc-for list="{{ quiz.options }}" as="o" hint-placeholder-count="4">
+                <div onClick="{{ o.pick }}" style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;border:1px solid {{ o.border }};background:{{ o.bg }};color:{{ o.fg }};cursor:{{ o.cursor }};min-height:50px;box-sizing:border-box;transition:background .2s ease,border-color .2s ease">
+                  <span style="width:24px;height:24px;flex:none;border-radius:999px;border:1px solid currentColor;display:flex;align-items:center;justify-content:center;font:500 10px/1 'IBM Plex Mono',monospace">{{ o.key }}</span>
+                  <span style="font:400 13px/1.4 Archivo,sans-serif;flex:1">{{ o.label }}</span>
+                  <span style="font:400 13px/1 'Instrument Serif',serif;flex:none">{{ o.mark }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <sc-if value="{{ quiz.showFeedback }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:16px;padding:16px;border-radius:16px;border:1px solid {{ quiz.verdictBorder }};background:{{ quiz.verdictBg }};animation:hy-pop .24s ease both">
+                <div style="font:400 20px/1.15 'Instrument Serif',serif;color:{{ quiz.verdictColor }}">{{ quiz.verdict }}</div>
+                <p style="font:400 12px/1.55 Archivo,sans-serif;margin:9px 0 0;color:rgba(238,242,248,.78)">{{ quiz.q.explanation }}</p>
+              </div>
+            </sc-if>
+          </div>
+
+          <div style="flex:none;padding:14px 20px 20px;border-top:1px solid rgba(170,200,255,.12)">
+            <span onClick="{{ quiz.next }}" style="display:block;text-align:center;padding:15px;border-radius:999px;cursor:pointer;font:700 10px/1 Archivo,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#fff;background:linear-gradient(180deg,#ff6a3d,#e8380f);box-shadow:0 8px 26px rgba(255,74,28,.4)">{{ quiz.nextLabel }}</span>
+          </div>
+        </section>
+      </div>
+    </sc-if>
+
+    <!-- ============================================ 4 · BIBLIOTECA -->
+    <sc-if value="{{ isBiblio }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;gap:44px;align-items:flex-start;animation:hy-in .34s cubic-bezier(.2,.8,.2,1) both">
+
+        <section data-screen-label="Escritorio — Biblioteca" style="width:1280px;flex:none;border-radius:30px;overflow:hidden;border:1px solid rgba(170,200,255,.16);background:radial-gradient(60% 50% at 88% 0%, rgba(24,150,196,.22) 0%, transparent 62%),linear-gradient(170deg,#0a0e18,#070a12);box-shadow:0 40px 120px rgba(0,0,0,.6)">
+          <div style="padding:34px 38px 28px;display:flex;align-items:flex-end;justify-content:space-between;gap:32px">
+            <div>
+              <div style="font:700 9px/1 Archivo,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#ff8256">Aprender y leer</div>
+              <h1 style="font:400 68px/.94 'Instrument Serif',serif;letter-spacing:-.025em;margin:16px 0 0">Biblioteca</h1>
+              <p style="font:400 15px/1.65 Archivo,sans-serif;color:rgba(238,242,248,.68);margin:16px 0 0;max-width:50ch;text-wrap:pretty">{{ biblio.count }} lecciones con fuentes, conceptos y debates historiográficos. Filtra por era o entra desde el globo.</p>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:12px">
+              <div style="font:500 46px/1 'IBM Plex Mono',monospace;color:#ffb49c">{{ biblio.progress }}%</div>
+              <div style="font:600 9px/1 Archivo,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:rgba(238,242,248,.5)">Tu progreso total</div>
+              <div style="width:230px;height:6px;border-radius:999px;background:rgba(255,255,255,.09);overflow:hidden">
+                <div style="height:100%;width:{{ biblio.progressW }};background:linear-gradient(90deg,#ff6a3d,#ffb066);box-shadow:0 0 16px rgba(255,120,60,.6);transition:width .4s ease"></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="padding:0 38px 22px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <sc-for list="{{ biblio.filters }}" as="f" hint-placeholder-count="5">
+              <span onClick="{{ f.go }}" style="display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:999px;cursor:pointer;font:700 9px/1 Archivo,sans-serif;letter-spacing:.16em;text-transform:uppercase;border:1px solid {{ f.border }};background:{{ f.bg }};color:{{ f.fg }};box-shadow:{{ f.glow }};transition:border-color .2s ease,background .2s ease">
+                <span style="width:7px;height:7px;border-radius:999px;background:{{ f.dot }}"></span>{{ f.label }}
+              </span>
+            </sc-for>
+            <span style="margin-left:auto;font:500 9px/1 'IBM Plex Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:rgba(238,242,248,.45)">{{ biblio.shown }} lecciones</span>
+          </div>
+
+          <div style="padding:0 38px 40px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+            <sc-for list="{{ biblio.items }}" as="t" hint-placeholder-count="9">
+              <div style="border-radius:22px;overflow:hidden;border:1px solid rgba(170,200,255,.14);background:linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.02));cursor:pointer;display:flex;flex-direction:column;transition:transform .22s cubic-bezier(.2,.8,.2,1),border-color .22s ease,box-shadow .22s ease" style-hover="transform:translateY(-6px);border-color:rgba(255,130,86,.4);box-shadow:0 22px 50px rgba(0,0,0,.5)">
+                <div style="height:3px;background:{{ t.bg }};box-shadow:{{ t.glow }}"></div>
+                <div style="padding:20px 22px 22px;display:flex;flex-direction:column;gap:14px;flex:1">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+                    <span style="font:600 8px/1 Archivo,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:{{ t.bg }}">{{ t.era }}</span>
+                    <span style="font:500 8px/1 'IBM Plex Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:rgba(238,242,248,.4)">{{ t.country }}</span>
+                  </div>
+                  <div style="font:400 27px/1.08 'Instrument Serif',serif;letter-spacing:-.01em;min-height:2.16em">{{ t.title }}</div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;font:500 9px/1 'IBM Plex Mono',monospace;letter-spacing:.04em;color:rgba(238,242,248,.45)">
+                    <span>{{ t.years }}</span><span>{{ t.duration }}</span>
+                  </div>
+                  <div style="height:4px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden">
+                    <div style="height:100%;width:{{ t.pw }};background:linear-gradient(90deg,#ff6a3d,#ffb066)"></div>
+                  </div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:4px">
+                    <span style="padding:7px 12px;border-radius:999px;font:600 8px/1 Archivo,sans-serif;letter-spacing:.14em;text-transform:uppercase;border:1px solid rgba(170,200,255,.18);color:rgba(238,242,248,.65)">{{ t.level }}</span>
+                    <span style="font:600 9px/1 Archivo,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#ff8256">{{ t.cta }} →</span>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+        <section data-screen-label="Móvil — Biblioteca" style="width:390px;flex:none;height:844px;border-radius:44px;overflow:hidden;border:1px solid rgba(170,200,255,.18);display:flex;flex-direction:column;background:linear-gradient(180deg,#0a0e18,#070a12);box-shadow:0 40px 100px rgba(0,0,0,.6)">
+          <div style="flex:none;padding:16px 20px 0;display:flex;align-items:center;justify-content:space-between;font:500 9px/1 'IBM Plex Mono',monospace;color:rgba(238,242,248,.5)">
+            <span>9:41</span><span>Biblioteca</span>
+          </div>
+          <div style="flex:none;padding:16px 20px 16px">
+            <h1 style="font:400 40px/.98 'Instrument Serif',serif;letter-spacing:-.02em;margin:0">Aprender<br><em style="font-style:italic;color:#ffb49c">y leer</em></h1>
+            <div style="display:flex;align-items:center;gap:12px;margin-top:16px">
+              <div style="flex:1;height:6px;border-radius:999px;background:rgba(255,255,255,.09);overflow:hidden">
+                <div style="height:100%;width:{{ biblio.progressW }};background:linear-gradient(90deg,#ff6a3d,#ffb066);box-shadow:0 0 14px rgba(255,120,60,.6)"></div>
+              </div>
+              <span style="font:500 13px/1 'IBM Plex Mono',monospace;color:#ffb49c;flex:none">{{ biblio.progress }}%</span>
+            </div>
+          </div>
+          <div style="flex:none;padding:0 20px 14px;display:flex;gap:7px;overflow:auto">
+            <sc-for list="{{ biblio.filters }}" as="f" hint-placeholder-count="5">
+              <span onClick="{{ f.go }}" style="white-space:nowrap;padding:9px 13px;border-radius:999px;cursor:pointer;font:700 8px/1 Archivo,sans-serif;letter-spacing:.14em;text-transform:uppercase;border:1px solid {{ f.border }};background:{{ f.bg }};color:{{ f.fg }}">{{ f.short }}</span>
+            </sc-for>
+          </div>
+          <div style="flex:1;min-height:0;overflow:auto;padding:0 20px 20px;display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ biblio.items }}" as="t" hint-placeholder-count="8">
+              <div style="border-radius:18px;overflow:hidden;border:1px solid rgba(170,200,255,.14);background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));display:flex;cursor:pointer">
+                <div style="width:3px;flex:none;background:{{ t.bg }};box-shadow:{{ t.glow }}"></div>
+                <div style="flex:1;min-width:0;padding:15px 16px">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                    <span style="font:600 7px/1 Archivo,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:{{ t.bg }}">{{ t.era }}</span>
+                    <span style="font:500 8px/1 'IBM Plex Mono',monospace;color:rgba(238,242,248,.4)">{{ t.duration }}</span>
+                  </div>
+                  <div style="font:400 20px/1.12 'Instrument Serif',serif;margin-top:10px">{{ t.title }}</div>
+                  <div style="display:flex;align-items:center;gap:10px;margin-top:12px">
+                    <div style="flex:1;height:4px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden">
+                      <div style="height:100%;width:{{ t.pw }};background:linear-gradient(90deg,#ff6a3d,#ffb066)"></div>
+                    </div>
+                    <span style="font:500 8px/1 'IBM Plex Mono',monospace;letter-spacing:.04em;text-transform:uppercase;color:rgba(238,242,248,.42);flex:none">{{ t.country }}</span>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="flex:none;margin:0 16px 16px;height:58px;border-radius:999px;border:1px solid rgba(170,200,255,.16);background:rgba(10,14,22,.82);display:grid;grid-template-columns:repeat(4,1fr);padding:0 6px">
+            <sc-for list="{{ tabsBiblio }}" as="t" hint-placeholder-count="4">
+              <div onClick="{{ t.go }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;color:{{ t.color }};border-radius:999px;background:{{ t.bg }};margin:5px 0">
+                <span style="font:400 13px/1 'Instrument Serif',serif">{{ t.mark }}</span>
+                <span style="font:600 8px/1 Archivo,sans-serif;letter-spacing:.14em;text-transform:uppercase">{{ t.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+      </div>
+    </sc-if>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1420,&quot;height&quot;:1100},&quot;globeMode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;night&quot;,&quot;color&quot;,&quot;grid&quot;,&quot;ink&quot;,&quot;outline&quot;],&quot;default&quot;:&quot;night&quot;,&quot;tsType&quot;:&quot;'night'|'color'|'grid'|'ink'|'outline'&quot;,&quot;section&quot;:&quot;Globo&quot;},&quot;autoSpin&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Globo&quot;},&quot;alexGuide&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Contenido&quot;},&quot;showNotes&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Contenido&quot;}}">
+class Component extends DCLogic {
+  state = {
+    screen: 'globe', hover: null, sel: null, playing: false, ready: 0,
+    fichaCountry: 'Italia', era: 'Todas',
+    qi: 0, picked: null, lives: 3, streak: 0, best: 0, score: 0, time: 20, results: [], over: false
+  };
+
+  ERA = {
+    'Antigüedad': { c: '#f5c451', t: 'rgba(245,196,81,.12)', b: 'rgba(245,196,81,.4)', g: '0 0 14px rgba(245,196,81,.7)' },
+    'Edad Media': { c: '#ff7a4d', t: 'rgba(255,122,77,.12)', b: 'rgba(255,122,77,.4)', g: '0 0 14px rgba(255,122,77,.7)' },
+    'Edad Moderna': { c: '#6fb7ff', t: 'rgba(111,183,255,.12)', b: 'rgba(111,183,255,.38)', g: '0 0 14px rgba(111,183,255,.7)' },
+    'Edad Contemporánea': { c: '#6ee0a8', t: 'rgba(110,224,168,.12)', b: 'rgba(110,224,168,.38)', g: '0 0 14px rgba(110,224,168,.7)' }
+  };
+  SHORT = { 'Antigüedad': 'Antig.', 'Edad Media': 'Media', 'Edad Moderna': 'Moderna', 'Edad Contemporánea': 'Contemp.' };
+
+  componentDidMount() {
+    window.HISTORYA_ON_HOVER = (d) => this.setState({ hover: d ? d.name : null });
+    window.HISTORYA_ON_SELECT = (d) => this.setState({
+      sel: d.name, hover: null, playing: false,
+      fichaCountry: this.data().countries[d.name] ? d.name : this.state.fichaCountry
+    });
+    window.HISTORYA_ON_READY = (n) => this.setState({ ready: n });
+    this.clock = setInterval(() => {
+      const s = this.state;
+      if (s.screen !== 'quiz' || s.picked !== null || s.over || s.time <= 0) return;
+      if (s.time <= 1) this.answer(-1); else this.setState({ time: s.time - 1 });
+    }, 1000);
+  }
+
+  componentWillUnmount() {
+    window.HISTORYA_ON_HOVER = window.HISTORYA_ON_SELECT = window.HISTORYA_ON_READY = null;
+    clearInterval(this.clock); clearInterval(this.tick);
+  }
+
+  data() { return window.HISTORYA_DATA || { countries: {}, eras: [], topics: [], quiz: [], mapas: {} }; }
+  era(name, k) { return (this.ERA[name] || { c: 'rgba(238,242,248,.5)', t: 'rgba(255,255,255,.04)', b: 'rgba(170,200,255,.14)', g: 'none' })[k]; }
+
+  go(screen) { this.setState({ screen }); }
+
+  pick(name) {
+    if (this.data().countries[name]) this.setState({ fichaCountry: name });
+    const g = window.HISTORYA_GLOBE;
+    if (g && g.focus(name)) return;
+    this.setState({ sel: name });
+  }
+
+  back() {
+    const g = window.HISTORYA_GLOBE;
+    if (g) g.zoomOut();
+    this.setState({ sel: null, hover: null, playing: false });
+  }
+
+  qList() { return this.data().quiz || []; }
+
+  answer(i) {
+    if (this.state.picked !== null || this.state.over) return;
+    const q = this.qList()[this.state.qi];
+    const ok = q.kind === 'mapa' ? ['A', 'B', 'C', 'D'][i] === q.answer : i === q.answer;
+    const streak = ok ? this.state.streak + 1 : 0;
+    const mult = 1 + Math.min(2, Math.floor(streak / 2));
+    this.setState({
+      picked: i, streak,
+      best: Math.max(this.state.best, streak),
+      lives: ok ? this.state.lives : this.state.lives - 1,
+      score: ok ? this.state.score + (100 + this.state.time * 5) * mult : this.state.score,
+      results: this.state.results.concat([ok])
+    });
+  }
+
+  next() {
+    if (this.state.qi >= this.qList().length - 1 || this.state.lives <= 0) { this.setState({ over: true }); return; }
+    this.setState({ qi: this.state.qi + 1, picked: null, time: 20 });
+  }
+
+  restart() { this.setState({ qi: 0, picked: null, lives: 3, streak: 0, best: 0, score: 0, time: 20, results: [], over: false }); }
+
+  renderVals() {
+    const d = this.data();
+    const countries = d.countries || {};
+    const names = Object.keys(countries);
+    const s = this.state;
+    const sel = s.sel;
+    const selData = sel ? countries[sel] : null;
+
+    const EMBER = 'linear-gradient(180deg,#ff6a3d,#e8380f)';
+    const screenDefs = [
+      { key: 'globe', label: 'Globo', title: 'Home con el globo' },
+      { key: 'ficha', label: 'Ficha de país', title: 'Ficha de país' },
+      { key: 'quiz', label: 'Quiz', title: 'Quiz contrarreloj' },
+      { key: 'biblio', label: 'Biblioteca', title: 'Biblioteca' }
+    ];
+    const screens = screenDefs.map((x, i) => ({
+      n: String(i + 1).padStart(2, '0'), label: x.label,
+      bg: s.screen === x.key ? EMBER : 'rgba(255,255,255,.04)',
+      fg: s.screen === x.key ? '#fff' : 'rgba(238,242,248,.66)',
+      border: s.screen === x.key ? 'rgba(255,140,100,.5)' : 'rgba(170,200,255,.16)',
+      glow: s.screen === x.key ? '0 8px 26px rgba(255,74,28,.34)' : 'none',
+      go: () => this.go(x.key)
+    }));
+
+    const navItems = [
+      { label: 'Globo', key: 'globe' }, { label: 'Biblioteca', key: 'biblio' },
+      { label: 'Quiz', key: 'quiz' }, { label: 'Perfil', key: 'ficha' }
+    ].map((x) => ({
+      label: x.label,
+      bg: x.key === 'globe' ? 'rgba(255,255,255,.1)' : 'transparent',
+      fg: x.key === 'globe' ? '#fff' : 'rgba(238,242,248,.6)',
+      go: () => this.go(x.key)
+    }));
+
+    const t = Date.now();
+    const wave = (n) => Array.from({ length: n }, (_, i) => {
+      const base = 26 + Math.abs(Math.sin(i * 1.7)) * 68;
+      const on = s.playing && i < n * 0.45;
+      const h = s.playing ? Math.max(14, Math.min(100, base * (0.55 + Math.abs(Math.sin(i * 0.9 + t / 260)) * 0.75))) : base * 0.55;
+      return { h: Math.round(h), c: on ? '#ff7a4d' : 'rgba(238,242,248,.28)', g: on ? '0 0 10px rgba(255,122,77,.7)' : 'none' };
+    });
+
+    const starters = ['Egipto', 'Grecia', 'Italia', 'España', 'Turquía']
+      .filter((n) => countries[n])
+      .map((n, i) => {
+        const era = ((countries[n].topics || [])[0] || {}).era;
+        const nT = (countries[n].topics || []).length;
+        return {
+          name: n, n: String(i + 1).padStart(2, '0'),
+          color: this.era(era, 'c'), glow: this.era(era, 'g'),
+          meta: nT + (nT > 1 ? ' lecciones' : ' lección'),
+          onPick: () => this.pick(n)
+        };
+      });
+
+    const mkTabs = (active) => [
+      { label: 'Globo', mark: '◍', key: 'globe' }, { label: 'Aprender', mark: '▤', key: 'biblio' },
+      { label: 'Quiz', mark: '◆', key: 'quiz' }, { label: 'Perfil', mark: '●', key: 'ficha' }
+    ].map((x) => ({
+      label: x.label, mark: x.mark,
+      bg: x.key === active ? 'rgba(255,255,255,.1)' : 'transparent',
+      color: x.key === active ? '#ffb49c' : 'rgba(238,242,248,.5)',
+      go: () => this.go(x.key)
+    }));
+
+    const fc = countries[s.fichaCountry] ? s.fichaCountry : 'Italia';
+    const fd = countries[fc] || { topics: [], hitos: [] };
+    const mapa = (d.mapas || {})[fc] || { label: '', year: '', note: '', countries: fc };
+    const fichaEras = (fd.topics || []).map((x) => x.era);
+    const ficha = {
+      name: fc,
+      kicker: 'Ficha de país · ' + (fichaEras[0] || 'Historia'),
+      resumen: fd.resumen, audio: fd.audio, alex: fd.alex,
+      hitos: fd.hitos || [], hitosShort: (fd.hitos || []).slice(0, 4),
+      stats: [
+        { v: (fd.topics || []).length, k: (fd.topics || []).length === 1 ? 'Lección' : 'Lecciones' },
+        { v: (fd.hitos || []).length, k: 'Hitos' },
+        { v: fd.audio, k: 'Narración' },
+        { v: this.qList().length, k: 'Preguntas' }
+      ],
+      topics: (fd.topics || []).map((x) => ({
+        title: x.title, level: x.level,
+        color: this.era(x.era, 'c'), glow: this.era(x.era, 'g'),
+        meta: x.era + ' · ' + x.years + ' · ' + x.duration
+      })),
+      mapCountries: mapa.countries, mapLabel: mapa.label, mapYear: mapa.year, mapNote: mapa.note,
+      quizCount: this.qList().length
+    };
+
+    const selEras = (d.eras || []).map((e) => {
+      const on = fichaEras.indexOf(e.name) >= 0;
+      return {
+        name: e.name, range: e.range, short: this.SHORT[e.name] || e.name,
+        bg: on ? this.era(e.name, 't') : 'rgba(255,255,255,.025)',
+        border: on ? this.era(e.name, 'b') : 'rgba(170,200,255,.1)',
+        fg: on ? '#eef2f8' : 'rgba(238,242,248,.4)',
+        dotColor: on ? this.era(e.name, 'c') : 'rgba(238,242,248,.2)',
+        glow: on ? this.era(e.name, 'g') : 'none',
+        mark: on ? 'Con lección' : 'Pendiente',
+        markColor: on ? this.era(e.name, 'c') : 'rgba(238,242,248,.3)'
+      };
+    });
+
+    const qs = this.qList();
+    const q = qs[Math.min(s.qi, qs.length - 1)] || { options: [], kind: 'opciones' };
+    const kindLabel = { opciones: 'Opción múltiple', mapa: 'Señala en el mapa', huecos: 'Rellena el hueco' };
+    const answered = s.picked !== null;
+    const correctIdx = q.kind === 'mapa' ? ['A', 'B', 'C', 'D'].indexOf(q.answer) : q.answer;
+    const wasRight = answered && s.picked === correctIdx;
+    const mult = 1 + Math.min(2, Math.floor(s.streak / 2));
+
+    const options = (q.options || (q.kind === 'mapa' ? ['A · Adrianópolis (Edirne)', 'B · Atenas', 'C · Constantinopla', 'D · Roma'] : []))
+      .map((label, i) => {
+        const isRight = i === correctIdx, isPicked = i === s.picked;
+        let bg = 'rgba(255,255,255,.045)', border = 'rgba(170,200,255,.18)', fg = '#eef2f8', mark = '', glow = 'none';
+        if (answered && isRight) { bg = 'rgba(110,224,168,.16)'; border = '#6ee0a8'; fg = '#e9fff2'; mark = '✓'; glow = '0 0 30px rgba(110,224,168,.25)'; }
+        else if (answered && isPicked) { bg = 'rgba(255,74,28,.18)'; border = '#ff4a1c'; fg = '#ffeee8'; mark = '✕'; glow = '0 0 30px rgba(255,74,28,.25)'; }
+        else if (answered) { bg = 'rgba(255,255,255,.02)'; border = 'rgba(170,200,255,.08)'; fg = 'rgba(238,242,248,.42)'; }
+        return { label, key: ['A', 'B', 'C', 'D'][i], bg, border, fg, mark, glow, cursor: answered ? 'default' : 'pointer', pick: () => this.answer(i) };
+      });
+
+    const rightCount = s.results.filter(Boolean).length;
+    const timeColor = s.time > 10 ? '#6ee0a8' : s.time > 5 ? '#f5c451' : '#ff4a1c';
+    const kindIdx = ['opciones', 'mapa', 'huecos'].indexOf(q.kind);
+
+    const quiz = {
+      scope: fc, playing: !s.over, finished: s.over,
+      q: Object.assign({}, q, { kindLabel: kindLabel[q.kind] || 'Pregunta' }),
+      isMapa: q.kind === 'mapa', isHuecos: q.kind === 'huecos',
+      mapActive: q.kind === 'mapa' ? (answered ? q.answer : null) : null,
+      options,
+      counter: String(Math.min(s.qi + 1, qs.length)).padStart(2, '0') + ' / ' + String(qs.length).padStart(2, '0'),
+      lives: [0, 1, 2].map((i) => ({
+        bg: i < s.lives ? '#ff4a1c' : 'rgba(255,255,255,.1)',
+        glow: i < s.lives ? '0 0 14px rgba(255,74,28,.7)' : 'none'
+      })),
+      streak: s.streak, mult,
+      streakColor: s.streak >= 2 ? '#f5c451' : '#eef2f8',
+      streakGlow: s.streak >= 2 ? '0 0 22px rgba(245,196,81,.6)' : 'none',
+      score: s.score, timeLeft: s.time,
+      timePct: Math.max(0, Math.min(100, (s.time / 20) * 100)) + '%',
+      timeColor,
+      timeGlow: '0 0 14px ' + (s.time > 10 ? 'rgba(110,224,168,.7)' : s.time > 5 ? 'rgba(245,196,81,.7)' : 'rgba(255,74,28,.8)'),
+      showFeedback: answered,
+      verdict: wasRight ? '¡Bien visto!' : s.picked === -1 ? 'Se acabó el tiempo.' : 'Casi. Mira la marcada.',
+      verdictColor: wasRight ? '#6ee0a8' : '#ffb49c',
+      verdictBg: wasRight ? 'rgba(110,224,168,.09)' : 'rgba(255,74,28,.09)',
+      verdictBorder: wasRight ? 'rgba(110,224,168,.35)' : 'rgba(255,74,28,.35)',
+      nextLabel: s.qi >= qs.length - 1 ? 'Ver resultado' : 'Siguiente pregunta',
+      next: () => this.next(), restart: () => this.restart(),
+      dots: Array.from({ length: qs.length }, (_, i) => ({
+        bg: i < s.results.length ? (s.results[i] ? '#6ee0a8' : '#ff4a1c') : 'rgba(255,255,255,.09)',
+        glow: i < s.results.length ? (s.results[i] ? '0 0 16px rgba(110,224,168,.4)' : '0 0 16px rgba(255,74,28,.4)') : 'none'
+      })),
+      rightCount, wrongCount: s.results.length - rightCount,
+      kinds: ['Opción múltiple', 'Señala en el mapa', 'Rellena el hueco', 'Duelo por era'].map((label, i) => ({
+        label,
+        fg: i === kindIdx ? '#eef2f8' : 'rgba(238,242,248,.45)',
+        bg: i === kindIdx ? '#ff4a1c' : 'rgba(255,255,255,.2)',
+        glow: i === kindIdx ? '0 0 14px rgba(255,74,28,.8)' : 'none'
+      })),
+      alexTip: '«Si dudas, quédate con la opción que explica un mecanismo, no la que suena grandilocuente. La historia es aburridamente concreta.»',
+      resultTitle: rightCount >= s.results.length * 0.75 ? 'Tienes muy buen ojo histórico.' : 'Cada fallo es una pista de dónde volver.',
+      resultBody: 'Has acertado ' + rightCount + ' de ' + s.results.length + ' preguntas con una racha máxima de ' + s.best + '. Guardamos el resultado en tu perfil y Alex te propone la siguiente lección.',
+      resultStats: [
+        { k: 'Puntos', v: s.score },
+        { k: 'Aciertos', v: rightCount + '/' + s.results.length },
+        { k: 'Racha máxima', v: s.best },
+        { k: 'Vidas restantes', v: Math.max(0, s.lives) }
+      ]
+    };
+
+    const topics = d.topics || [];
+    const eraNames = ['Todas'].concat((d.eras || []).map((e) => e.name));
+    const items = topics.filter((x) => s.era === 'Todas' || x.era === s.era).map((x) => ({
+      title: x.title, era: x.era, country: x.country, years: x.years, duration: x.duration, level: x.level,
+      bg: this.era(x.era, 'c'), glow: this.era(x.era, 'g'), pw: x.progress + '%',
+      cta: x.progress === 100 ? 'Repasar' : x.progress > 0 ? 'Continuar' : 'Empezar'
+    }));
+    const totalProgress = topics.length ? Math.round(topics.reduce((a, x) => a + x.progress, 0) / topics.length) : 0;
+    const biblio = {
+      count: topics.length, shown: items.length, progress: totalProgress, progressW: totalProgress + '%', items,
+      filters: eraNames.map((n) => {
+        const on = s.era === n;
+        return {
+          label: n, short: this.SHORT[n] || n,
+          bg: on ? EMBER : 'rgba(255,255,255,.04)',
+          fg: on ? '#fff' : 'rgba(238,242,248,.7)',
+          border: on ? 'rgba(255,140,100,.5)' : 'rgba(170,200,255,.16)',
+          glow: on ? '0 8px 24px rgba(255,74,28,.3)' : 'none',
+          dot: n === 'Todas' ? 'rgba(238,242,248,.5)' : this.era(n, 'c'),
+          go: () => this.setState({ era: n })
+        };
+      })
+    };
+
+    const nT = selData ? (selData.topics || []).length : 0;
+
+    return {
+      globeMode: this.props.globeMode ?? 'night',
+      spinAttr: (this.props.autoSpin ?? true) ? 'on' : 'off',
+      alexOn: this.props.alexGuide ?? true,
+      notesOn: this.props.showNotes ?? true,
+
+      screens, navItems,
+      screenTitle: (screenDefs.find((x) => x.key === s.screen) || screenDefs[0]).title,
+      isGlobe: s.screen === 'globe', isFicha: s.screen === 'ficha',
+      isQuiz: s.screen === 'quiz', isBiblio: s.screen === 'biblio',
+      goGlobe: () => this.go('globe'), goFicha: () => this.go('ficha'),
+      goQuiz: () => this.go('quiz'), goBiblio: () => this.go('biblio'),
+
+      countryCount: s.ready || 176,
+      coveredCount: names.length,
+      coveredList: names.join(','),
+      selAttr: sel || null,
+      sel: sel || '',
+      readout: s.hover || sel || 'Gira el globo',
+      readoutColor: (s.hover || sel) ? '#eef2f8' : 'rgba(238,242,248,.32)',
+      showIntro: !sel, showCountry: !!selData, showEmpty: !!sel && !selData,
+      selResumen: selData ? selData.resumen : '',
+      selHitos: selData ? selData.hitos : [],
+      sheetHitos: selData ? (selData.hitos || []).slice(0, 3) : [],
+      selStats: selData ? [
+        { v: nT, k: nT === 1 ? 'Lección' : 'Lecciones' },
+        { v: (selData.hitos || []).length, k: 'Hitos' },
+        { v: selData.audio, k: 'Narración' }
+      ] : [],
+      sheetKicker: selData ? 'Ficha de país' : 'Sin lección todavía',
+      sheetY: sel ? 'translateY(0)' : 'translateY(calc(100% + 90px))',
+      eraLegend: (d.eras || []).map((e) => ({ name: e.name, c: this.era(e.name, 'c'), g: this.era(e.name, 'g') })),
+      selEras, starters,
+      tabs: mkTabs('globe'), tabsBiblio: mkTabs('biblio'),
+      fichaTabs: ['Ficha', 'Lecciones', 'Mapas', 'Quiz'].map((label, i) => ({
+        label, bg: i === 0 ? 'rgba(255,255,255,.9)' : 'transparent', fg: i === 0 ? '#c22a08' : 'rgba(255,255,255,.85)'
+      })),
+      quizBadges: [{ label: '3 vidas' }, { label: 'Racha ×2' }, { label: 'Mapa' }],
+      back: () => this.back(),
+
+      playIcon: s.playing ? '❙❙' : '▶',
+      playLabel: s.playing ? 'Sonando' : 'Escuchar',
+      togglePlay: () => {
+        const on = !s.playing;
+        clearInterval(this.tick);
+        if (on) this.tick = setInterval(() => this.forceUpdate(), 130);
+        this.setState({ playing: on });
+      },
+      bars: wave(34), barsShort: wave(20),
+
+      ficha, quiz, biblio,
+
+      notes: [
+        { k: 'globe.js', v: 'Custom elements vanilla: historya-globe, historya-map y historya-outline. El modo noche dibuja atmósfera, terminador y brillo de brasa en el mismo canvas.' },
+        { k: 'Navegación', v: 'HISTORYA_ON_SELECT recibe { name, en, id } al terminar el vuelo. Ahí llamas a router.push("/estudiar/" + topicId): el zoom y la ruta quedan sincronizados.' },
+        { k: 'Mapas históricos', v: 'Extensión aproximada sobre fronteras actuales de Natural Earth. Nada dibujado a mano: si no podemos verificar una frontera antigua, no la inventamos.' },
+        { k: 'Rendimiento', v: 'Un canvas para 176 países y un requestAnimationFrame que se detiene en reposo. Los brillos son box-shadow y las auroras una capa fija con transform: la GPU las compone sin repintar el contenido.' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

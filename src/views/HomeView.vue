@@ -1,64 +1,230 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { eras } from '../data/history'
+import { eraColor, eras, findTopic } from '../data/history'
 import { useTopics } from '../composables/useTopics'
+import { atlasCountries, coveredCountries } from '../lib/regions'
+import '../lib/globe.js'
 
 const { topics } = useTopics()
-const selectedEra = ref('Todas')
-const highlightedTopics = computed(() =>
-  selectedEra.value === 'Todas'
-    ? topics.value.slice(0, 3)
-    : topics.value.filter((topic) => topic.era === selectedEra.value).slice(0, 3),
+
+const hovered = ref<string | null>(null)
+const selected = ref<string | null>(null)
+const countryTotal = ref(0)
+
+/** Países del atlas con al menos una lección. Es lo que se enciende en brasa. */
+const covered = computed(() => coveredCountries(topics.value.map((topic) => topic.country)))
+// `.attr` es obligatorio: el elemento tiene un método covered() y, sin el
+// modificador, Vue ve la clave en el elemento y asigna la propiedad en vez del
+// atributo, dejando el método sobrescrito con una cadena.
+const coveredAttr = computed(() => covered.value.join(','))
+
+function topicsOf(country: string) {
+  return topics.value.filter((topic) => atlasCountries(topic.country).includes(country))
+}
+
+const selectedTopics = computed(() => (selected.value ? topicsOf(selected.value) : []))
+const hasLesson = computed(() => selectedTopics.value.length > 0)
+
+const readout = computed(() => hovered.value ?? selected.value ?? 'Gira el globo')
+
+/** Hitos del primer tema del país. El contenido vive en el repositorio, así que
+ *  se leen de ahí en lugar de pedir la lección entera solo para el panel. */
+const selectedDates = computed(() => {
+  const first = selectedTopics.value[0]
+  return first ? (findTopic(first.id)?.keyDates ?? []).slice(0, 5) : []
+})
+
+const selectedStats = computed(() => {
+  const list = selectedTopics.value
+  if (!list.length) return []
+  const years = list.map((topic) => topic.years).filter(Boolean)
+  return [
+    { k: 'Lecciones', v: String(list.length) },
+    { k: 'Nivel', v: list.some((topic) => topic.level === 'Universidad') ? 'Univ.' : list[0].level },
+    { k: 'Periodo', v: years.length === 1 ? years[0] : `${years.length} tramos` },
+  ]
+})
+
+/** Los cinco países con más lecciones, para la lista «Empieza por aquí». */
+const starters = computed(() =>
+  covered.value
+    .map((country) => ({ country, list: topicsOf(country) }))
+    .sort((a, b) => b.list.length - a.list.length || a.country.localeCompare(b.country, 'es'))
+    .slice(0, 5)
+    .map(({ country, list }, index) => ({
+      country,
+      n: String(index + 1).padStart(2, '0'),
+      era: eraColor(list[0].era),
+      meta: list.length === 1 ? list[0].era : `${list.length} lecciones`,
+    })),
 )
+
+function onHover(event: Event) {
+  hovered.value = (event as CustomEvent<{ name: string } | null>).detail?.name ?? null
+}
+function onSelect(event: Event) {
+  selected.value = (event as CustomEvent<{ name: string }>).detail.name
+}
+function onReady(event: Event) {
+  countryTotal.value = (event as CustomEvent<{ count: number }>).detail.count
+}
+function pick(country: string) {
+  selected.value = country
+}
+function back() {
+  selected.value = null
+  hovered.value = null
+}
 </script>
 
 <template>
-  <section class="hero-section">
-    <div class="shell hero-grid">
-      <div class="hero-copy">
-        <p class="eyebrow"><span class="eyebrow-dot"></span> Aprende a mirar el pasado</p>
-        <h1>La historia no se memoriza.<br /><i>Se descubre.</i></h1>
-        <p class="hero-intro">Lee, explora y pon a prueba lo que sabes. Un lugar para estudiantes y curiosos que quieren conectar los hechos.</p>
-        <div class="hero-actions">
-          <RouterLink class="button button-primary" to="/biblioteca">Empezar a explorar <span>→</span></RouterLink>
-          <RouterLink class="button button-quiet" to="/quiz">Jugar un quiz</RouterLink>
+  <section class="globe-screen shell">
+    <historya-globe
+      class="globe-canvas"
+      mode="night"
+      spin="on"
+      :selected="selected ?? undefined"
+      :covered.attr="coveredAttr"
+      @hy-hover="onHover"
+      @hy-select="onSelect"
+      @hy-ready="onReady"
+    ></historya-globe>
+
+    <div class="globe-readout">
+      <p class="globe-readout-label">Bajo el cursor</p>
+      <p class="globe-readout-name" :class="{ dim: !hovered && !selected }">{{ readout }}</p>
+      <p class="globe-readout-meta">
+        {{ countryTotal }} países · {{ covered.length }} encendidos · arrastra para girar
+      </p>
+    </div>
+
+    <aside class="globe-panel">
+      <!-- Sin país elegido -->
+      <div v-if="!selected" class="globe-panel-body">
+        <p class="eyebrow eyebrow-light">Explora el mundo</p>
+        <h1 class="globe-title">Gira el globo.<br /><i>Elige un país.</i></h1>
+        <p class="globe-lead">
+          Cada país abre sus lecciones, sus hitos y su quiz.
+          {{ covered.length }} brillan ya con lección escrita; el resto está en camino.
+        </p>
+
+        <div class="alex-card">
+          <span class="alex-avatar" aria-hidden="true">AL</span>
+          <div>
+            <p class="alex-name">Alex te guía</p>
+            <p class="alex-quote">
+              «No hace falta orden. Pincha donde te dé curiosidad y yo te digo por dónde seguir.»
+            </p>
+          </div>
         </div>
-        <div class="hero-trust"><div class="avatar-stack" aria-hidden="true"><span>J</span><span>M</span><span>A</span></div><p><strong>+2.400</strong> personas aprendiendo cada semana</p></div>
+
+        <div class="era-legend">
+          <span v-for="era in eras" :key="era.name" class="era-chip" :class="`era-${era.color}`">
+            <i></i>{{ era.name }}
+          </span>
+        </div>
+
+        <p class="panel-label">Empieza por aquí</p>
+        <div class="starter-list">
+          <button
+            v-for="starter in starters"
+            :key="starter.country"
+            class="starter"
+            :class="`era-${starter.era}`"
+            type="button"
+            @click="pick(starter.country)"
+          >
+            <span class="starter-n">{{ starter.n }}</span>
+            <span class="starter-dot"></span>
+            <span class="starter-name">{{ starter.country }}</span>
+            <span class="starter-meta">{{ starter.meta }}</span>
+            <span class="starter-arrow">→</span>
+          </button>
+        </div>
       </div>
 
-      <div class="hero-art" aria-label="Composición editorial inspirada en la historia antigua" role="img">
-        <div class="sun-disc"></div><div class="arch arch-back"></div><div class="arch arch-front"><span class="arch-inscription">SPQR</span></div>
-        <div class="laurel laurel-left">❧</div><div class="laurel laurel-right">❧</div>
-        <div class="paper-label label-top">SIGLO I <small>ROMA</small></div><div class="paper-label label-bottom">DESCUBRE<br />EL PASADO</div>
-      </div>
-    </div>
-  </section>
+      <!-- País con lecciones -->
+      <div v-else-if="hasLesson" class="globe-panel-body">
+        <button class="panel-back" type="button" @click="back">← Volver al globo</button>
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow eyebrow-light">Ficha de país</p>
+            <h1 class="panel-country">{{ selected }}</h1>
+          </div>
+          <historya-outline :country="selected" tone="ember" class="panel-outline"></historya-outline>
+        </div>
 
-  <section class="period-section">
-    <div class="shell">
-      <div class="section-heading split-heading"><div><p class="eyebrow">VIAJA EN EL TIEMPO</p><h2>¿Por dónde quieres<br /><i>empezar?</i></h2></div><p>Elige una época, sigue tu curiosidad y avanza a tu ritmo.</p></div>
-      <div class="era-grid">
-        <button v-for="(era, index) in eras" :key="era.name" class="era-card" :class="[`era-${era.color}`, { selected: selectedEra === era.name }]" type="button" @click="selectedEra = era.name">
-          <span class="era-number">{{ String(index + 1).padStart(2, '0') }}</span><span class="era-range">{{ era.range }}</span><strong>{{ era.name }}</strong><small>{{ era.description }}</small><span class="era-arrow">→</span>
-        </button>
-      </div>
-    </div>
-  </section>
+        <div class="panel-stats">
+          <div v-for="stat in selectedStats" :key="stat.k">
+            <span class="stat-value">{{ stat.v }}</span>
+            <span class="stat-key">{{ stat.k }}</span>
+          </div>
+        </div>
 
-  <section class="study-section">
-    <div class="shell">
-      <div class="section-heading inline-heading"><div><p class="eyebrow">CONTINÚA APRENDIENDO</p><h2>Una historia a la vez</h2></div><RouterLink to="/biblioteca" class="text-link">Ver todos los temas <span>→</span></RouterLink></div>
-      <div class="topic-grid">
-        <article v-for="topic in highlightedTopics" :key="topic.id" class="topic-card">
-          <div class="topic-visual" :class="`visual-${topic.color}`"><span>{{ topic.visual }}</span></div>
-          <div class="topic-content"><div class="topic-meta"><span>{{ topic.era }}</span><span>{{ topic.years }}</span></div><h3>{{ topic.title }}</h3><p>{{ topic.description }}</p><div class="topic-footer"><span>{{ topic.duration }} · {{ topic.level }}</span><RouterLink :to="`/estudiar/${topic.id}`" :aria-label="`Estudiar ${topic.title}`">→</RouterLink></div></div>
-        </article>
-      </div>
-    </div>
-  </section>
+        <p class="panel-label">Lecciones</p>
+        <div class="panel-topics">
+          <RouterLink
+            v-for="topic in selectedTopics"
+            :key="topic.id"
+            class="panel-topic"
+            :class="`era-${eraColor(topic.era)}`"
+            :to="`/estudiar/${topic.id}`"
+          >
+            <span class="panel-topic-bar"></span>
+            <span class="panel-topic-body">
+              <span class="panel-topic-title">{{ topic.title }}</span>
+              <span class="panel-topic-meta">{{ topic.years }} · {{ topic.duration }}</span>
+            </span>
+            <span class="starter-arrow">→</span>
+          </RouterLink>
+        </div>
 
-  <section class="quiz-cta">
-    <div class="shell quiz-cta-inner"><div><p class="eyebrow eyebrow-light">¿TE ANIMAS?</p><h2>Convierte lo que lees<br />en lo que <i>sabes.</i></h2><p>Elige un tema o mezcla toda la historia. Cada pregunta viene con contexto para que aprender sea parte del juego.</p><RouterLink class="button button-cream" to="/quiz">Ir al quiz <span>→</span></RouterLink></div><div class="quiz-card-preview" aria-hidden="true"><span class="quiz-number">03</span><p>¿Qué civilización construyó la ciudad de Machu Picchu?</p><div><span>○ Maya</span><span class="answer-preview">● Inca</span><span>○ Azteca</span></div><small>HISTORIA DE AMÉRICA</small></div></div>
+        <template v-if="selectedDates.length">
+          <p class="panel-label">Hitos clave</p>
+          <div class="panel-dates">
+            <div v-for="item in selectedDates" :key="item.date">
+              <span>{{ item.date }}</span><span>{{ item.event }}</span>
+            </div>
+          </div>
+        </template>
+
+        <div class="panel-actions">
+          <RouterLink class="button button-primary panel-grow" :to="`/pais/${encodeURIComponent(selected)}`">
+            Abrir ficha completa
+          </RouterLink>
+          <RouterLink class="button button-quiet" :to="{ name: 'quiz', query: { topic: selectedTopics[0].id } }">
+            Quiz
+          </RouterLink>
+        </div>
+      </div>
+
+      <!-- País sin lección todavía -->
+      <div v-else class="globe-panel-body">
+        <button class="panel-back" type="button" @click="back">← Volver al globo</button>
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Sin lección todavía</p>
+            <h1 class="panel-country">{{ selected }}</h1>
+          </div>
+          <historya-outline :country="selected" tone="light" class="panel-outline faded"></historya-outline>
+        </div>
+        <p class="globe-lead">
+          Todavía no hemos escrito la historia de {{ selected }}. Está en la lista.
+        </p>
+        <p class="panel-label">Mientras tanto</p>
+        <div class="era-legend">
+          <button
+            v-for="starter in starters"
+            :key="starter.country"
+            class="chip-button"
+            type="button"
+            @click="pick(starter.country)"
+          >
+            {{ starter.country }}
+          </button>
+        </div>
+      </div>
+    </aside>
   </section>
 </template>

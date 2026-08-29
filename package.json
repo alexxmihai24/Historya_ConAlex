@@ -12,9 +12,12 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.4",
+    "d3-geo": "^3.1.1",
     "pinia": "^4.0.3",
+    "topojson-client": "^3.1.0",
     "vue": "^3.5.41",
-    "vue-router": "^5.2.0"
+    "vue-router": "^5.2.0",
+    "world-atlas": "^2.0.2"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",

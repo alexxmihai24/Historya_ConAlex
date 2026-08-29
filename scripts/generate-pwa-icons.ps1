@@ -16,9 +16,9 @@ function New-HistoryIcon {
   $graphics.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
   $graphics.TextRenderingHint = [System.Drawing.Text.TextRenderingHint]::AntiAliasGridFit
 
-  $moss = [System.Drawing.ColorTranslator]::FromHtml('#234c3e')
-  $cream = [System.Drawing.ColorTranslator]::FromHtml('#f8f4eb')
-  $gold = [System.Drawing.ColorTranslator]::FromHtml('#e1aa44')
+  $moss = [System.Drawing.ColorTranslator]::FromHtml('#0a0e18')
+  $cream = [System.Drawing.ColorTranslator]::FromHtml('#eef2f8')
+  $gold = [System.Drawing.ColorTranslator]::FromHtml('#ff4a1c')
   $graphics.Clear($moss)
 
   $safeScale = if ($Maskable) { 0.70 } else { 0.78 }

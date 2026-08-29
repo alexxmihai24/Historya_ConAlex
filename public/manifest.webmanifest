@@ -1,13 +1,13 @@
 {
-  "name": "Historia Con Alex",
-  "short_name": "Historia",
-  "description": "Aprende historia, explora lecciones y repasa con quizzes.",
+  "name": "Historya con Alex",
+  "short_name": "Historya",
+  "description": "Gira el globo, estudia lecciones y repasa contrarreloj.",
   "lang": "es",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#f8f4eb",
-  "theme_color": "#234c3e",
+  "background_color": "#06080e",
+  "theme_color": "#06080e",
   "orientation": "any",
   "categories": ["education", "books", "games"],
   "icons": [

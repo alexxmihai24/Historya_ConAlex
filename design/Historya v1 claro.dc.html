@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="_ds/modernist-4e8b2d76-9b82-4223-becb-9fcfa16422e5/styles.css">
+<script src="_ds/modernist-4e8b2d76-9b82-4223-becb-9fcfa16422e5/_ds_bundle.js"></script>
+<script src="https://unpkg.com/d3@7.9.0/dist/d3.min.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" crossorigin="anonymous"></script>
+<script src="historya-data.js"></script>
+<script src="globe.js"></script>
+<style>
+  body { margin: 0; background: #f3f2f2; }
+  a { color: var(--color-accent-700); text-decoration: none; }
+  a:hover { color: var(--color-accent); }
+  @keyframes hy-in { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+  @keyframes hy-pop { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: none; } }
+  @keyframes hy-drift { 0% { transform: translate3d(0,0,0); } 50% { transform: translate3d(-2%,1.5%,0); } 100% { transform: translate3d(0,0,0); } }
+  @media (prefers-reduced-motion: reduce) { * { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+</style>
+</helmet>
+
+<div style="min-height:100vh;width:max-content;min-width:100%;color:var(--color-text);font-family:var(--font-body);-webkit-font-smoothing:antialiased;position:relative;background:linear-gradient(166deg, oklch(0.976 0.008 92) 0%, oklch(0.934 0.014 250) 100%)">
+
+  <!-- capa de degradado: fija y a pantalla completa, se mueve muy despacio sin repintar nada más -->
+  <div style="position:fixed;inset:-10%;pointer-events:none;z-index:0;background:radial-gradient(58% 46% at 4% 0%, oklch(0.985 0.028 92) 0%, transparent 62%),radial-gradient(46% 38% at 100% 8%, oklch(0.93 0.062 34) 0%, transparent 60%),radial-gradient(48% 40% at 62% 104%, oklch(0.94 0.048 228) 0%, transparent 62%);animation:hy-drift 26s ease-in-out infinite;will-change:transform"></div>
+
+  <div style="position:relative;z-index:1;padding:40px 44px 72px;display:flex;flex-direction:column;gap:26px">
+
+    <header style="display:flex;align-items:flex-end;justify-content:space-between;gap:32px">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="font:700 11px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent-700)">Historya con Alex · PWA</div>
+        <div style="font:800 40px/1 var(--font-heading);letter-spacing:-.025em">{{ screenTitle }}</div>
+      </div>
+      <div style="font:500 11px/1.6 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--color-neutral-600);text-align:right">Escritorio 1280 · Móvil 390<br>Geometría Natural Earth 110m</div>
+    </header>
+
+    <div style="display:flex;gap:0;border-top:2px solid var(--color-text);border-bottom:2px solid var(--color-text)">
+      <sc-for list="{{ screens }}" as="s" hint-placeholder-count="4">
+        <div onClick="{{ s.go }}" style="padding:13px 22px 12px;cursor:pointer;border-right:2px solid var(--color-text);background:{{ s.bg }};color:{{ s.fg }};transition:background .2s ease,color .2s ease;display:flex;align-items:baseline;gap:9px">
+          <span style="font:800 10px/1 var(--font-heading);opacity:.55">{{ s.n }}</span>
+          <span style="font:700 11px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase">{{ s.label }}</span>
+        </div>
+      </sc-for>
+    </div>
+
+    <!-- ================================================== 1 · GLOBO -->
+    <sc-if value="{{ isGlobe }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;flex-direction:column;gap:44px;animation:hy-in .3s cubic-bezier(.2,.8,.2,1) both">
+
+        <section data-screen-label="Escritorio — Home con el globo" style="width:1280px;border:2px solid var(--color-text);box-shadow:var(--shadow-lg);background:linear-gradient(180deg, rgba(255,255,255,.92) 0%, rgba(255,255,255,.64) 100%);display:flex;flex-direction:column;overflow:hidden">
+          <nav style="height:68px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 24px">
+            <div style="display:flex;align-items:baseline;gap:10px">
+              <span style="font:800 21px/1 var(--font-heading);letter-spacing:-.02em">HISTORYA</span>
+              <span style="font:600 10px/1 var(--font-body);letter-spacing:.18em;text-transform:uppercase;color:var(--color-accent-700)">con Alex</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:28px">
+              <span style="font:700 11px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;padding-bottom:4px;border-bottom:2px solid var(--color-accent)">Globo</span>
+              <span style="font:600 11px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-700);cursor:pointer" style-hover="color:var(--color-text)">Biblioteca</span>
+              <span style="font:600 11px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-700);cursor:pointer" style-hover="color:var(--color-text)">Quiz</span>
+              <span style="font:600 11px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-700);cursor:pointer" style-hover="color:var(--color-text)">Perfil</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <button class="btn btn-ghost" style="font-size:11px;letter-spacing:.12em;text-transform:uppercase">Acceder</button>
+              <button class="btn btn-primary" style="font-size:11px;letter-spacing:.12em;text-transform:uppercase">Empezar</button>
+            </div>
+          </nav>
+          <div style="height:2px;background:var(--color-text);flex:none"></div>
+
+          <div style="display:flex;height:724px">
+            <div style="width:678px;flex:none;border-right:2px solid var(--color-text);padding:26px 30px;display:flex;flex-direction:column">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px">
+                <div style="font:700 10px/1.5 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600)">Globo terráqueo<br><span style="color:var(--color-text)">{{ countryCount }} países · {{ coveredCount }} con lección</span></div>
+                <div style="font:500 10px/1.6 var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-500);text-align:right">Arrastra para girar<br>Rueda para acercar</div>
+              </div>
+              <div style="flex:1;min-height:0;margin:14px 0;position:relative">
+                <x-import component-from-global-scope="historya-globe" from="./globe.js" mode="{{ globeMode }}" spin="{{ spinAttr }}" selected="{{ selAttr }}" covered="{{ coveredList }}" style="position:absolute;inset:0" hint-size="100%,100%"></x-import>
+              </div>
+              <div style="height:2px;background:var(--color-text)"></div>
+              <div style="padding-top:14px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px">
+                <div>
+                  <div style="font:700 10px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600)">País bajo el cursor</div>
+                  <div style="font:800 26px/1.1 var(--font-heading);letter-spacing:-.01em;margin-top:6px;color:{{ readoutColor }}">{{ readout }}</div>
+                </div>
+                <div style="display:flex;gap:6px;align-items:center">
+                  <span style="width:12px;height:12px;background:var(--color-accent);display:block"></span>
+                  <span style="font:600 10px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--color-neutral-700)">Con lección</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="flex:1;min-width:0;position:relative;overflow:hidden">
+              <sc-if value="{{ showIntro }}" hint-placeholder-val="{{ true }}">
+                <div style="padding:34px 36px;display:flex;flex-direction:column;height:100%;box-sizing:border-box;animation:hy-in .3s cubic-bezier(.2,.8,.2,1) both">
+                  <div style="font:700 11px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent-700)">Explora el mundo</div>
+                  <h1 style="font:800 60px/.94 var(--font-heading);letter-spacing:-.035em;margin:16px 0 0">Gira el globo.<br>Elige un país.</h1>
+                  <p style="font:400 15px/1.6 var(--font-body);color:var(--color-neutral-800);margin:16px 0 0;max-width:44ch;text-wrap:pretty">Cada país abre su línea de tiempo, sus hitos y su quiz. Ocho ya tienen lección completa; el resto está en camino.</p>
+
+                  <sc-if value="{{ alexOn }}" hint-placeholder-val="{{ true }}">
+                    <div style="display:flex;gap:14px;align-items:stretch;margin-top:22px;border-top:2px solid var(--color-text);border-bottom:1px solid var(--color-neutral-300);padding:16px 0">
+                      <div style="width:52px;height:52px;flex:none;border:2px solid var(--color-text);display:flex;align-items:center;justify-content:center;font:800 15px/1 var(--font-heading);background:linear-gradient(140deg, oklch(0.9 0.06 88), oklch(0.86 0.08 44))">AL</div>
+                      <div>
+                        <div style="font:700 10px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent-700)">Alex te guía</div>
+                        <p style="font:400 14px/1.5 var(--font-body);margin:7px 0 0;max-width:40ch;color:var(--color-neutral-800)">«No hace falta orden. Pincha donde te dé curiosidad y yo te cuento por dónde seguir.»</p>
+                      </div>
+                    </div>
+                  </sc-if>
+
+                  <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:20px">
+                    <sc-for list="{{ eraLegend }}" as="e" hint-placeholder-count="4">
+                      <div style="display:flex;align-items:center;gap:7px">
+                        <span style="width:14px;height:14px;flex:none;border:1px solid var(--color-text);background:{{ e.bg }}"></span>
+                        <span style="font:600 9px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--color-neutral-700)">{{ e.name }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+
+                  <div style="font:700 10px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600);margin:24px 0 0">Empieza por aquí</div>
+                  <div style="display:flex;flex-direction:column;margin-top:12px">
+                    <sc-for list="{{ starters }}" as="c" hint-placeholder-count="5">
+                      <div onClick="{{ c.onPick }}" style="display:flex;align-items:center;gap:14px;padding:13px 8px 13px 0;border-bottom:1px solid var(--color-neutral-300);cursor:pointer;transition:padding-left .18s ease,background .18s ease" style-hover="background:rgba(255,255,255,.75);padding-left:10px">
+                        <span style="font:800 12px/1 var(--font-heading);color:var(--color-neutral-500);width:22px">{{ c.n }}</span>
+                        <span style="width:12px;height:12px;flex:none;border:1px solid var(--color-text);background:{{ c.color }}"></span>
+                        <span style="font:800 17px/1 var(--font-heading);letter-spacing:-.01em;flex:1">{{ c.name }}</span>
+                        <span style="font:500 10px/1 var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600)">{{ c.meta }}</span>
+                        <span style="font:800 14px/1 var(--font-heading);color:var(--color-accent)">→</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ showCountry }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:26px 36px 0;height:100%;box-sizing:border-box;display:flex;flex-direction:column;animation:hy-in .34s cubic-bezier(.2,.8,.2,1) both">
+                  <div onClick="{{ back }}" style="font:700 10px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600);cursor:pointer" style-hover="color:var(--color-accent)">← Volver al globo</div>
+                  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-top:18px">
+                    <div>
+                      <div style="font:700 11px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent-700)">Ficha de país</div>
+                      <h1 style="font:800 64px/.9 var(--font-heading);letter-spacing:-.04em;margin:12px 0 0">{{ sel }}</h1>
+                    </div>
+                    <historya-outline country="{{ sel }}" tone="accent" style="width:92px;height:92px;flex:none"></historya-outline>
+                  </div>
+                  <div style="display:flex;margin-top:18px;border-top:2px solid var(--color-text);border-bottom:2px solid var(--color-text)">
+                    <sc-for list="{{ selStats }}" as="s" hint-placeholder-count="3">
+                      <div style="flex:1;padding:12px 0 12px 14px;border-left:1px solid var(--color-neutral-300)">
+                        <div style="font:800 20px/1 var(--font-heading)">{{ s.v }}</div>
+                        <div style="font:600 9px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:6px">{{ s.k }}</div>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <p style="font:400 15px/1.6 var(--font-body);color:var(--color-neutral-800);margin:16px 0 0;max-width:46ch;text-wrap:pretty">{{ selResumen }}</p>
+                  <div style="font:700 10px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600);margin:20px 0 0">Hitos clave</div>
+                  <div style="margin-top:8px;flex:1;min-height:0;overflow:auto">
+                    <sc-for list="{{ selHitos }}" as="h" hint-placeholder-count="4">
+                      <div style="display:flex;gap:16px;padding:11px 0;border-bottom:1px solid var(--color-neutral-300);align-items:baseline">
+                        <span style="font:800 13px/1.2 var(--font-heading);width:104px;flex:none;font-variant-numeric:tabular-nums">{{ h.date }}</span>
+                        <span style="font:400 14px/1.4 var(--font-body);color:var(--color-neutral-800)">{{ h.event }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <div style="display:flex;gap:10px;padding:16px 0;border-top:2px solid var(--color-text)">
+                    <button onClick="{{ goFicha }}" class="btn btn-primary" style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;flex:1">Abrir ficha completa</button>
+                    <button onClick="{{ goQuiz }}" class="btn btn-secondary" style="font-size:11px;letter-spacing:.12em;text-transform:uppercase">Quiz de {{ sel }}</button>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ showEmpty }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:26px 36px;height:100%;box-sizing:border-box;display:flex;flex-direction:column;animation:hy-in .34s cubic-bezier(.2,.8,.2,1) both">
+                  <div onClick="{{ back }}" style="font:700 10px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600);cursor:pointer" style-hover="color:var(--color-accent)">← Volver al globo</div>
+                  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-top:18px">
+                    <div>
+                      <div style="font:700 11px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600)">Sin lección todavía</div>
+                      <h1 style="font:800 58px/.92 var(--font-heading);letter-spacing:-.04em;margin:12px 0 0">{{ sel }}</h1>
+                    </div>
+                    <historya-outline country="{{ sel }}" tone="ink" style="width:88px;height:88px;flex:none;opacity:.35"></historya-outline>
+                  </div>
+                  <div style="height:2px;background:var(--color-text);margin:20px 0 0"></div>
+                  <p style="font:400 15px/1.6 var(--font-body);color:var(--color-neutral-800);margin:18px 0 0;max-width:44ch">Todavía no hemos escrito la historia de {{ sel }}. Alex está en ello — dime que te interesa y sube en la lista.</p>
+                  <button class="btn btn-secondary" style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;align-self:flex-start;margin-top:18px">Avísame cuando esté</button>
+                  <div style="font:700 10px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600);margin:28px 0 12px">Mientras tanto</div>
+                  <div style="display:flex;flex-wrap:wrap;gap:8px">
+                    <sc-for list="{{ starters }}" as="c" hint-placeholder-count="5">
+                      <span onClick="{{ c.onPick }}" class="tag tag-outline" style="cursor:pointer;letter-spacing:.1em;text-transform:uppercase">{{ c.name }}</span>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </section>
+
+        <div style="display:flex;gap:44px;align-items:flex-start">
+          <section data-screen-label="Móvil — Home con el globo" style="width:390px;flex:none;height:844px;border:2px solid var(--color-text);box-shadow:var(--shadow-lg);background:linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,255,255,.6));position:relative;overflow:hidden;display:flex;flex-direction:column">
+            <div style="height:34px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font:600 10px/1 var(--font-body);letter-spacing:.1em;color:var(--color-neutral-600)">
+              <span>9:41</span><span style="letter-spacing:.16em;text-transform:uppercase">Historya · PWA</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 16px 14px">
+              <div style="display:flex;align-items:baseline;gap:8px">
+                <span style="font:800 18px/1 var(--font-heading);letter-spacing:-.02em">HISTORYA</span>
+                <span style="font:600 9px/1 var(--font-body);letter-spacing:.18em;text-transform:uppercase;color:var(--color-accent-700)">con Alex</span>
+              </div>
+              <span style="width:34px;height:34px;border:2px solid var(--color-text);display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:rgba(255,255,255,.7)">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4.2-4.2"></path></svg>
+              </span>
+            </div>
+            <div style="height:2px;background:var(--color-text);flex:none"></div>
+            <div style="padding:18px 16px 10px">
+              <div style="font:700 10px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent-700)">{{ coveredCount }} países con lección</div>
+              <h2 style="font:800 32px/.96 var(--font-heading);letter-spacing:-.03em;margin:10px 0 0">Gira el globo.<br>Elige un país.</h2>
+            </div>
+            <div style="flex:1;min-height:0;position:relative">
+              <x-import component-from-global-scope="historya-globe" from="./globe.js" mode="{{ globeMode }}" spin="off" selected="{{ selAttr }}" covered="{{ coveredList }}" style="position:absolute;inset:0" hint-size="100%,100%"></x-import>
+            </div>
+            <div style="flex:none;padding:0 16px 12px">
+              <div style="height:2px;background:var(--color-text)"></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:12px">
+                <div>
+                  <div style="font:700 9px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600)">Seleccionado</div>
+                  <div style="font:800 20px/1.1 var(--font-heading);margin-top:5px;color:{{ readoutColor }}">{{ readout }}</div>
+                </div>
+                <button onClick="{{ goFicha }}" class="btn btn-primary" style="font-size:10px;letter-spacing:.12em;text-transform:uppercase">Ver historia</button>
+              </div>
+            </div>
+            <div style="position:absolute;left:0;right:0;bottom:62px;border-top:2px solid var(--color-text);padding:18px 16px 20px;transform:{{ sheetY }};transition:transform .34s cubic-bezier(.2,.8,.2,1);box-shadow:var(--shadow-lg);background:linear-gradient(180deg, rgba(255,255,255,.97), rgba(255,255,255,.9))">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+                <div>
+                  <div style="font:700 9px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent-700)">{{ sheetKicker }}</div>
+                  <div style="font:800 34px/.94 var(--font-heading);letter-spacing:-.03em;margin-top:8px">{{ sel }}</div>
+                </div>
+                <div style="display:flex;gap:10px;align-items:flex-start">
+                  <historya-outline country="{{ sel }}" tone="accent" style="width:52px;height:52px;flex:none"></historya-outline>
+                  <span onClick="{{ back }}" style="width:26px;height:26px;border:2px solid var(--color-text);display:flex;align-items:center;justify-content:center;font:800 12px/1 var(--font-heading);cursor:pointer;flex:none">×</span>
+                </div>
+              </div>
+              <div style="height:1px;background:var(--color-neutral-300);margin:14px 0"></div>
+              <sc-for list="{{ sheetHitos }}" as="h" hint-placeholder-count="3">
+                <div style="display:flex;gap:12px;padding:8px 0;align-items:baseline">
+                  <span style="font:800 11px/1.2 var(--font-heading);width:82px;flex:none;font-variant-numeric:tabular-nums;color:var(--color-accent-700)">{{ h.date }}</span>
+                  <span style="font:400 12px/1.4 var(--font-body);color:var(--color-neutral-800)">{{ h.event }}</span>
+                </div>
+              </sc-for>
+              <div style="display:flex;gap:8px;margin-top:14px">
+                <button onClick="{{ goFicha }}" class="btn btn-primary btn-block" style="font-size:10px;letter-spacing:.12em;text-transform:uppercase">Abrir ficha</button>
+                <button onClick="{{ goQuiz }}" class="btn btn-secondary" style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;flex:none">Quiz</button>
+              </div>
+            </div>
+            <div style="flex:none;height:62px;border-top:2px solid var(--color-text);display:grid;grid-template-columns:repeat(4,1fr);position:relative;z-index:2;background:rgba(255,255,255,.82)">
+              <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+                <div onClick="{{ t.go }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;border-top:2px solid {{ t.bar }};margin-top:-2px;color:{{ t.color }}">
+                  <span style="font:800 13px/1 var(--font-heading)">{{ t.mark }}</span>
+                  <span style="font:600 9px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase">{{ t.label }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+
+          <sc-if value="{{ notesOn }}" hint-placeholder-val="{{ true }}">
+            <aside style="flex:1;min-width:0;max-width:520px;padding-top:6px">
+              <div style="font:700 10px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent-700)">Cómo encaja en tu Vue</div>
+              <h3 style="font:800 26px/1.05 var(--font-heading);letter-spacing:-.02em;margin:12px 0 0">Un canvas, un rAF,<br>cero dependencias nuevas.</h3>
+              <div style="height:2px;background:var(--color-text);margin:18px 0 0"></div>
+              <sc-for list="{{ notes }}" as="n" hint-placeholder-count="4">
+                <div style="padding:14px 0;border-bottom:1px solid var(--color-neutral-300)">
+                  <div style="font:700 9px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600)">{{ n.k }}</div>
+                  <p style="font:400 13px/1.55 var(--font-body);margin:7px 0 0;color:var(--color-neutral-800)">{{ n.v }}</p>
+                </div>
+              </sc-for>
+            </aside>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ================================================== 2 · FICHA DE PAÍS -->
+    <sc-if value="{{ isFicha }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;gap:44px;align-items:flex-start;animation:hy-in .3s cubic-bezier(.2,.8,.2,1) both">
+
+        <section data-screen-label="Escritorio — Ficha de país" style="width:1280px;flex:none;border:2px solid var(--color-text);box-shadow:var(--shadow-lg);background:linear-gradient(180deg, rgba(255,255,255,.93) 0%, rgba(255,255,255,.66) 100%);overflow:hidden">
+
+          <!-- cabecera-póster: el país al que acaba de volar el globo -->
+          <div style="position:relative;padding:30px 36px 26px;color:#fff;overflow:hidden;background:linear-gradient(118deg, var(--color-accent-700) 0%, var(--color-accent) 54%, oklch(0.7 0.19 52) 100%)">
+            <div style="position:absolute;right:-40px;top:-30px;width:340px;height:340px;opacity:.16;pointer-events:none">
+              <historya-outline country="{{ ficha.name }}" tone="ink" style="width:100%;height:100%"></historya-outline>
+            </div>
+            <div style="position:relative;display:flex;align-items:center;justify-content:space-between;gap:20px">
+              <div onClick="{{ goGlobe }}" style="font:700 10px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;opacity:.9;cursor:pointer">← Globo</div>
+              <div style="display:flex;gap:22px;font:600 10px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;opacity:.9">
+                <span>Ficha</span><span>Lecciones</span><span>Mapas</span><span>Quiz</span>
+              </div>
+            </div>
+            <div style="position:relative;display:flex;align-items:flex-end;justify-content:space-between;gap:28px;margin-top:26px">
+              <div>
+                <div style="font:700 11px/1 var(--font-body);letter-spacing:.18em;text-transform:uppercase;opacity:.9">{{ ficha.kicker }}</div>
+                <h1 style="font:800 92px/.86 var(--font-heading);letter-spacing:-.045em;margin:14px 0 0">{{ ficha.name }}</h1>
+                <p style="font:400 16px/1.5 var(--font-body);margin:16px 0 0;max-width:56ch;opacity:.95;text-wrap:pretty">{{ ficha.resumen }}</p>
+              </div>
+              <div style="width:150px;height:150px;flex:none;border:2px solid rgba(255,255,255,.65);padding:10px;box-sizing:border-box">
+                <historya-outline country="{{ ficha.name }}" tone="ink" style="width:100%;height:100%;filter:invert(1)"></historya-outline>
+              </div>
+            </div>
+            <div style="position:relative;display:flex;margin-top:24px;border-top:2px solid rgba(255,255,255,.55)">
+              <sc-for list="{{ ficha.stats }}" as="s" hint-placeholder-count="4">
+                <div style="flex:1;padding:14px 0 0 16px;border-left:1px solid rgba(255,255,255,.4)">
+                  <div style="font:800 24px/1 var(--font-heading)">{{ s.v }}</div>
+                  <div style="font:600 9px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;opacity:.85;margin-top:7px">{{ s.k }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display:flex">
+            <div style="flex:1;min-width:0;padding:30px 34px;border-right:2px solid var(--color-text)">
+              <div style="font:700 10px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600)">Línea de tiempo de eras</div>
+              <div style="display:flex;margin-top:12px;border:2px solid var(--color-text)">
+                <sc-for list="{{ selEras }}" as="e" hint-placeholder-count="4">
+                  <div style="flex:1;min-width:0;padding:11px 12px 12px;border-left:2px solid var(--color-text);background:{{ e.bg }};color:{{ e.fg }};transition:background .3s ease">
+                    <div style="font:800 13px/1.05 var(--font-heading);letter-spacing:-.01em">{{ e.name }}</div>
+                    <div style="font:600 8px/1.2 var(--font-body);letter-spacing:.1em;text-transform:uppercase;opacity:.8;margin-top:7px;font-variant-numeric:tabular-nums">{{ e.range }}</div>
+                    <div style="font:700 8px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;margin-top:9px">{{ e.mark }}</div>
+                  </div>
+                </sc-for>
+              </div>
+
+              <div style="display:flex;align-items:center;gap:14px;margin-top:22px;border:2px solid var(--color-text);padding:10px 14px 10px 10px;background:rgba(255,255,255,.6)">
+                <div onClick="{{ togglePlay }}" style="width:44px;height:44px;flex:none;background:var(--color-accent);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font:800 13px/1 var(--font-heading)" style-hover="background:var(--color-accent-600)">{{ playIcon }}</div>
+                <div style="flex:1;min-width:0">
+                  <div style="font:700 9px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600)">Narración de Alex · {{ ficha.audio }}</div>
+                  <div style="display:flex;align-items:flex-end;gap:2px;height:24px;margin-top:8px">
+                    <sc-for list="{{ bars }}" as="b" hint-placeholder-count="34">
+                      <span style="width:3px;flex:none;background:{{ b.c }};height:{{ b.h }}%;transition:height .3s ease,background .3s ease"></span>
+                    </sc-for>
+                  </div>
+                </div>
+                <div style="font:600 9px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--color-neutral-600);flex:none">{{ playLabel }}</div>
+              </div>
+
+              <div style="font:700 10px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600);margin:26px 0 0">Hitos clave</div>
+              <div style="margin-top:10px">
+                <sc-for list="{{ ficha.hitos }}" as="h" hint-placeholder-count="6">
+                  <div style="display:flex;gap:18px;padding:13px 0;border-bottom:1px solid var(--color-neutral-300);align-items:baseline">
+                    <span style="width:8px;height:8px;flex:none;background:var(--color-accent);margin-bottom:3px"></span>
+                    <span style="font:800 14px/1.2 var(--font-heading);width:112px;flex:none;font-variant-numeric:tabular-nums">{{ h.date }}</span>
+                    <span style="font:400 14px/1.45 var(--font-body);color:var(--color-neutral-800)">{{ h.event }}</span>
+                  </div>
+                </sc-for>
+              </div>
+
+              <div style="font:700 10px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600);margin:26px 0 0">Lecciones de {{ ficha.name }}</div>
+              <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+                <sc-for list="{{ ficha.topics }}" as="t" hint-placeholder-count="2">
+                  <div style="border:2px solid var(--color-text);padding:16px 18px;display:flex;align-items:center;gap:18px;cursor:pointer;transition:background .18s ease;background:rgba(255,255,255,.55)" style-hover="background:rgba(255,255,255,.95)">
+                    <span style="width:14px;height:44px;flex:none;background:{{ t.color }};border:1px solid var(--color-text)"></span>
+                    <div style="flex:1;min-width:0">
+                      <div style="font:800 19px/1.15 var(--font-heading);letter-spacing:-.015em">{{ t.title }}</div>
+                      <div style="font:500 11px/1 var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:8px">{{ t.meta }}</div>
+                    </div>
+                    <span class="tag tag-neutral" style="letter-spacing:.1em;text-transform:uppercase;flex:none">{{ t.level }}</span>
+                    <span style="font:800 15px/1 var(--font-heading);color:var(--color-accent);flex:none">→</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="width:426px;flex:none;padding:30px 34px;display:flex;flex-direction:column;gap:24px">
+              <div>
+                <div style="font:700 10px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600)">Mapa histórico</div>
+                <div style="border:2px solid var(--color-text);margin-top:12px">
+                  <historya-map highlight="{{ ficha.mapCountries }}" style="width:100%;height:236px;display:block"></historya-map>
+                  <div style="border-top:2px solid var(--color-text);padding:13px 15px;background:rgba(255,255,255,.7)">
+                    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+                      <span style="font:800 15px/1.15 var(--font-heading);letter-spacing:-.01em">{{ ficha.mapLabel }}</span>
+                      <span style="font:800 12px/1 var(--font-heading);color:var(--color-accent-700);flex:none;font-variant-numeric:tabular-nums">{{ ficha.mapYear }}</span>
+                    </div>
+                    <p style="font:400 12px/1.5 var(--font-body);color:var(--color-neutral-700);margin:8px 0 0">{{ ficha.mapNote }}</p>
+                    <div style="font:500 9px/1.4 var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-500);margin-top:10px">Extensión aproximada sobre fronteras actuales</div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="border:2px solid var(--color-text);padding:20px;color:#fff;background:linear-gradient(140deg, oklch(0.32 0.05 40) 0%, oklch(0.24 0.04 265) 100%)">
+                <div style="font:700 10px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;opacity:.85">Quiz de {{ ficha.name }}</div>
+                <div style="font:800 30px/1 var(--font-heading);letter-spacing:-.025em;margin-top:12px">{{ ficha.quizCount }} preguntas<br>contrarreloj</div>
+                <div style="display:flex;gap:8px;margin-top:16px">
+                  <span style="font:600 9px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;border:1px solid rgba(255,255,255,.5);padding:6px 9px">3 vidas</span>
+                  <span style="font:600 9px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;border:1px solid rgba(255,255,255,.5);padding:6px 9px">Racha ×2</span>
+                  <span style="font:600 9px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;border:1px solid rgba(255,255,255,.5);padding:6px 9px">Mapa</span>
+                </div>
+                <button onClick="{{ goQuiz }}" class="btn btn-primary btn-block" style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-top:18px">Jugar ahora</button>
+              </div>
+
+              <sc-if value="{{ alexOn }}" hint-placeholder-val="{{ true }}">
+                <div style="border-top:2px solid var(--color-text);padding-top:16px;display:flex;gap:14px">
+                  <div style="width:48px;height:48px;flex:none;border:2px solid var(--color-text);display:flex;align-items:center;justify-content:center;font:800 14px/1 var(--font-heading);background:linear-gradient(140deg, oklch(0.9 0.06 88), oklch(0.86 0.08 44))">AL</div>
+                  <div>
+                    <div style="font:700 9px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent-700)">Alex te sugiere</div>
+                    <p style="font:400 13px/1.5 var(--font-body);margin:7px 0 0;color:var(--color-neutral-800)">{{ ficha.alex }}</p>
+                  </div>
+                </div>
+              </sc-if>
+
+              <div>
+                <div style="font:700 10px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600)">Salta a otro país</div>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px">
+                  <sc-for list="{{ starters }}" as="c" hint-placeholder-count="5">
+                    <span onClick="{{ c.onPick }}" class="tag tag-outline" style="cursor:pointer;letter-spacing:.1em;text-transform:uppercase">{{ c.name }}</span>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section data-screen-label="Móvil — Ficha de país" style="width:390px;flex:none;height:844px;border:2px solid var(--color-text);box-shadow:var(--shadow-lg);overflow:hidden;display:flex;flex-direction:column;background:linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.62))">
+          <div style="flex:none;color:#fff;padding:12px 16px 18px;background:linear-gradient(126deg, var(--color-accent-700) 0%, var(--color-accent) 58%, oklch(0.7 0.19 52) 100%);position:relative;overflow:hidden">
+            <div style="position:absolute;right:-24px;bottom:-40px;width:190px;height:190px;opacity:.18">
+              <historya-outline country="{{ ficha.name }}" tone="ink" style="width:100%;height:100%"></historya-outline>
+            </div>
+            <div style="position:relative;display:flex;align-items:center;justify-content:space-between;font:600 9px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;opacity:.9">
+              <span onClick="{{ goGlobe }}" style="cursor:pointer">← Globo</span><span>9:41</span>
+            </div>
+            <div style="position:relative;font:700 9px/1 var(--font-body);letter-spacing:.18em;text-transform:uppercase;margin-top:20px;opacity:.9">{{ ficha.kicker }}</div>
+            <h1 style="position:relative;font:800 46px/.9 var(--font-heading);letter-spacing:-.04em;margin:10px 0 0">{{ ficha.name }}</h1>
+            <div style="position:relative;display:flex;gap:14px;margin-top:18px;border-top:1px solid rgba(255,255,255,.5);padding-top:12px">
+              <sc-for list="{{ ficha.stats }}" as="s" hint-placeholder-count="4">
+                <div style="flex:1">
+                  <div style="font:800 16px/1 var(--font-heading)">{{ s.v }}</div>
+                  <div style="font:600 8px/1.1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;opacity:.85;margin-top:5px">{{ s.k }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="flex:1;min-height:0;overflow:auto;padding:18px 16px 20px">
+            <p style="font:400 14px/1.55 var(--font-body);color:var(--color-neutral-800);margin:0;text-wrap:pretty">{{ ficha.resumen }}</p>
+            <div style="display:flex;margin-top:18px;border:2px solid var(--color-text)">
+              <sc-for list="{{ selEras }}" as="e" hint-placeholder-count="4">
+                <div style="flex:1;min-width:0;padding:9px 7px 10px;border-left:2px solid var(--color-text);background:{{ e.bg }};color:{{ e.fg }}">
+                  <div style="font:800 9px/1.15 var(--font-heading)">{{ e.short }}</div>
+                  <div style="font:700 7px/1 var(--font-body);letter-spacing:.1em;text-transform:uppercase;margin-top:7px">{{ e.dot }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;margin-top:16px;border:2px solid var(--color-text);padding:8px 12px 8px 8px;background:rgba(255,255,255,.7)">
+              <div onClick="{{ togglePlay }}" style="width:38px;height:38px;flex:none;background:var(--color-accent);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font:800 12px/1 var(--font-heading)">{{ playIcon }}</div>
+              <div style="flex:1;min-width:0">
+                <div style="font:700 8px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">Alex narra · {{ ficha.audio }}</div>
+                <div style="display:flex;align-items:flex-end;gap:2px;height:18px;margin-top:7px">
+                  <sc-for list="{{ barsShort }}" as="b" hint-placeholder-count="20">
+                    <span style="width:3px;flex:none;background:{{ b.c }};height:{{ b.h }}%;transition:height .3s ease"></span>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+            <div style="font:700 9px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600);margin:22px 0 10px">Hitos clave</div>
+            <sc-for list="{{ ficha.hitosShort }}" as="h" hint-placeholder-count="5">
+              <div style="display:flex;gap:12px;padding:9px 0;border-bottom:1px solid var(--color-neutral-300);align-items:baseline">
+                <span style="font:800 11px/1.2 var(--font-heading);width:86px;flex:none;font-variant-numeric:tabular-nums;color:var(--color-accent-700)">{{ h.date }}</span>
+                <span style="font:400 12px/1.45 var(--font-body);color:var(--color-neutral-800)">{{ h.event }}</span>
+              </div>
+            </sc-for>
+            <div style="font:700 9px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600);margin:22px 0 10px">Mapa histórico</div>
+            <div style="border:2px solid var(--color-text)">
+              <historya-map highlight="{{ ficha.mapCountries }}" style="width:100%;height:170px;display:block"></historya-map>
+              <div style="border-top:2px solid var(--color-text);padding:11px 13px;background:rgba(255,255,255,.75);display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+                <span style="font:800 12px/1.2 var(--font-heading)">{{ ficha.mapLabel }}</span>
+                <span style="font:800 11px/1 var(--font-heading);color:var(--color-accent-700);flex:none">{{ ficha.mapYear }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="flex:none;border-top:2px solid var(--color-text);padding:12px 16px;display:flex;gap:8px;background:rgba(255,255,255,.85)">
+            <button class="btn btn-primary btn-block" style="font-size:10px;letter-spacing:.12em;text-transform:uppercase">Leer la lección</button>
+            <button onClick="{{ goQuiz }}" class="btn btn-secondary" style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;flex:none">Quiz</button>
+          </div>
+        </section>
+      </div>
+    </sc-if>
+
+    <!-- ================================================== 3 · QUIZ -->
+    <sc-if value="{{ isQuiz }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;gap:44px;align-items:flex-start;animation:hy-in .3s cubic-bezier(.2,.8,.2,1) both">
+
+        <section data-screen-label="Escritorio — Quiz contrarreloj" style="width:1280px;flex:none;border:2px solid var(--color-text);box-shadow:var(--shadow-lg);overflow:hidden;color:#fff;background:linear-gradient(152deg, oklch(0.3 0.045 42) 0%, oklch(0.22 0.035 268) 62%, oklch(0.26 0.06 20) 100%)">
+
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:24px;padding:20px 34px;border-bottom:2px solid rgba(255,255,255,.35)">
+            <div style="display:flex;align-items:baseline;gap:14px">
+              <span style="font:800 18px/1 var(--font-heading);letter-spacing:-.02em">HISTORYA</span>
+              <span style="font:600 9px/1 var(--font-body);letter-spacing:.18em;text-transform:uppercase;opacity:.75">Quiz · {{ quiz.scope }}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:26px">
+              <div style="display:flex;align-items:center;gap:7px">
+                <sc-for list="{{ quiz.lives }}" as="l" hint-placeholder-count="3">
+                  <span style="width:13px;height:13px;display:block;background:{{ l.bg }};border:1px solid rgba(255,255,255,.7);transition:background .25s ease"></span>
+                </sc-for>
+                <span style="font:600 9px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;opacity:.75;margin-left:4px">Vidas</span>
+              </div>
+              <div style="display:flex;align-items:baseline;gap:8px">
+                <span style="font:800 22px/1 var(--font-heading);color:{{ quiz.streakColor }};font-variant-numeric:tabular-nums">{{ quiz.streak }}</span>
+                <span style="font:600 9px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;opacity:.75">Racha · ×{{ quiz.mult }}</span>
+              </div>
+              <div style="display:flex;align-items:baseline;gap:8px">
+                <span style="font:800 22px/1 var(--font-heading);font-variant-numeric:tabular-nums">{{ quiz.score }}</span>
+                <span style="font:600 9px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;opacity:.75">Puntos</span>
+              </div>
+              <div onClick="{{ goGlobe }}" style="font:600 9px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;opacity:.7;cursor:pointer">Salir</div>
+            </div>
+          </div>
+
+          <div style="padding:0 34px">
+            <div style="display:flex;align-items:center;gap:16px;padding:14px 0">
+              <span style="font:800 12px/1 var(--font-heading);font-variant-numeric:tabular-nums;flex:none">{{ quiz.counter }}</span>
+              <div style="flex:1;height:6px;background:rgba(255,255,255,.2);position:relative">
+                <div style="position:absolute;left:0;top:0;bottom:0;width:{{ quiz.timePct }};background:{{ quiz.timeColor }};transition:width .96s linear,background .3s ease"></div>
+              </div>
+              <span style="font:800 14px/1 var(--font-heading);font-variant-numeric:tabular-nums;flex:none;width:44px;text-align:right;color:{{ quiz.timeColor }}">{{ quiz.timeLeft }}s</span>
+            </div>
+          </div>
+
+          <sc-if value="{{ quiz.playing }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;gap:0;border-top:2px solid rgba(255,255,255,.35)">
+              <div style="flex:1;min-width:0;padding:30px 34px 34px">
+                <div style="display:flex;gap:8px">
+                  <span style="font:600 9px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;border:1px solid rgba(255,255,255,.45);padding:6px 10px">{{ quiz.q.era }}</span>
+                  <span style="font:600 9px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;border:1px solid rgba(255,255,255,.45);padding:6px 10px">{{ quiz.q.topic }}</span>
+                  <span style="font:600 9px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;padding:6px 10px;background:var(--color-accent)">{{ quiz.q.kindLabel }}</span>
+                </div>
+
+                <h2 style="font:800 36px/1.1 var(--font-heading);letter-spacing:-.03em;margin:20px 0 0;max-width:34ch;text-wrap:pretty">{{ quiz.q.question }}</h2>
+
+                <sc-if value="{{ quiz.isHuecos }}" hint-placeholder-val="{{ false }}">
+                  <p style="font:400 19px/1.6 var(--font-body);margin:18px 0 0;max-width:52ch;opacity:.95">{{ quiz.q.text }}</p>
+                </sc-if>
+
+                <div style="display:flex;flex-direction:column;gap:10px;margin-top:24px;max-width:760px">
+                  <sc-for list="{{ quiz.options }}" as="o" hint-placeholder-count="4">
+                    <div onClick="{{ o.pick }}" style="display:flex;align-items:center;gap:16px;padding:16px 18px;border:2px solid {{ o.border }};background:{{ o.bg }};color:{{ o.fg }};cursor:{{ o.cursor }};transition:background .2s ease,border-color .2s ease,transform .18s ease" style-hover="transform:translateX(4px)">
+                      <span style="width:26px;height:26px;flex:none;border:2px solid currentColor;display:flex;align-items:center;justify-content:center;font:800 11px/1 var(--font-heading)">{{ o.key }}</span>
+                      <span style="font:500 16px/1.4 var(--font-body);flex:1">{{ o.label }}</span>
+                      <span style="font:800 14px/1 var(--font-heading);flex:none">{{ o.mark }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+
+                <sc-if value="{{ quiz.showFeedback }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:22px;border-left:none;border-top:2px solid rgba(255,255,255,.4);padding-top:16px;display:flex;gap:20px;align-items:flex-start;animation:hy-pop .22s ease both">
+                    <div style="flex:1">
+                      <div style="font:800 20px/1.2 var(--font-heading);color:{{ quiz.verdictColor }}">{{ quiz.verdict }}</div>
+                      <p style="font:400 14px/1.55 var(--font-body);margin:9px 0 0;max-width:64ch;opacity:.92">{{ quiz.q.explanation }}</p>
+                    </div>
+                    <button onClick="{{ quiz.next }}" class="btn btn-primary" style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;flex:none">{{ quiz.nextLabel }}</button>
+                  </div>
+                </sc-if>
+              </div>
+
+              <div style="width:430px;flex:none;border-left:2px solid rgba(255,255,255,.35);padding:26px 30px;display:flex;flex-direction:column;gap:20px">
+                <sc-if value="{{ quiz.isMapa }}" hint-placeholder-val="{{ false }}">
+                  <div>
+                    <div style="font:700 9px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;opacity:.75">Señala en el mapa</div>
+                    <div style="border:2px solid rgba(255,255,255,.55);margin-top:12px">
+                      <historya-map highlight="{{ quiz.q.highlight }}" pins="{{ quiz.q.pins }}" pin-active="{{ quiz.mapActive }}" style="width:100%;height:250px;display:block"></historya-map>
+                    </div>
+                    <p style="font:400 12px/1.5 var(--font-body);opacity:.8;margin:10px 0 0">Elige la letra que marca el lugar. Los puntos están sobre fronteras actuales.</p>
+                  </div>
+                </sc-if>
+
+                <div>
+                  <div style="font:700 9px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;opacity:.75">Progreso de la partida</div>
+                  <div style="display:flex;gap:4px;margin-top:12px">
+                    <sc-for list="{{ quiz.dots }}" as="d" hint-placeholder-count="10">
+                      <span style="flex:1;height:26px;background:{{ d.bg }};border:1px solid rgba(255,255,255,.4);transition:background .25s ease"></span>
+                    </sc-for>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;font:600 9px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;opacity:.7;margin-top:10px">
+                    <span>{{ quiz.rightCount }} aciertos</span><span>{{ quiz.wrongCount }} fallos</span>
+                  </div>
+                </div>
+
+                <div style="border-top:2px solid rgba(255,255,255,.35);padding-top:18px">
+                  <div style="font:700 9px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;opacity:.75">Formatos de esta partida</div>
+                  <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+                    <sc-for list="{{ quiz.kinds }}" as="k" hint-placeholder-count="4">
+                      <div style="display:flex;align-items:center;gap:10px;font:500 12px/1 var(--font-body);opacity:{{ k.op }}">
+                        <span style="width:9px;height:9px;flex:none;background:{{ k.bg }}"></span>{{ k.label }}
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+
+                <sc-if value="{{ alexOn }}" hint-placeholder-val="{{ true }}">
+                  <div style="margin-top:auto;border-top:2px solid rgba(255,255,255,.35);padding-top:16px;display:flex;gap:12px">
+                    <div style="width:42px;height:42px;flex:none;border:2px solid rgba(255,255,255,.6);display:flex;align-items:center;justify-content:center;font:800 13px/1 var(--font-heading)">AL</div>
+                    <p style="font:400 12px/1.5 var(--font-body);opacity:.9;margin:0">{{ quiz.alexTip }}</p>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ quiz.finished }}" hint-placeholder-val="{{ false }}">
+            <div style="border-top:2px solid rgba(255,255,255,.35);padding:40px 34px 46px;display:flex;gap:44px;align-items:flex-start;animation:hy-pop .28s ease both">
+              <div style="flex:1">
+                <div style="font:700 10px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;opacity:.8">Partida terminada · {{ quiz.scope }}</div>
+                <h2 style="font:800 56px/.96 var(--font-heading);letter-spacing:-.04em;margin:16px 0 0;max-width:26ch">{{ quiz.resultTitle }}</h2>
+                <p style="font:400 16px/1.55 var(--font-body);margin:16px 0 0;max-width:52ch;opacity:.92">{{ quiz.resultBody }}</p>
+                <div style="display:flex;gap:10px;margin-top:26px">
+                  <button onClick="{{ quiz.restart }}" class="btn btn-primary" style="font-size:11px;letter-spacing:.12em;text-transform:uppercase">Jugar de nuevo</button>
+                  <button onClick="{{ goBiblio }}" class="btn btn-secondary" style="font-size:11px;letter-spacing:.12em;text-transform:uppercase">Repasar en la biblioteca</button>
+                </div>
+              </div>
+              <div style="width:430px;flex:none;display:flex;flex-direction:column;gap:0;border-top:2px solid rgba(255,255,255,.4)">
+                <sc-for list="{{ quiz.resultStats }}" as="s" hint-placeholder-count="4">
+                  <div style="display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.25)">
+                    <span style="font:600 10px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;opacity:.8">{{ s.k }}</span>
+                    <span style="font:800 26px/1 var(--font-heading);font-variant-numeric:tabular-nums">{{ s.v }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+        </section>
+
+        <section data-screen-label="Móvil — Quiz" style="width:390px;flex:none;height:844px;border:2px solid var(--color-text);box-shadow:var(--shadow-lg);overflow:hidden;display:flex;flex-direction:column;color:#fff;background:linear-gradient(160deg, oklch(0.3 0.045 42) 0%, oklch(0.22 0.035 268) 70%, oklch(0.26 0.06 20) 100%)">
+          <div style="flex:none;padding:12px 16px 0;display:flex;align-items:center;justify-content:space-between;font:600 9px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;opacity:.8">
+            <span onClick="{{ goGlobe }}" style="cursor:pointer">← Salir</span><span>9:41</span>
+          </div>
+          <div style="flex:none;padding:16px 16px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+            <div style="display:flex;align-items:center;gap:5px">
+              <sc-for list="{{ quiz.lives }}" as="l" hint-placeholder-count="3">
+                <span style="width:11px;height:11px;display:block;background:{{ l.bg }};border:1px solid rgba(255,255,255,.7)"></span>
+              </sc-for>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:6px">
+              <span style="font:800 17px/1 var(--font-heading);color:{{ quiz.streakColor }}">{{ quiz.streak }}</span>
+              <span style="font:600 8px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;opacity:.7">racha</span>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:6px">
+              <span style="font:800 17px/1 var(--font-heading)">{{ quiz.score }}</span>
+              <span style="font:600 8px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;opacity:.7">pts</span>
+            </div>
+            <span style="font:800 15px/1 var(--font-heading);color:{{ quiz.timeColor }};font-variant-numeric:tabular-nums">{{ quiz.timeLeft }}s</span>
+          </div>
+          <div style="flex:none;height:5px;background:rgba(255,255,255,.2);margin:0 16px;position:relative">
+            <div style="position:absolute;inset:0 auto 0 0;width:{{ quiz.timePct }};background:{{ quiz.timeColor }};transition:width .96s linear"></div>
+          </div>
+
+          <div style="flex:1;min-height:0;overflow:auto;padding:18px 16px 16px">
+            <div style="display:flex;gap:6px">
+              <span style="font:600 8px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;border:1px solid rgba(255,255,255,.45);padding:5px 8px">{{ quiz.q.era }}</span>
+              <span style="font:600 8px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;padding:5px 8px;background:var(--color-accent)">{{ quiz.q.kindLabel }}</span>
+              <span style="font:600 8px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;opacity:.7;margin-left:auto;align-self:center">{{ quiz.counter }}</span>
+            </div>
+            <h2 style="font:800 24px/1.15 var(--font-heading);letter-spacing:-.025em;margin:16px 0 0;text-wrap:pretty">{{ quiz.q.question }}</h2>
+            <sc-if value="{{ quiz.isMapa }}" hint-placeholder-val="{{ false }}">
+              <div style="border:2px solid rgba(255,255,255,.55);margin-top:14px">
+                <historya-map highlight="{{ quiz.q.highlight }}" pins="{{ quiz.q.pins }}" pin-active="{{ quiz.mapActive }}" style="width:100%;height:150px;display:block"></historya-map>
+              </div>
+            </sc-if>
+            <sc-if value="{{ quiz.isHuecos }}" hint-placeholder-val="{{ false }}">
+              <p style="font:400 15px/1.6 var(--font-body);margin:14px 0 0;opacity:.95">{{ quiz.q.text }}</p>
+            </sc-if>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:18px">
+              <sc-for list="{{ quiz.options }}" as="o" hint-placeholder-count="4">
+                <div onClick="{{ o.pick }}" style="display:flex;align-items:center;gap:12px;padding:13px 14px;border:2px solid {{ o.border }};background:{{ o.bg }};color:{{ o.fg }};cursor:{{ o.cursor }};min-height:48px;box-sizing:border-box;transition:background .2s ease,border-color .2s ease">
+                  <span style="width:22px;height:22px;flex:none;border:2px solid currentColor;display:flex;align-items:center;justify-content:center;font:800 10px/1 var(--font-heading)">{{ o.key }}</span>
+                  <span style="font:500 13px/1.35 var(--font-body);flex:1">{{ o.label }}</span>
+                  <span style="font:800 12px/1 var(--font-heading);flex:none">{{ o.mark }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <sc-if value="{{ quiz.showFeedback }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:16px;border-top:2px solid rgba(255,255,255,.4);padding-top:14px;animation:hy-pop .22s ease both">
+                <div style="font:800 16px/1.2 var(--font-heading);color:{{ quiz.verdictColor }}">{{ quiz.verdict }}</div>
+                <p style="font:400 12px/1.5 var(--font-body);margin:8px 0 0;opacity:.92">{{ quiz.q.explanation }}</p>
+              </div>
+            </sc-if>
+          </div>
+
+          <div style="flex:none;border-top:2px solid rgba(255,255,255,.35);padding:12px 16px">
+            <button onClick="{{ quiz.next }}" class="btn btn-primary btn-block" style="font-size:10px;letter-spacing:.12em;text-transform:uppercase">{{ quiz.nextLabel }}</button>
+          </div>
+        </section>
+      </div>
+    </sc-if>
+
+    <!-- ================================================== 4 · BIBLIOTECA -->
+    <sc-if value="{{ isBiblio }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;gap:44px;align-items:flex-start;animation:hy-in .3s cubic-bezier(.2,.8,.2,1) both">
+
+        <section data-screen-label="Escritorio — Biblioteca" style="width:1280px;flex:none;border:2px solid var(--color-text);box-shadow:var(--shadow-lg);background:linear-gradient(180deg, rgba(255,255,255,.93) 0%, rgba(255,255,255,.66) 100%);overflow:hidden">
+          <div style="padding:34px 36px 26px;display:flex;align-items:flex-end;justify-content:space-between;gap:32px">
+            <div>
+              <div style="font:700 11px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent-700)">Aprender y leer</div>
+              <h1 style="font:800 58px/.94 var(--font-heading);letter-spacing:-.035em;margin:14px 0 0">Biblioteca</h1>
+              <p style="font:400 15px/1.6 var(--font-body);color:var(--color-neutral-800);margin:14px 0 0;max-width:52ch">{{ biblio.count }} lecciones con fuentes, conceptos y debates historiográficos. Filtra por era o entra desde el globo.</p>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px">
+              <div style="font:800 44px/1 var(--font-heading);font-variant-numeric:tabular-nums">{{ biblio.progress }}%</div>
+              <div style="font:600 10px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">Tu progreso total</div>
+              <div style="width:220px;height:8px;border:2px solid var(--color-text);position:relative">
+                <div style="position:absolute;inset:0 auto 0 0;width:{{ biblio.progressW }};background:var(--color-accent);transition:width .4s ease"></div>
+              </div>
+            </div>
+          </div>
+          <div style="height:2px;background:var(--color-text)"></div>
+
+          <div style="padding:18px 36px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <sc-for list="{{ biblio.filters }}" as="f" hint-placeholder-count="5">
+              <span onClick="{{ f.go }}" style="cursor:pointer;font:700 10px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;padding:9px 14px;border:2px solid var(--color-text);background:{{ f.bg }};color:{{ f.fg }};transition:background .2s ease">{{ f.label }}</span>
+            </sc-for>
+            <span style="margin-left:auto;font:600 10px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--color-neutral-600)">{{ biblio.shown }} lecciones</span>
+          </div>
+          <div style="height:2px;background:var(--color-text)"></div>
+
+          <div style="padding:26px 36px 36px;display:grid;grid-template-columns:repeat(3,1fr);gap:20px">
+            <sc-for list="{{ biblio.items }}" as="t" hint-placeholder-count="9">
+              <div style="border:2px solid var(--color-text);display:flex;flex-direction:column;cursor:pointer;transition:transform .2s cubic-bezier(.2,.8,.2,1),box-shadow .2s ease;background:rgba(255,255,255,.62)" style-hover="transform:translateY(-4px);box-shadow:var(--shadow-md)">
+                <div style="padding:16px 18px 14px;background:{{ t.bg }};border-bottom:2px solid var(--color-text)">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+                    <span style="font:700 9px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase">{{ t.era }}</span>
+                    <span style="font:600 9px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;opacity:.7">{{ t.country }}</span>
+                  </div>
+                  <div style="font:800 22px/1.08 var(--font-heading);letter-spacing:-.02em;margin-top:14px;min-height:2.16em">{{ t.title }}</div>
+                </div>
+                <div style="padding:14px 18px 16px;display:flex;flex-direction:column;gap:12px;flex:1">
+                  <div style="display:flex;align-items:center;justify-content:space-between;font:600 10px/1 var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600)">
+                    <span>{{ t.years }}</span><span>{{ t.duration }}</span>
+                  </div>
+                  <div style="height:6px;border:1px solid var(--color-text);position:relative">
+                    <div style="position:absolute;inset:0 auto 0 0;width:{{ t.pw }};background:var(--color-accent)"></div>
+                  </div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-top:auto">
+                    <span class="tag tag-outline" style="letter-spacing:.1em;text-transform:uppercase">{{ t.level }}</span>
+                    <span style="font:600 10px/1 var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700)">{{ t.cta }} →</span>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+        <section data-screen-label="Móvil — Biblioteca" style="width:390px;flex:none;height:844px;border:2px solid var(--color-text);box-shadow:var(--shadow-lg);overflow:hidden;display:flex;flex-direction:column;background:linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.62))">
+          <div style="flex:none;padding:12px 16px 0;display:flex;align-items:center;justify-content:space-between;font:600 9px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">
+            <span>9:41</span><span>Biblioteca</span>
+          </div>
+          <div style="flex:none;padding:14px 16px 14px">
+            <h1 style="font:800 32px/.98 var(--font-heading);letter-spacing:-.03em;margin:0">Aprender<br>y leer</h1>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:14px">
+              <div style="flex:1;height:8px;border:2px solid var(--color-text);position:relative">
+                <div style="position:absolute;inset:0 auto 0 0;width:{{ biblio.progressW }};background:var(--color-accent)"></div>
+              </div>
+              <span style="font:800 13px/1 var(--font-heading);flex:none">{{ biblio.progress }}%</span>
+            </div>
+          </div>
+          <div style="height:2px;background:var(--color-text);flex:none"></div>
+          <div style="flex:none;padding:12px 16px;display:flex;gap:7px;overflow:auto">
+            <sc-for list="{{ biblio.filters }}" as="f" hint-placeholder-count="5">
+              <span onClick="{{ f.go }}" style="cursor:pointer;white-space:nowrap;font:700 9px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;padding:8px 11px;border:2px solid var(--color-text);background:{{ f.bg }};color:{{ f.fg }}">{{ f.short }}</span>
+            </sc-for>
+          </div>
+          <div style="flex:1;min-height:0;overflow:auto;padding:4px 16px 16px">
+            <sc-for list="{{ biblio.items }}" as="t" hint-placeholder-count="8">
+              <div style="border:2px solid var(--color-text);margin-bottom:10px;display:flex;cursor:pointer;background:rgba(255,255,255,.6)">
+                <div style="width:12px;flex:none;background:{{ t.bg }};border-right:2px solid var(--color-text)"></div>
+                <div style="flex:1;min-width:0;padding:13px 14px">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;font:600 8px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--color-neutral-600)">
+                    <span>{{ t.era }}</span><span>{{ t.duration }}</span>
+                  </div>
+                  <div style="font:800 16px/1.15 var(--font-heading);letter-spacing:-.015em;margin-top:9px">{{ t.title }}</div>
+                  <div style="display:flex;align-items:center;gap:10px;margin-top:11px">
+                    <div style="flex:1;height:5px;border:1px solid var(--color-text);position:relative">
+                      <div style="position:absolute;inset:0 auto 0 0;width:{{ t.pw }};background:var(--color-accent)"></div>
+                    </div>
+                    <span style="font:600 8px/1 var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600);flex:none">{{ t.country }}</span>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="flex:none;height:62px;border-top:2px solid var(--color-text);display:grid;grid-template-columns:repeat(4,1fr);background:rgba(255,255,255,.82)">
+            <sc-for list="{{ tabsBiblio }}" as="t" hint-placeholder-count="4">
+              <div onClick="{{ t.go }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;border-top:2px solid {{ t.bar }};margin-top:-2px;color:{{ t.color }}">
+                <span style="font:800 13px/1 var(--font-heading)">{{ t.mark }}</span>
+                <span style="font:600 9px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase">{{ t.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+      </div>
+    </sc-if>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1420,&quot;height&quot;:1100},&quot;globeMode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;color&quot;,&quot;grid&quot;,&quot;ink&quot;,&quot;outline&quot;],&quot;default&quot;:&quot;color&quot;,&quot;tsType&quot;:&quot;'color'|'grid'|'ink'|'outline'&quot;,&quot;section&quot;:&quot;Globo&quot;},&quot;autoSpin&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Globo&quot;},&quot;alexGuide&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Contenido&quot;},&quot;showNotes&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Contenido&quot;}}">
+class Component extends DCLogic {
+  state = {
+    screen: 'globe', hover: null, sel: null, playing: false, ready: 0,
+    fichaCountry: 'Italia',
+    era: 'Todas',
+    qi: 0, picked: null, lives: 3, streak: 0, best: 0, score: 0, time: 20, results: [], over: false
+  };
+
+  componentDidMount() {
+    window.HISTORYA_ON_HOVER = (d) => this.setState({ hover: d ? d.name : null });
+    window.HISTORYA_ON_SELECT = (d) => this.setState({ sel: d.name, hover: null, playing: false, fichaCountry: this.data().countries[d.name] ? d.name : this.state.fichaCountry });
+    window.HISTORYA_ON_READY = (n) => this.setState({ ready: n });
+    this.clock = setInterval(() => {
+      const s = this.state;
+      if (s.screen !== 'quiz' || s.picked !== null || s.over || s.time <= 0) return;
+      if (s.time <= 1) this.answer(-1);
+      else this.setState({ time: s.time - 1 });
+    }, 1000);
+  }
+
+  componentWillUnmount() {
+    window.HISTORYA_ON_HOVER = window.HISTORYA_ON_SELECT = window.HISTORYA_ON_READY = null;
+    clearInterval(this.clock);
+    clearInterval(this.tick);
+  }
+
+  data() { return window.HISTORYA_DATA || { countries: {}, eras: [], topics: [], quiz: [], mapas: {} }; }
+
+  eraColor(name) {
+    return {
+      'Antigüedad': 'oklch(0.88 0.075 98)',
+      'Edad Media': 'oklch(0.83 0.075 48)',
+      'Edad Moderna': 'oklch(0.85 0.055 232)',
+      'Edad Contemporánea': 'oklch(0.86 0.050 148)'
+    }[name] || 'var(--color-neutral-200)';
+  }
+
+  go(screen) { this.setState({ screen }); }
+
+  pick(name) {
+    const g = window.HISTORYA_GLOBE;
+    if (this.data().countries[name]) this.setState({ fichaCountry: name });
+    if (g && g.focus(name)) return;
+    this.setState({ sel: name });
+  }
+
+  back() {
+    const g = window.HISTORYA_GLOBE;
+    if (g) g.zoomOut();
+    this.setState({ sel: null, hover: null, playing: false });
+  }
+
+  /* ---------------------------------------------------------------- quiz */
+  qList() { return this.data().quiz || []; }
+
+  answer(i) {
+    if (this.state.picked !== null || this.state.over) return;
+    const q = this.qList()[this.state.qi];
+    const key = q.kind === 'mapa' ? ['A', 'B', 'C', 'D'][i] : i;
+    const ok = q.kind === 'mapa' ? key === q.answer : i === q.answer;
+    const streak = ok ? this.state.streak + 1 : 0;
+    const mult = 1 + Math.min(2, Math.floor(streak / 2));
+    this.setState({
+      picked: i,
+      streak,
+      best: Math.max(this.state.best, streak),
+      lives: ok ? this.state.lives : this.state.lives - 1,
+      score: ok ? this.state.score + (100 + this.state.time * 5) * mult : this.state.score,
+      results: this.state.results.concat([ok])
+    });
+  }
+
+  next() {
+    const last = this.state.qi >= this.qList().length - 1;
+    if (last || this.state.lives <= 0) { this.setState({ over: true }); return; }
+    this.setState({ qi: this.state.qi + 1, picked: null, time: 20 });
+  }
+
+  restart() {
+    this.setState({ qi: 0, picked: null, lives: 3, streak: 0, best: 0, score: 0, time: 20, results: [], over: false });
+  }
+
+  renderVals() {
+    const d = this.data();
+    const countries = d.countries || {};
+    const names = Object.keys(countries);
+    const s = this.state;
+    const sel = s.sel;
+    const selData = sel ? countries[sel] : null;
+
+    /* ---------- navegación entre pantallas */
+    const screenDefs = [
+      { key: 'globe', label: 'Globo', title: 'Home con el globo' },
+      { key: 'ficha', label: 'Ficha de país', title: 'Ficha de país' },
+      { key: 'quiz', label: 'Quiz', title: 'Quiz contrarreloj' },
+      { key: 'biblio', label: 'Biblioteca', title: 'Biblioteca' }
+    ];
+    const screens = screenDefs.map((x, i) => ({
+      n: String(i + 1).padStart(2, '0'),
+      label: x.label,
+      bg: s.screen === x.key ? 'var(--color-text)' : 'rgba(255,255,255,.45)',
+      fg: s.screen === x.key ? 'var(--color-neutral-100)' : 'var(--color-neutral-700)',
+      go: () => this.go(x.key)
+    }));
+
+    /* ---------- audio */
+    const t = Date.now();
+    const wave = (n) => Array.from({ length: n }, (_, i) => {
+      const base = 26 + Math.abs(Math.sin(i * 1.7)) * 68;
+      const h = s.playing ? Math.max(14, Math.min(100, base * (0.55 + Math.abs(Math.sin(i * 0.9 + t / 260)) * 0.75))) : base * 0.6;
+      return { h: Math.round(h), c: s.playing && i < n * 0.45 ? 'var(--color-accent)' : 'var(--color-neutral-500)' };
+    });
+
+    const starters = ['Egipto', 'Grecia', 'Italia', 'España', 'Turquía']
+      .filter((n) => countries[n])
+      .map((n, i) => ({
+        name: n, n: String(i + 1).padStart(2, '0'),
+        color: this.eraColor(((countries[n].topics || [])[0] || {}).era),
+        meta: (countries[n].topics || []).length + ' lección' + ((countries[n].topics || []).length > 1 ? 'es' : ''),
+        onPick: () => this.pick(n)
+      }));
+
+    const mkTabs = (active) => [
+      { label: 'Globo', mark: '◍', key: 'globe' },
+      { label: 'Aprender', mark: '▤', key: 'biblio' },
+      { label: 'Quiz', mark: '◆', key: 'quiz' },
+      { label: 'Perfil', mark: '●', key: 'ficha' }
+    ].map((x) => ({
+      label: x.label, mark: x.mark,
+      bar: x.key === active ? 'var(--color-accent)' : 'transparent',
+      color: x.key === active ? 'var(--color-text)' : 'var(--color-neutral-500)',
+      go: () => this.go(x.key)
+    }));
+
+    /* ---------- ficha */
+    const fc = countries[s.fichaCountry] ? s.fichaCountry : 'Italia';
+    const fd = countries[fc] || { topics: [], hitos: [], resumen: '', audio: '', alex: '' };
+    const mapa = (d.mapas || {})[fc] || { label: '', year: '', note: '', countries: fc };
+    const fichaEras = (fd.topics || []).map((x) => x.era);
+    const ficha = {
+      name: fc,
+      kicker: 'Ficha de país · ' + (fichaEras[0] || 'Historia'),
+      resumen: fd.resumen,
+      audio: fd.audio,
+      alex: fd.alex,
+      hitos: fd.hitos || [],
+      hitosShort: (fd.hitos || []).slice(0, 4),
+      stats: [
+        { v: (fd.topics || []).length, k: (fd.topics || []).length === 1 ? 'Lección' : 'Lecciones' },
+        { v: (fd.hitos || []).length, k: 'Hitos' },
+        { v: fd.audio, k: 'Narración' },
+        { v: this.qList().length, k: 'Preguntas' }
+      ],
+      topics: (fd.topics || []).map((x) => ({
+        title: x.title, level: x.level, color: this.eraColor(x.era),
+        meta: x.era + ' · ' + x.years + ' · ' + x.duration
+      })),
+      mapCountries: mapa.countries,
+      mapLabel: mapa.label,
+      mapYear: mapa.year,
+      mapNote: mapa.note,
+      quizCount: this.qList().length
+    };
+
+    const shortEra = { 'Antigüedad': 'Antig.', 'Edad Media': 'Media', 'Edad Moderna': 'Moderna', 'Edad Contemporánea': 'Contemp.' };
+    const eraStrip = (activeNames) => (d.eras || []).map((e) => {
+      const on = activeNames.indexOf(e.name) >= 0;
+      return {
+        name: e.name, range: e.range, short: shortEra[e.name] || e.name,
+        bg: on ? this.eraColor(e.name) : 'rgba(255,255,255,.5)',
+        fg: on ? 'var(--color-text)' : 'var(--color-neutral-500)',
+        mark: on ? '● Con lección' : '—',
+        dot: on ? '●' : '—'
+      };
+    });
+
+    /* ---------- quiz */
+    const qs = this.qList();
+    const q = qs[Math.min(s.qi, qs.length - 1)] || { options: [], kind: 'opciones' };
+    const kindLabel = { opciones: 'Opción múltiple', mapa: 'Señala en el mapa', huecos: 'Rellena el hueco', imagen: 'Identifica la imagen' };
+    const answered = s.picked !== null;
+    const correctIdx = q.kind === 'mapa' ? ['A', 'B', 'C', 'D'].indexOf(q.answer) : q.answer;
+    const wasRight = answered && s.picked === correctIdx;
+    const mult = 1 + Math.min(2, Math.floor(s.streak / 2));
+
+    const options = (q.options || (q.kind === 'mapa' ? ['A · Adrianópolis (Edirne)', 'B · Atenas', 'C · Constantinopla', 'D · Roma'] : []))
+      .map((label, i) => {
+        const isRight = i === correctIdx;
+        const isPicked = i === s.picked;
+        let bg = 'rgba(255,255,255,.06)', border = 'rgba(255,255,255,.4)', fg = '#fff', mark = '';
+        if (answered && isRight) { bg = 'oklch(0.62 0.14 148)'; border = 'oklch(0.72 0.14 148)'; mark = '✓'; }
+        else if (answered && isPicked) { bg = 'var(--color-accent-700)'; border = 'var(--color-accent)'; mark = '✕'; }
+        else if (answered) { bg = 'rgba(255,255,255,.04)'; border = 'rgba(255,255,255,.2)'; fg = 'rgba(255,255,255,.55)'; }
+        return {
+          label, key: ['A', 'B', 'C', 'D'][i], bg, border, fg, mark,
+          cursor: answered ? 'default' : 'pointer',
+          pick: () => this.answer(i)
+        };
+      });
+
+    const rightCount = s.results.filter(Boolean).length;
+    const timePct = Math.max(0, Math.min(100, (s.time / 20) * 100)) + '%';
+    const timeColor = s.time > 10 ? 'oklch(0.78 0.13 148)' : s.time > 5 ? 'oklch(0.82 0.14 88)' : 'var(--color-accent)';
+
+    const quiz = {
+      scope: fc,
+      playing: !s.over,
+      finished: s.over,
+      q: Object.assign({}, q, { kindLabel: kindLabel[q.kind] || 'Pregunta' }),
+      isMapa: q.kind === 'mapa',
+      isHuecos: q.kind === 'huecos',
+      mapActive: q.kind === 'mapa' && answered ? q.answer : (q.kind === 'mapa' && s.picked !== null ? ['A', 'B', 'C', 'D'][s.picked] : null),
+      options,
+      counter: String(Math.min(s.qi + 1, qs.length)).padStart(2, '0') + ' / ' + String(qs.length).padStart(2, '0'),
+      lives: [0, 1, 2].map((i) => ({ bg: i < s.lives ? 'var(--color-accent)' : 'rgba(255,255,255,.12)' })),
+      streak: s.streak,
+      mult,
+      streakColor: s.streak >= 2 ? 'oklch(0.84 0.15 88)' : '#fff',
+      score: s.score,
+      timeLeft: s.time,
+      timePct,
+      timeColor,
+      showFeedback: answered,
+      verdict: wasRight ? '¡Bien visto!' : s.picked === -1 ? 'Se acabó el tiempo.' : 'Casi. Mira la marcada.',
+      verdictColor: wasRight ? 'oklch(0.82 0.14 148)' : 'oklch(0.82 0.14 40)',
+      nextLabel: s.qi >= qs.length - 1 ? 'Ver resultado' : 'Siguiente pregunta',
+      next: () => this.next(),
+      restart: () => this.restart(),
+      dots: Array.from({ length: qs.length }, (_, i) => ({
+        bg: i < s.results.length ? (s.results[i] ? 'oklch(0.62 0.14 148)' : 'var(--color-accent-700)') : 'rgba(255,255,255,.12)'
+      })),
+      rightCount,
+      wrongCount: s.results.length - rightCount,
+      kinds: ['Opción múltiple', 'Señala en el mapa', 'Rellena el hueco', 'Duelo por era'].map((label, i) => ({
+        label,
+        op: i === ['opciones', 'mapa', 'huecos'].indexOf(q.kind) ? 1 : 0.5,
+        bg: i === ['opciones', 'mapa', 'huecos'].indexOf(q.kind) ? 'var(--color-accent)' : 'rgba(255,255,255,.35)'
+      })),
+      alexTip: '«Si dudas, quédate con la opción que explica un mecanismo, no la que suena grandilocuente. La historia es aburridamente concreta.»',
+      resultTitle: rightCount >= s.results.length * 0.75 ? 'Tienes muy buen ojo histórico.' : 'Cada fallo es una pista de dónde volver.',
+      resultBody: 'Has acertado ' + rightCount + ' de ' + s.results.length + ' preguntas con una racha máxima de ' + s.best + '. Guardamos el resultado en tu perfil y Alex te propone la siguiente lección.',
+      resultStats: [
+        { k: 'Puntos', v: s.score },
+        { k: 'Aciertos', v: rightCount + '/' + s.results.length },
+        { k: 'Racha máxima', v: s.best },
+        { k: 'Vidas restantes', v: Math.max(0, s.lives) }
+      ]
+    };
+
+    /* ---------- biblioteca */
+    const topics = d.topics || [];
+    const eraNames = ['Todas'].concat((d.eras || []).map((e) => e.name));
+    const items = topics.filter((x) => s.era === 'Todas' || x.era === s.era).map((x) => ({
+      title: x.title, era: x.era, country: x.country, years: x.years, duration: x.duration, level: x.level,
+      bg: this.eraColor(x.era),
+      pw: x.progress + '%',
+      cta: x.progress === 100 ? 'Repasar' : x.progress > 0 ? 'Continuar' : 'Empezar'
+    }));
+    const totalProgress = topics.length ? Math.round(topics.reduce((a, x) => a + x.progress, 0) / topics.length) : 0;
+    const biblio = {
+      count: topics.length,
+      shown: items.length,
+      progress: totalProgress,
+      progressW: totalProgress + '%',
+      items,
+      filters: eraNames.map((n) => ({
+        label: n, short: shortEra[n] || n,
+        bg: s.era === n ? 'var(--color-text)' : (n === 'Todas' ? 'rgba(255,255,255,.5)' : this.eraColor(n)),
+        fg: s.era === n ? 'var(--color-neutral-100)' : 'var(--color-text)',
+        go: () => this.setState({ era: n })
+      }))
+    };
+
+    const nTopics = selData ? (selData.topics || []).length : 0;
+
+    return {
+      globeMode: this.props.globeMode ?? 'color',
+      spinAttr: (this.props.autoSpin ?? true) ? 'on' : 'off',
+      alexOn: this.props.alexGuide ?? true,
+      notesOn: this.props.showNotes ?? true,
+
+      screens,
+      screenTitle: (screenDefs.find((x) => x.key === s.screen) || screenDefs[0]).title,
+      isGlobe: s.screen === 'globe',
+      isFicha: s.screen === 'ficha',
+      isQuiz: s.screen === 'quiz',
+      isBiblio: s.screen === 'biblio',
+      goGlobe: () => this.go('globe'),
+      goFicha: () => this.go('ficha'),
+      goQuiz: () => this.go('quiz'),
+      goBiblio: () => this.go('biblio'),
+
+      countryCount: s.ready || 176,
+      coveredCount: names.length,
+      coveredList: names.join(','),
+      selAttr: sel || null,
+      sel: sel || '',
+      readout: s.hover || sel || 'Gira el globo',
+      readoutColor: (s.hover || sel) ? 'var(--color-text)' : 'var(--color-neutral-400)',
+      showIntro: !sel,
+      showCountry: !!selData,
+      showEmpty: !!sel && !selData,
+      selResumen: selData ? selData.resumen : '',
+      selHitos: selData ? selData.hitos : [],
+      sheetHitos: selData ? (selData.hitos || []).slice(0, 3) : [],
+      selStats: selData ? [
+        { v: nTopics, k: nTopics === 1 ? 'Lección' : 'Lecciones' },
+        { v: (selData.hitos || []).length, k: 'Hitos' },
+        { v: selData.audio, k: 'Narración' }
+      ] : [],
+      sheetKicker: selData ? 'Ficha de país' : 'Sin lección todavía',
+      sheetY: sel ? 'translateY(0)' : 'translateY(calc(100% + 70px))',
+      eraLegend: (d.eras || []).map((e) => ({ name: e.name, bg: this.eraColor(e.name) })),
+      selEras: eraStrip(fichaEras),
+      starters,
+      tabs: mkTabs('globe'),
+      tabsBiblio: mkTabs('biblio'),
+      back: () => this.back(),
+
+      playIcon: s.playing ? '❙❙' : '▶',
+      playLabel: s.playing ? 'Sonando' : 'Escuchar',
+      togglePlay: () => {
+        const on = !s.playing;
+        clearInterval(this.tick);
+        if (on) this.tick = setInterval(() => this.forceUpdate(), 130);
+        this.setState({ playing: on });
+      },
+      bars: wave(34),
+      barsShort: wave(20),
+
+      ficha,
+      quiz,
+      biblio,
+
+      notes: [
+        { k: 'globe.js', v: 'Custom elements vanilla: historya-globe, historya-map y historya-outline. En Vue basta un wrapper con :selected y un listener global; no hay estado de framework dentro del canvas.' },
+        { k: 'Navegación', v: 'HISTORYA_ON_SELECT recibe { name, en, id } al terminar el vuelo. Ahí llamas a router.push("/estudiar/" + topicId): el zoom y la ruta quedan sincronizados.' },
+        { k: 'Mapas históricos', v: 'Extensión aproximada sobre fronteras actuales, resaltando países reales de Natural Earth. Nada dibujado a mano: si no podemos verificar una frontera antigua, no la inventamos.' },
+        { k: 'Rendimiento', v: 'Un canvas para 176 países, un requestAnimationFrame que se detiene en reposo y se pausa con IntersectionObserver. El degradado del fondo es una sola capa con transform: no repinta el contenido.' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

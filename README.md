@@ -1,4 +1,4 @@
-# Historia Con Alex
+# Historya con Alex
 
 Plataforma educativa de historia construida con Vue 3, TypeScript y Vite. Incluye una biblioteca filtrable, lecciones de lectura, quiz global o por tema, perfil personalizable y acceso preparado para Supabase.
 

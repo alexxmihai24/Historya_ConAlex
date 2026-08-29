@@ -30,3 +30,6 @@ dist-ssr
 
 # Notas de trabajo internas, fuera del repositorio
 CONTINUAR.md
+
+# Entrega de diseño del cliente: se conserva descomprimida en design/
+*.zip

@@ -12,9 +12,10 @@ function closeMenu() {
 <template>
   <header class="site-header">
     <div class="shell nav-wrap">
-      <RouterLink class="brand" to="/" aria-label="Historia Con Alex, inicio" @click="closeMenu">
+      <RouterLink class="brand" to="/" aria-label="Historya con Alex, inicio" @click="closeMenu">
         <span class="brand-mark" aria-hidden="true">H</span>
-        <span>Historia <em>Con Alex</em></span>
+        <span class="brand-name">Historya</span>
+        <em>con Alex</em>
       </RouterLink>
 
       <button
@@ -29,10 +30,11 @@ function closeMenu() {
       </button>
 
       <nav id="main-navigation" class="main-nav" :class="{ 'is-open': menuOpen }" aria-label="Navegación principal">
-        <RouterLink to="/biblioteca" @click="closeMenu">Explorar</RouterLink>
+        <RouterLink to="/">Globo</RouterLink>
+        <RouterLink to="/biblioteca" @click="closeMenu">Biblioteca</RouterLink>
         <RouterLink to="/quiz" @click="closeMenu">Quiz</RouterLink>
-        <RouterLink to="/perfil" @click="closeMenu">Mi progreso</RouterLink>
-        <RouterLink class="nav-login" to="/acceso" @click="closeMenu">Entrar</RouterLink>
+        <RouterLink to="/perfil" @click="closeMenu">Progreso</RouterLink>
+        <RouterLink class="nav-login" to="/acceso" @click="closeMenu">Acceder</RouterLink>
       </nav>
     </div>
   </header>
@@ -45,10 +47,11 @@ function closeMenu() {
     <div class="shell footer-content">
       <RouterLink class="brand footer-brand" to="/">
         <span class="brand-mark" aria-hidden="true">H</span>
-        <span>Historia <em>Con Alex</em></span>
+        <span class="brand-name">Historya</span>
+        <em>con Alex</em>
       </RouterLink>
       <p>Aprender historia es conectar las piezas del mundo.</p>
-      <p class="footer-note">Proyecto educativo · Contenido de demostración</p>
+      <p class="footer-note">Proyecto educativo · Contenido a nivel universitario</p>
     </div>
   </footer>
 </template>

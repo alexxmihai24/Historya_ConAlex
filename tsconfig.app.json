@@ -5,11 +5,17 @@
     "types": ["vite/client"],
     "allowArbitraryExtensions": true,
 
+    /* globe.js es el componente del diseño portado tal cual: se resuelve como
+       módulo pero no se type-checkea, para no reescribir su JS de 2015. */
+    "allowJs": true,
+    "checkJs": false,
+    "resolveJsonModule": true,
+
     /* Linting */
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "src/**/*.js"]
 }

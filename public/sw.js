@@ -1,5 +1,5 @@
-/* Historia Con Alex PWA: cachea la aplicación después de la primera visita. */
-const CACHE_NAME = 'historia-con-alex-v1'
+/* Historya con Alex PWA: cachea la aplicación después de la primera visita. */
+const CACHE_NAME = 'historya-con-alex-v2'
 const APP_SHELL = [
   '/',
   '/index.html',
