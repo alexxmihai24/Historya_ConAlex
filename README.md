@@ -24,7 +24,7 @@ npm run build
 | `npm run dev` | Servidor de desarrollo |
 | `npm run build` | Comprobación de tipos y compilación de producción |
 | `npm test` | Comprueba contenido, seguridad de rutas de imagen, puntuación del quiz y archivos en disco |
-| `npm run seed` | Regenera `supabase/seed.sql` desde `src/data/topics/` |
+| `npm run seed` | Regenera los archivos de `supabase/seed/` desde `src/data/topics/` |
 | `npm run flags` | Copia a `public/img/flags/` las banderas de los países del atlas |
 | `npm run images` | Descarga las imágenes de `scripts/images.json` desde Wikimedia Commons |
 | `npm run check:backend` | Comprobación de humo contra el Supabase real |
@@ -71,7 +71,14 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\generate-pwa-icons
    1. `supabase/migrations/20260826_initial_schema.sql`
    2. `supabase/migrations/20260827_content_metadata_and_answer_check.sql`
    3. `supabase/migrations/20260829_topic_cover_image.sql`
-5. Ejecuta `supabase/seed.sql` para cargar el contenido. Se genera desde `src/data/topics/` con `npm run seed`; no lo edites a mano.
+5. Ejecuta **en orden numérico** los archivos de `supabase/seed/` para cargar el contenido:
+   `01-catalogo.sql`, `02-lecciones.sql`, … Se generan desde `src/data/topics/` con `npm run seed`; no los edites a mano.
+
+   > Van repartidos porque el SQL Editor rechaza las consultas grandes con
+   > «Query is too large to be run via the SQL Editor». Cada archivo es una
+   > transacción propia e idempotente, y avisa si le falta una migración o si se
+   > ejecuta antes que el catálogo. Con la CLI de Supabase o `psql` puedes
+   > lanzarlos de una vez: `for f in supabase/seed/*.sql; do psql "$DB" -f "$f"; done`.
 6. En Authentication → URL Configuration, añade la URL local y la URL de producción a los *redirect URLs*.
 
 No subas `.env.local` al repositorio. La clave `service_role`/secret no debe usarse nunca en el navegador ni empezar por `VITE_`.

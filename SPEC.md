@@ -153,14 +153,16 @@ public/                    Manifest, service worker, iconos PWA e imágenes
 design/                    Entrega de diseño del cliente. Fuente de verdad del sistema visual
 scripts/
   generate-pwa-icons.ps1   Generador reproducible de iconos PNG
-  generate-seed.mjs        Genera supabase/seed.sql desde src/data/topics/
+  generate-seed.mjs        Genera los archivos de supabase/seed/ desde src/data/topics/
   copy-flags.mjs           Copia a public/img/flags/ las banderas de los países del atlas
   fetch-images.mjs         Descarga imágenes de Commons y genera src/data/topic-images.ts
   check-content.mjs        Comprobaciones de contenido y seguridad (`npm test`)
   check-backend.mjs        Comprobación de humo contra el Supabase real
 supabase/
   migrations/              Esquema inicial y metadatos de contenido
-  seed.sql                 GENERADO desde src/data/topics/ con `npm run seed`. No editar a mano.
+  seed/NN-*.sql            GENERADO con `npm run seed`. No editar a mano.
+                           Repartido en varios archivos: el SQL Editor rechaza
+                           las consultas grandes. Ejecutar en orden numérico.
 ```
 
 ## 7. Rutas de frontend
@@ -199,7 +201,7 @@ interface TopicModule {
 1. Crear `src/data/topics/<slug>.ts` copiando la estructura de `egipto.ts`.
 2. Importarlo en `src/data/history.ts` y añadirlo al array `modules`.
 3. `npm run build` para comprobar tipos y compilación.
-4. `npm run seed` para regenerar `supabase/seed.sql` y ejecutarlo en el SQL Editor.
+4. `npm run seed` para regenerar `supabase/seed/` y ejecutar sus archivos en orden en el SQL Editor.
 
 ## 9. Modelo de datos de Supabase
 
@@ -259,7 +261,7 @@ user_roles (separada de profiles)
 npm install
 npm run dev     # servidor de desarrollo
 npm run build   # vue-tsc + vite build
-npm run seed          # regenera supabase/seed.sql desde src/data/topics/
+npm run seed          # regenera supabase/seed/ desde src/data/topics/
 npm run check:backend # comprueba contenido, RLS y corrección del quiz en Supabase
 ```
 
@@ -274,7 +276,7 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_tu_clave
 
 > Vite solo lee los archivos `.env*` de la raíz. Un `.env` en cualquier subcarpeta se ignora en silencio y la aplicación cae al contenido local sin avisar.
 
-Después, ejecutar las migraciones de `supabase/migrations/` en orden y luego `supabase/seed.sql`.
+Después, ejecutar las migraciones de `supabase/migrations/` en orden y luego los archivos de `supabase/seed/`, también en orden numérico.
 
 ## 12. Próximo orden de trabajo
 
@@ -287,7 +289,7 @@ Después, ejecutar las migraciones de `supabase/migrations/` en orden y luego `s
 
 1. ~~Crear el proyecto de Supabase y sustituir la URL de `.env.local`.~~ Hecho.
 2. ~~Aplicar las dos migraciones y ejecutar el seed.~~ Hecho.
-0. Ejecutar `supabase/migrations/20260829_topic_cover_image.sql` y volver a lanzar `supabase/seed.sql`.
+0. Ejecutar `supabase/migrations/20260829_topic_cover_image.sql` y después los archivos de `supabase/seed/` en orden numérico.
 3. Configurar Auth: confirmación de correo y URLs de redirección permitidas.
 4. Probar registro, login y RLS con dos usuarios distintos.
 5. Volver a ejecutar `npm run seed` y el SQL cada vez que se añadan temas.

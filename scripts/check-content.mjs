@@ -14,8 +14,10 @@
 //   4. Integridad del banco de preguntas: ids únicos, cuatro opciones y una
 //      respuesta dentro de rango.
 //   5. Que cada imagen y cada bandera referenciadas existan en disco.
+//   6. Que ningún archivo del seed se pase de tamaño: el SQL Editor de Supabase
+//      rechaza las consultas grandes y el fallo solo aparece al pegarlo allí.
 
-import { access, readdir } from 'node:fs/promises'
+import { access, readdir, readFile, stat } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { safeImageSrc, imageProblem } from '../src/lib/images.ts'
@@ -155,6 +157,23 @@ for (const topic of topics) {
   for (const pais of paises) {
     ok(flagCode(pais) !== null, `${topic.id}: «${pais}» no está en el atlas`)
   }
+}
+
+// 6. Archivos del seed ------------------------------------------------------
+// El SQL Editor rechaza las consultas grandes con «Query is too large to be run
+// via the SQL Editor». El límite real ronda el megabyte; se avisa mucho antes.
+const LIMITE_SEED = 900 * 1024
+const dirSeed = join(root, 'supabase', 'seed')
+const archivosSeed = (await readdir(dirSeed)).filter((nombre) => nombre.endsWith('.sql')).sort()
+ok(archivosSeed.length > 0, 'no hay archivos en supabase/seed/. Ejecuta `npm run seed`.')
+for (const [indice, nombre] of archivosSeed.entries()) {
+  const esperado = String(indice + 1).padStart(2, '0')
+  ok(nombre.startsWith(`${esperado}-`), `los archivos del seed deben ir numerados sin huecos; se esperaba ${esperado}- y hay ${nombre}`)
+  const { size } = await stat(join(dirSeed, nombre))
+  ok(size <= LIMITE_SEED, `supabase/seed/${nombre} pesa ${(size / 1024).toFixed(0)} KB y el SQL Editor lo rechazará. Baja MAX_BYTES en scripts/generate-seed.mjs.`)
+  const contenido = await readFile(join(dirSeed, nombre), 'utf8')
+  ok(/^begin;$/m.test(contenido), `supabase/seed/${nombre}: falta el begin`)
+  ok(contenido.trimEnd().endsWith('commit;'), `supabase/seed/${nombre}: no termina en commit`)
 }
 
 // --------------------------------------------------------------------------
