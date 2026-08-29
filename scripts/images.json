@@ -1,0 +1,156 @@
+[
+  { "slug": "prehistoria", "file": "Lascaux painting.jpg", "name": "portada", "role": "portada",
+    "alt": "Pintura rupestre de Lascaux con caballos y bóvidos trazados en ocre y negro sobre la roca",
+    "caption": "Las pinturas de Lascaux, en la Dordoña, tienen unos 17.000 años." },
+
+  { "slug": "mesopotamia", "file": "Standard of Ur - War.jpg", "name": "portada", "role": "portada",
+    "alt": "Panel de mosaico con incrustaciones de concha y lapislázuli en tres registros con carros, soldados y prisioneros",
+    "caption": "Cara de la guerra del Estandarte de Ur, hacia 2600 a. C." },
+
+  { "slug": "egipto", "file": "All Gizah Pyramids.jpg", "name": "portada", "role": "portada",
+    "alt": "Las tres grandes pirámides de Guiza alineadas sobre la arena del desierto al atardecer",
+    "caption": "La necrópolis de Guiza, levantada durante la IV dinastía." },
+
+  { "slug": "grecia", "file": "The Parthenon in Athens.jpg", "name": "portada", "role": "portada",
+    "alt": "El Partenón visto desde el oeste, con las columnas dóricas de su fachada en pie",
+    "caption": "El Partenón, construido en la Acrópolis de Atenas entre 447 y 432 a. C." },
+
+  { "slug": "helenismo", "file": "BattleofIssus333BC-mosaic-detail1.jpg", "name": "portada", "role": "portada",
+    "alt": "Detalle de mosaico romano con Alejandro Magno a caballo, coraza y lanza, cargando en la batalla",
+    "caption": "Alejandro en el mosaico de Issos, copia romana de una pintura helenística." },
+
+  { "slug": "roma-republica", "file": "Maccari-Cicero.jpg", "name": "portada", "role": "portada",
+    "alt": "Pintura del siglo XIX con Cicerón de pie ante el Senado romano mientras Catilina aparece aislado en un banco",
+    "caption": "Cicerón denuncia a Catilina, según Cesare Maccari (1888). Es una reconstrucción del XIX, no un documento antiguo." },
+
+  { "slug": "roma-imperio", "file": "Colosseum in Rome, Italy - April 2007.jpg", "name": "portada", "role": "portada",
+    "alt": "El Coliseo de Roma visto desde el exterior, con sus arcadas superpuestas y la fachada parcialmente derruida",
+    "caption": "El anfiteatro Flavio, inaugurado en el año 80." },
+
+  { "slug": "bizancio", "file": "Hagia Sophia Mars 2013.jpg", "name": "portada", "role": "portada",
+    "alt": "Santa Sofía de Estambul con su gran cúpula central y los minaretes añadidos en época otomana",
+    "caption": "Santa Sofía, terminada en 537 bajo Justiniano." },
+
+  { "slug": "islam", "file": "Mosque of Cordoba.jpg", "name": "portada", "role": "portada",
+    "alt": "Bosque de columnas y arcos de dovelas rojas y blancas en el interior de la mezquita de Córdoba",
+    "caption": "Los arcos bicolores de la mezquita de Córdoba, iniciada en 786." },
+
+  { "slug": "feudalismo", "file": "Les Très Riches Heures du duc de Berry juin.jpg", "name": "portada", "role": "portada",
+    "alt": "Miniatura medieval con campesinos segando y agavillando heno frente a una ciudad amurallada",
+    "caption": "El mes de junio en las Très Riches Heures del duque de Berry, hacia 1412-1416." },
+
+  { "slug": "andalus", "file": "Fountain patio de los Leones Alhambra Granada Spain.jpg", "name": "portada", "role": "portada",
+    "alt": "Fuente de los Leones de la Alhambra, con doce leones de piedra sosteniendo la taza central",
+    "caption": "El patio de los Leones de la Alhambra, del siglo XIV nazarí." },
+
+  { "slug": "plena-edad-media", "file": "Laurentius de Voltolina 001.jpg", "name": "portada", "role": "portada",
+    "alt": "Miniatura de una clase universitaria medieval: un maestro lee desde una cátedra elevada ante alumnos sentados en bancos",
+    "caption": "Clase en la Universidad de Bolonia, miniatura de Laurentius de Voltolina, siglo XIV." },
+
+  { "slug": "crisis-siglo-xiv", "file": "The Triumph of Death by Pieter Bruegel the Elder.jpg", "name": "portada", "role": "portada",
+    "alt": "Pintura de un paisaje devastado en el que ejércitos de esqueletos arrasan a hombres y mujeres de toda condición",
+    "caption": "El triunfo de la Muerte, de Pieter Brueghel el Viejo (hacia 1562). Es muy posterior a la peste negra y recoge su memoria." },
+
+  { "slug": "renacimiento", "file": "Sandro Botticelli - La nascita di Venere - Google Art Project - edited.jpg", "name": "portada", "role": "portada",
+    "alt": "Venus emerge del mar de pie sobre una concha, con vientos a su izquierda y una figura que le ofrece un manto a su derecha",
+    "caption": "El nacimiento de Venus, de Sandro Botticelli (hacia 1485)." },
+
+  { "slug": "descubrimientos", "file": "Cantino planisphere (1502).jpg", "name": "portada", "role": "portada",
+    "alt": "Carta náutica manuscrita de 1502 con las costas conocidas, banderas y líneas de rumbo trazadas sobre pergamino",
+    "caption": "El planisferio de Cantino (1502), sacado clandestinamente de Portugal." },
+
+  { "slug": "reforma", "file": "Martin Luther, 1529.jpg", "name": "portada", "role": "portada",
+    "alt": "Retrato de medio cuerpo de Martín Lutero con hábito oscuro sobre fondo azul",
+    "caption": "Martín Lutero retratado por Lucas Cranach el Viejo en 1529." },
+  { "slug": "reforma", "file": "Luther95theses.jpg", "name": "tesis", "role": "figura", "section": 0,
+    "alt": "Impreso antiguo a dos columnas en latín con las noventa y cinco tesis numeradas",
+    "caption": "Impresión temprana de las noventa y cinco tesis. La difusión por imprenta es lo que convirtió una disputa académica en un conflicto europeo." },
+
+  { "slug": "absolutismo", "file": "Louis XIV of France.jpg", "name": "portada", "role": "portada",
+    "alt": "Retrato de cuerpo entero de Luis XIV con manto de armiño y flores de lis, peluca larga y espada al costado",
+    "caption": "Luis XIV retratado por Hyacinthe Rigaud en 1701." },
+
+  { "slug": "revolucion-cientifica", "file": "Justus Sustermans - Portrait of Galileo Galilei, 1636.jpg", "name": "portada", "role": "portada",
+    "alt": "Retrato de Galileo Galilei anciano, de tres cuartos, con barba blanca y gola oscura",
+    "caption": "Galileo retratado por Justus Sustermans en 1636, ya condenado y bajo arresto domiciliario." },
+
+  { "slug": "ilustracion", "file": "Encyclopedie frontispice full.jpg", "name": "portada", "role": "portada",
+    "alt": "Grabado alegórico con la Verdad rodeada de figuras que representan la razón, la filosofía y las artes",
+    "caption": "Frontispicio de la Encyclopédie de Diderot y D'Alembert, grabado por Bonaventure-Louis Prévost." },
+
+  { "slug": "revolucion-francesa", "file": "Prise de la Bastille.jpg", "name": "portada", "role": "portada",
+    "alt": "Pintura del asalto a la Bastilla, con humo de artillería y multitud armada frente a las torres de la fortaleza",
+    "caption": "La toma de la Bastilla, 14 de julio de 1789, por Jean-Pierre Houël." },
+
+  { "slug": "industrializacion", "file": "Philipp Jakob Loutherbourg d. J. 002.jpg", "name": "portada", "role": "portada",
+    "alt": "Paisaje nocturno con las llamas y el humo rojizo de unos altos hornos iluminando el valle",
+    "caption": "Coalbrookdale de noche, de Philip James de Loutherbourg (1801)." },
+
+  { "slug": "revoluciones-liberales", "file": "Eugène Delacroix - La liberté guidant le peuple.jpg", "name": "portada", "role": "portada",
+    "alt": "La Libertad personificada avanza con la bandera tricolor y un fusil sobre una barricada cubierta de cadáveres",
+    "caption": "La Libertad guiando al pueblo, de Eugène Delacroix (1830), sobre las jornadas de julio de ese año." },
+
+  { "slug": "imperialismo", "file": "Punch Rhodes Colossus.png", "name": "portada", "role": "portada",
+    "alt": "Caricatura de Cecil Rhodes representado como un coloso a horcajadas sobre África, de El Cairo a Ciudad del Cabo",
+    "caption": "El coloso de Rodas, caricatura de Edward Linley Sambourne para Punch, 10 de diciembre de 1892." },
+
+  { "slug": "gran-guerra", "file": "Cheshire Regiment trench Somme 1916.jpg", "name": "portada", "role": "portada",
+    "alt": "Soldados británicos en una trinchera estrecha del Somme, uno de guardia con el fusil y el resto descansando contra la pared de tierra",
+    "caption": "Trinchera del Regimiento de Cheshire en el Somme, 1916." },
+
+  { "slug": "revolucion-rusa", "file": "19170704 Riot on Nevsky prosp Petrograd.jpg", "name": "portada", "role": "portada",
+    "alt": "Multitud dispersándose en desbandada por una avenida amplia mientras suenan los disparos, con cuerpos y objetos en el suelo",
+    "caption": "Dispersión a tiros de una manifestación en la avenida Nevski de Petrogrado, julio de 1917." },
+  { "slug": "revolucion-rusa", "file": "Vladimir Lenin giving a speech.jpg", "name": "lenin-discurso", "role": "figura", "section": 2,
+    "alt": "Lenin de pie sobre una tribuna de madera, inclinado hacia delante, dirigiéndose a una multitud",
+    "caption": "Lenin en Moscú, 1920. La fotografía se retocó después para borrar a Trotski del pie de la tribuna." },
+
+  { "slug": "entreguerras", "file": "Crowd outside nyse.jpg", "name": "portada", "role": "portada",
+    "alt": "Multitud de hombres con sombrero agolpada en la calle frente al edificio de la Bolsa de Nueva York",
+    "caption": "Concentración frente a la Bolsa de Nueva York tras el hundimiento de octubre de 1929." },
+
+  { "slug": "segunda-guerra", "file": "Into the Jaws of Death 23-0455M edit.jpg", "name": "portada", "role": "portada",
+    "alt": "Soldados desembarcando desde una lancha con la rampa abierta y avanzando con el agua por la cintura hacia la playa",
+    "caption": "Desembarco en la playa de Omaha, 6 de junio de 1944, fotografiado por Robert F. Sargent." },
+
+  { "slug": "guerra-fria", "file": "Berlin Wall 1961-11-20.jpg", "name": "portada", "role": "portada",
+    "alt": "Obreros levantando un muro de bloques de hormigón en una calle de Berlín, vigilados por soldados",
+    "caption": "Construcción del Muro de Berlín, noviembre de 1961." },
+  { "slug": "guerra-fria", "file": "Thefalloftheberlinwall1989.JPG", "name": "caida-muro", "role": "figura", "section": 5,
+    "alt": "Personas subidas al Muro de Berlín ante la Puerta de Brandeburgo, rodeadas de multitud",
+    "caption": "El Muro de Berlín la noche del 9 de noviembre de 1989." },
+
+  { "slug": "espana-siglo-xx", "file": "Bundesarchiv Bild 183-H25224, Guernica, Ruinen.jpg", "name": "portada", "role": "portada",
+    "alt": "Calle de Guernica reducida a escombros y fachadas vacías tras el bombardeo",
+    "caption": "Ruinas de Guernica tras el bombardeo del 26 de abril de 1937." },
+
+  { "slug": "mundo-actual", "file": "Internet map 1024.jpg", "name": "portada", "role": "portada",
+    "alt": "Representación gráfica de las conexiones de internet como una maraña radial de líneas de colores sobre fondo negro",
+    "caption": "Mapa parcial de internet trazado a partir de rutas de red. Ilustración de datos, no una fotografía." },
+
+  { "slug": "china-imperial", "file": "Along the River During the Qingming Festival (detail of original).jpg", "name": "portada", "role": "portada",
+    "alt": "Detalle de rollo pintado con un puente de madera abarrotado, barcazas en el río y puestos de mercado",
+    "caption": "Detalle de A lo largo del río durante el festival Qingming, de Zhang Zeduan, época Song." },
+
+  { "slug": "india", "file": "Taj Mahal in March 2004.jpg", "name": "portada", "role": "portada",
+    "alt": "El Taj Mahal de mármol blanco con su cúpula bulbosa y los cuatro minaretes, reflejado en el estanque del jardín",
+    "caption": "El Taj Mahal, mausoleo mogol construido entre 1632 y 1653." },
+
+  { "slug": "japon", "file": "The Great Wave off Kanagawa.jpg", "name": "portada", "role": "portada",
+    "alt": "Estampa japonesa con una ola enorme de cresta espumosa a punto de romper sobre tres barcas, y el Fuji al fondo",
+    "caption": "La gran ola de Kanagawa, de Katsushika Hokusai, hacia 1831." },
+
+  { "slug": "africa", "file": "Catalan Atlas BNF Sheet 6 Mansa Musa.jpg", "name": "portada", "role": "portada",
+    "alt": "Detalle de carta náutica medieval con un rey coronado sentado en su trono sosteniendo una pepita de oro",
+    "caption": "El mansa Musa en el Atlas catalán de 1375, con una pepita de oro en la mano." },
+  { "slug": "africa", "file": "Great Zimbabwe Ruins.jpg", "name": "gran-zimbabue", "role": "figura", "section": 4,
+    "alt": "Muros curvos de bloques de granito colocados sin argamasa, de varios metros de altura, entre la vegetación",
+    "caption": "Recinto de Gran Zimbabue. Que era obra africana medieval se demostró arqueológicamente en 1929." },
+
+  { "slug": "america-precolombina", "file": "Machu Picchu, Peru.jpg", "name": "portada", "role": "portada",
+    "alt": "Vista de Machu Picchu con sus terrazas escalonadas y recintos de piedra sobre la cresta de la montaña",
+    "caption": "Machu Picchu, construido en el siglo XV bajo Pachacútec." },
+  { "slug": "america-precolombina", "file": "Chichen Itza 3.jpg", "name": "chichen-itza", "role": "figura", "section": 2,
+    "alt": "Pirámide escalonada de El Castillo en Chichén Itzá, con la escalinata central y el templo en la cúspide",
+    "caption": "El Castillo de Chichén Itzá, del período posclásico maya." }
+]

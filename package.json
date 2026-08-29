@@ -6,8 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
+    "test": "node --experimental-strip-types scripts/check-content.mjs",
     "preview": "vite preview",
     "seed": "node --experimental-strip-types scripts/generate-seed.mjs",
+    "flags": "node --experimental-strip-types scripts/copy-flags.mjs",
+    "images": "node --experimental-strip-types scripts/fetch-images.mjs",
     "check:backend": "node scripts/check-backend.mjs"
   },
   "dependencies": {
@@ -23,6 +26,7 @@
     "@types/node": "^24.13.3",
     "@vitejs/plugin-vue": "^6.0.8",
     "@vue/tsconfig": "^0.9.1",
+    "flag-icons": "^7.5.0",
     "typescript": "~6.0.2",
     "vite": "^8.2.2",
     "vue-tsc": "^3.3.11"

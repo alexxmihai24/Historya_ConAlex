@@ -5,6 +5,11 @@
     "types": ["vite/client"],
     "allowArbitraryExtensions": true,
 
+    /* Los imports relativos llevan la extensión .ts explícita para que los
+       scripts de scripts/ puedan cargar los mismos módulos desde Node, que sin
+       extensión no resuelve un import relativo. */
+    "allowImportingTsExtensions": true,
+
     /* globe.js es el componente del diseño portado tal cual: se resuelve como
        módulo pero no se type-checkea, para no reescribir su JS de 2015. */
     "allowJs": true,

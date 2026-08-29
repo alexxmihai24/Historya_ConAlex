@@ -1,3 +1,5 @@
+import { ISO_CODES } from './country-codes.ts'
+
 /* Nombres en español de los países de Natural Earth 110m.
    Tabla del diseño del cliente (design/historya-data.js). La clave es el
    `properties.name` del atlas; si un país no está aquí se muestra en inglés. */
@@ -34,3 +36,19 @@ export const ES_NAMES: Record<string, string> = {
   'Bosnia and Herz.': 'Bosnia y Herzegovina', Montenegro: 'Montenegro', 'North Macedonia': 'Macedonia del Norte',
   Moldova: 'Moldavia', Lithuania: 'Lituania', Latvia: 'Letonia', Estonia: 'Estonia', Luxembourg: 'Luxemburgo'
 };
+
+/* La búsqueda de bandera por nombre en español vive aquí y no en
+   `country-codes.ts` porque necesita ES_NAMES, y aquel archivo tiene que poder
+   cargarse desde Node sin importar nada (lo usa `scripts/copy-flags.mjs`). */
+const A2_BY_ES = new Map<string, string>()
+for (const [englishName, code] of Object.entries(ISO_CODES)) {
+  const spanishName = ES_NAMES[englishName]
+  if (spanishName) A2_BY_ES.set(spanishName, code.a2)
+}
+
+/** Alfa-2 de un país por su nombre en español, para nombrar su archivo de bandera.
+ *  Devuelve null si no es un país del atlas: «Europa», «Mundo» y las regiones
+ *  históricas no tienen bandera, y eso no es un error. */
+export function flagCode(spanishName: string): string | null {
+  return A2_BY_ES.get(spanishName) ?? null
+}

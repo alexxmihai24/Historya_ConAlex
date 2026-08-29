@@ -1,19 +1,13 @@
 <script setup lang="ts">
 import { computed, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { useTopics } from '../composables/useTopics'
-import { useQuiz, type AnswerResult, type QuizQuestionUI } from '../composables/useQuiz'
-import { useAuthStore } from '../stores/auth'
-
-/* Reglas de la partida contrarreloj.
-   La puntuación que se ve aquí es de la sesión: lo que se guarda en Supabase lo
-   calcula el servidor a partir de las respuestas (SPEC §10.4), y son aciertos,
-   no puntos. Para persistir puntos haría falta una función nueva que reciba
-   también los tiempos, con el problema de que el reloj lo pone el cliente. */
-const SECONDS_PER_QUESTION = 20
-const LIVES = 3
-const BASE_POINTS = 100
-const TIME_BONUS = 5
+import { useTopics } from '../composables/useTopics.ts'
+import { useQuiz, type AnswerResult, type QuizQuestionUI } from '../composables/useQuiz.ts'
+import { useAuthStore } from '../stores/auth.ts'
+/* Las reglas de la partida viven en src/lib/scoring.ts para poder comprobarlas
+   sin montar el componente, y porque harán falta también en el servidor cuando
+   se persistan los puntos (SPEC §10.4). */
+import { BASE_POINTS, LIVES, SECONDS_PER_QUESTION, TIME_BONUS, multiplierFor, pointsFor } from '../lib/scoring.ts'
 
 const route = useRoute()
 const auth = useAuthStore()
@@ -58,7 +52,7 @@ const selectedTopicInfo = computed(() => topics.value.find((topic) => topic.id =
 const scopeLabel = computed(() =>
   selectedMode.value === 'global' ? 'Historia completa' : (selectedTopicInfo.value?.title ?? ''),
 )
-const multiplier = computed(() => Math.min(4, 1 + Math.floor(streak.value / 2)))
+const multiplier = computed(() => multiplierFor(streak.value))
 const timeColor = computed(() =>
   timeLeft.value > 10 ? 'var(--good)' : timeLeft.value > 5 ? 'var(--warn)' : 'var(--ember)',
 )
@@ -130,7 +124,7 @@ function register(isCorrect: boolean) {
   if (isCorrect) {
     streak.value += 1
     bestStreak.value = Math.max(bestStreak.value, streak.value)
-    score.value += BASE_POINTS * multiplier.value + timeLeft.value * TIME_BONUS
+    score.value += pointsFor(streak.value, timeLeft.value)
   } else {
     streak.value = 0
     lives.value = Math.max(0, lives.value - 1)

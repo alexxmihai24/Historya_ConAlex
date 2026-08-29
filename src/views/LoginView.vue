@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { supabase } from '../lib/supabase'
-import { useAuthStore } from '../stores/auth'
+import { supabase } from '../lib/supabase.ts'
+import { useAuthStore } from '../stores/auth.ts'
 
 const auth = useAuthStore()
 const router = useRouter()

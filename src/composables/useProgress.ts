@@ -1,6 +1,6 @@
 import { ref, watch, type Ref } from 'vue'
-import { supabase } from '../lib/supabase'
-import { useAuthStore } from '../stores/auth'
+import { supabase } from '../lib/supabase.ts'
+import { useAuthStore } from '../stores/auth.ts'
 
 /**
  * Progreso de lectura de una lección. `lessonId` es el uuid real de `lessons` (solo existe

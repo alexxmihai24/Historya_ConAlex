@@ -1,7 +1,7 @@
 # Especificación del producto · Historya con Alex
 
 **Última actualización:** 29 de agosto de 2026
-**Estado:** contenido en reescritura a nivel universitario. Rediseño «Atlas Nocturno» implantado. **Supabase conectado; el seed de 25 temas está pendiente de ejecutarse.**
+**Estado:** temario completo a nivel universitario: 35 temas y 555 preguntas. Rediseño «Atlas Nocturno» implantado. Banderas e imágenes de tema en producción. **Supabase conectado; falta ejecutar la migración `20260829_topic_cover_image.sql` y volver a lanzar el seed.**
 
 ## 1. Visión
 
@@ -28,7 +28,7 @@ Historya con Alex es una plataforma web en español para estudiantes y personas 
 Un archivo por tema en `src/data/topics/`, con la forma `TopicModule` definida en `src/data/types.ts`:
 lección + glosario + debates + bibliografía + banco de preguntas.
 
-**Escritos a nivel universitario (25 temas, 395 preguntas):**
+**Escritos a nivel universitario (35 temas, 555 preguntas):**
 
 | Tema | Época | Preguntas |
 | --- | --- | --- |
@@ -57,8 +57,18 @@ lección + glosario + debates + bibliografía + banco de preguntas.
 | `imperialismo` — Imperialismo y colonialismo | Edad Contemporánea | 16 |
 | `gran-guerra` — Primera Guerra Mundial | Edad Contemporánea | 16 |
 | `revolucion-rusa` — Revolución rusa y URSS | Edad Contemporánea | 16 |
+| `entreguerras` — Crisis de 1929 y fascismos | Edad Contemporánea | 16 |
+| `segunda-guerra` — Segunda Guerra Mundial y Holocausto | Edad Contemporánea | 16 |
+| `guerra-fria` — Guerra Fría y descolonización | Edad Contemporánea | 16 |
+| `espana-siglo-xx` — España en el siglo XX | Edad Contemporánea | 16 |
+| `mundo-actual` — El mundo desde 1991 | Edad Contemporánea | 16 |
+| `china-imperial` — China imperial | Edad Media | 16 |
+| `india` — India: de los Mauryas a los mogoles | Edad Media | 16 |
+| `japon` — Japón: de Heian a Meiji | Edad Media | 16 |
+| `africa` — Reinos africanos: Malí, Songhay, Etiopía y Gran Zimbabue | Edad Media | 16 |
+| `america-precolombina` — Mesoamérica y los Andes | Antigüedad | 16 |
 
-**Por escribir:** quedan 10 temas: entreguerras, II Guerra Mundial, Guerra Fría, España siglo XX, mundo actual, y el bloque no europeo (China imperial, India, Japón, África y América precolombina).
+**Por escribir:** ninguno. El temario acordado con el cliente está completo: las cuatro épocas y el bloque no europeo. Los cinco temas no europeos se asignan a la época donde está su centro de gravedad y cierran el array `modules` como bloque.
 
 El recuento vivo está en `CONTINUAR.md`, que se actualiza tema a tema. `npm run seed` imprime el número real de temas y preguntas del repositorio.
 
@@ -79,7 +89,11 @@ Ya no queda ningún tema con el texto corto de la demo inicial: `_pendientes.ts`
 - Perfil conectado a datos reales (progreso, historial de quizzes) y cierre de sesión.
 - Formularios de registro e inicio de sesión sobre Supabase Auth.
 - Migraciones con RLS, perfiles, contenido, progreso y resultados; funciones RPC que no exponen la respuesta correcta.
-- **Backend en marcha:** las dos migraciones aplicadas y el contenido cargado. Verificado con `npm run check:backend`. El seed regenerado el 29/08/2026 (25 temas, 395 preguntas) está pendiente de ejecutarse en el SQL Editor.
+- **Backend en marcha:** las dos migraciones aplicadas y el contenido cargado. Verificado con `npm run check:backend`. El seed de 25 temas ya se ejecutó; el regenerado el 29/08/2026 (35 temas, 555 preguntas) está pendiente de volver a lanzarse en el SQL Editor.
+- **Banderas de país**: 142 SVG empaquetados en `public/img/flags/`, copiados de `flag-icons` con `npm run flags`. Se muestran en el panel del globo, la cabecera de la ficha de país y el chip de la biblioteca; nunca dentro de una lección.
+- **Imágenes de tema**: portada en la tarjeta de la biblioteca y en la cabecera de la lección, y figuras dentro de los apartados, todas con pie y atribución completa. Se declaran en `scripts/images.json` y las descarga `npm run images` desde Wikimedia Commons, rechazando cualquier licencia que no sea libre.
+- **Validación de rutas de imagen** en `src/lib/images.ts`, aplicada al pintar y también al generar el seed.
+- **Comprobaciones automáticas** con `npm test`: seguridad de rutas, puntuación del quiz, filtros de la biblioteca, integridad del banco de preguntas y existencia en disco de cada imagen y bandera.
 - PWA instalable: manifest, iconos Android/iPhone, service worker y caché offline.
 - Diseño responsive desde 320 px.
 
@@ -88,8 +102,9 @@ Ya no queda ningún tema con el texto corto de la demo inicial: `_pendientes.ts`
 - Panel de administración para autores o editores.
 - Recuperación de contraseña y edición de nombre/avatar.
 - Búsqueda de contenido y filtros por país o materia.
-- **Imágenes: no hay ninguna.** Ni banderas de país, ni portadas de tema, ni retratos, ni caricaturas, ni figuras dentro de las lecciones. Hoy el único elemento gráfico de un tema es un glifo tipográfico. Es la carencia mayor del producto y tiene sección propia: **§14**.
-- Tests automatizados y pipeline de despliegue.
+- **Más figuras por lección.** Hay 35 portadas y 5 figuras; §14.2 pide entre dos y cuatro figuras por tema, así que faltan alrededor de un centenar. El trabajo restante es editorial, no técnico: añadir entradas a `scripts/images.json` y ejecutar `npm run images`.
+- **Formatos AVIF y WebP con `<picture>`.** Hoy se sirve el JPEG o PNG de Commons a 1200 px de ancho. Convertirlos exigiría una herramienta de imagen que el proyecto no tiene.
+- Tests de componentes con DOM y pipeline de despliegue. `npm test` cubre la lógica pura y la integridad del contenido, no el renderizado.
 - **Puntos del quiz persistidos.** `submit_quiz_attempt` guarda aciertos calculados en el servidor; los puntos, la racha y el tiempo son de la sesión. Guardarlos exigiría una función que reciba los tiempos por respuesta, con el reloj en manos del cliente.
 - **Formatos de pregunta `mapa` y `huecos`.** El diseño los contempla; el banco solo tiene `opciones`. Faltan la columna de tipo, el seed y las preguntas.
 - **Mapa histórico y narración de audio** de la ficha de país: retirados a propósito, no hay datos ni grabaciones.
@@ -104,6 +119,7 @@ Ya no queda ningún tema con el texto corto de la demo inicial: `_pendientes.ts`
 | Estado | Pinia | Sesión de usuario |
 | Backend | Supabase | PostgreSQL, Auth, RLS, Storage y funciones RPC |
 | Estilos | CSS propio | Sistema «Atlas Nocturno» en `src/style.css`, sin kit visual de terceros |
+| Banderas | flag-icons (solo en desarrollo) | Los SVG se copian a `public/img/flags/`; en producción no se importa nada del paquete |
 | Cartografía | d3-geo + topojson-client + world-atlas | Globo y siluetas de país. El atlas viaja en el paquete: la PWA no depende de un CDN |
 
 No se usa Nuxt. Si el SEO de las lecciones pasa a ser prioritario, evaluar una migración posterior sin reescribir el dominio de datos.
@@ -115,22 +131,32 @@ src/
   data/
     types.ts               Tipos del contenido: Topic, Concept, Debate, Source, QuizQuestion
     history.ts             Agregador: reúne los módulos y expone topics, quizQuestions y eras
+    topic-images.ts        GENERADO desde scripts/images.json con `npm run images`. No editar a mano
     topics/
       <slug>.ts            Un archivo por tema: lección + glosario + debates + fuentes + preguntas
   composables/             useTopics, useLesson, useQuiz, useProgress
   lib/supabase.ts          Cliente Supabase: solo URL y clave publishable
   lib/globe.js             historya-globe, historya-outline e historya-map. Portado del diseño
-  lib/country-names.ts     Nombres en español de los países del atlas
+  lib/country-names.ts     Nombres en español de los países del atlas y búsqueda de bandera
+  lib/country-codes.ts     Tabla ISO numérico y alfa-2. No importa nada: la leen los scripts desde Node
+  lib/images.ts            Allowlist de rutas de imagen y comprobación de atribución
+  lib/scoring.ts           Reglas de puntuación del contrarreloj, aparte para poder comprobarlas
+  components/CountryFlag.vue  Bandera de un país, siempre como <img src>
   lib/regions.ts           Traduce un topic.country a los países que se encienden en el globo
   router/index.ts          Rutas de la aplicación
   stores/auth.ts           Sesión y operaciones de Supabase Auth
   views/                   HomeView, LibraryView, StudyView, QuizView, ProfileView, LoginView
   style.css                Sistema visual y responsive
-public/                    Manifest, service worker e iconos PWA
+public/                    Manifest, service worker, iconos PWA e imágenes
+  img/flags/               142 banderas SVG. Generado con `npm run flags`
+  img/<slug>/              Portada y figuras de cada tema. Generado con `npm run images`
 design/                    Entrega de diseño del cliente. Fuente de verdad del sistema visual
 scripts/
   generate-pwa-icons.ps1   Generador reproducible de iconos PNG
   generate-seed.mjs        Genera supabase/seed.sql desde src/data/topics/
+  copy-flags.mjs           Copia a public/img/flags/ las banderas de los países del atlas
+  fetch-images.mjs         Descarga imágenes de Commons y genera src/data/topic-images.ts
+  check-content.mjs        Comprobaciones de contenido y seguridad (`npm test`)
   check-backend.mjs        Comprobación de humo contra el Supabase real
 supabase/
   migrations/              Esquema inicial y metadatos de contenido
@@ -163,7 +189,8 @@ interface TopicModule {
 - `debates[]` recoge una controversia con las posiciones enfrentadas (`school` + `argument`) y el estado de la cuestión.
 - `sources[]` distingue `kind: 'primaria'` (textos de la época) de `kind: 'estudio'` (historiografía moderna).
 - `color` debe ser uno de `gold`, `blue`, `terracotta`, `green`, `plum` o `red`: son las clases `.visual-*` del CSS y el `check` de `accent_color` en el esquema. `npm run seed` falla si no lo es.
-- En la base de datos todo esto viaja dentro de `lessons.body`, un array de bloques tipados (`section`, `concepts`, `debates`, `timeline`, `sources`). No hicieron falta columnas nuevas.
+- En la base de datos todo esto viaja dentro de `lessons.body`, un array de bloques tipados (`section`, `concepts`, `debates`, `timeline`, `sources`, `images`). Solo hizo falta una columna nueva, `topics.cover_image`, porque la biblioteca lista temas sin tocar `lessons`.
+- `images[]` son `TopicImage`: ruta local, texto alternativo, tamaño, papel (`portada` o `figura`), apartado al que acompaña y atribución completa. Se generan en `src/data/topic-images.ts` y `history.ts` las engancha a cada tema.
 - Los `id` de pregunta siguen el patrón `<slug>-<n>` para evitar colisiones entre temas.
 - `npm run seed` despublica los temas que ya no están en `src/data/topics/`. Sin eso, un tema renombrado seguiría visible en la biblioteca: los `insert` solo actualizan.
 
@@ -191,7 +218,7 @@ user_roles (separada de profiles)
 | --- | --- |
 | `profiles` | Nombre visible, nivel educativo y avatar |
 | `user_roles` | Roles `editor`/`admin`; nunca se modifican desde el navegador |
-| `eras`, `countries`, `topics`, `lessons` | Catálogo editorial publicable |
+| `eras`, `countries`, `topics`, `lessons` | Catálogo editorial publicable. `topics.cover_image` guarda la portada con su atribución |
 | `questions`, `question_options` | Banco de preguntas y respuestas correctas |
 | `user_preferences` | Intereses con los que se personalizan sugerencias |
 | `learning_progress` | Porcentaje y apartados terminados de cada lección |
@@ -217,7 +244,7 @@ user_roles (separada de profiles)
 7. `.env.local` **no se sube al repositorio**. `.gitignore` cubre `.env`, `.env.local` y `.env.*.local`.
 8. Antes de producción: confirmación de correo, URLs de redirección exactas, límites de Auth y CAPTCHA, copias de seguridad, revisión de RLS y buckets privados en Storage.
 9. **Nunca `v-html` ni `innerHTML` con datos que vengan de la base de datos.** Hoy no hay ni una sola aparición de ninguno de los dos en `src/`, y esa es la mitad de la defensa contra XSS en una aplicación cuyo contenido lo escriben editores. Comprobación: `grep -rn "v-html\|innerHTML" src/` debe salir vacío.
-10. **Ninguna URL que venga de la base de datos se pinta sin validar.** Una `src` de imagen editable es un canal para filtrar la IP y el `Referer` de cada visitante a un tercero. Allowlist de dominios en el cliente, y validación también al guardar.
+10. **Ninguna URL que venga de la base de datos se pinta sin validar.** Una `src` de imagen editable es un canal para filtrar la IP y el `Referer` de cada visitante a un tercero. Implementado en `src/lib/images.ts`: allowlist de rutas, aplicada al pintar (`safeImage`) y al guardar (`npm run seed` falla si una imagen no pasa). La lista de orígenes remotos está vacía a propósito: hoy solo se sirven imágenes locales. `npm test` comprueba los casos de rechazo uno a uno.
 
 ## 11. Configuración local
 
@@ -251,15 +278,16 @@ Después, ejecutar las migraciones de `supabase/migrations/` en orden y luego `s
 
 ## 12. Próximo orden de trabajo
 
-### Fase 1 · Contenido (en curso)
+### Fase 1 · Contenido — hecha
 
-1. Completar el temario por bloques cronológicos, siguiendo el orden de la sección 3.
-2. Script para obtener cronologías de Wikidata e imágenes con licencia clara de Europeana o Wikimedia Commons, y así dejar de escribir fechas a mano. **Acordado con el cliente: después del contenido.**
+1. ~~Completar el temario por bloques cronológicos.~~ 35 temas y 555 preguntas, temario cerrado.
+2. ~~Script para obtener imágenes con licencia clara de Wikimedia Commons.~~ Hecho: `scripts/fetch-images.mjs`. Queda pendiente el equivalente para cronologías de Wikidata.
 
 ### Fase 2 · Backend
 
 1. ~~Crear el proyecto de Supabase y sustituir la URL de `.env.local`.~~ Hecho.
 2. ~~Aplicar las dos migraciones y ejecutar el seed.~~ Hecho.
+0. Ejecutar `supabase/migrations/20260829_topic_cover_image.sql` y volver a lanzar `supabase/seed.sql`.
 3. Configurar Auth: confirmación de correo y URLs de redirección permitidas.
 4. Probar registro, login y RLS con dos usuarios distintos.
 5. Volver a ejecutar `npm run seed` y el SQL cada vez que se añadan temas.
@@ -268,11 +296,11 @@ Después, ejecutar las migraciones de `supabase/migrations/` en orden y luego `s
 
 1. ~~Recibir las referencias visuales del cliente.~~ Recibidas el 29/08/2026.
 2. ~~Rediseñar sobre ellas.~~ «Atlas Nocturno» implantado en toda la aplicación.
-3. Pendiente de decidir con el cliente: qué temas de ámbito «Europa» o «Mundo» deberían apuntar a un país concreto para ser alcanzables desde el globo.
+3. Pendiente de decidir con el cliente: qué temas de ámbito «Europa» o «Mundo» deberían apuntar a un país concreto para ser alcanzables desde el globo. `src/lib/regions.ts` ya traduce «África» a Malí, Etiopía, Zimbabue y Tanzania, y «América» a México, Guatemala, Perú y Bolivia.
 
 ### Fase 4 · Calidad y despliegue
 
-1. Tests unitarios de puntuación, filtros y composables.
+1. ~~Tests unitarios de puntuación y filtros.~~ Hechos en `npm test`. Faltan los de composables, que necesitan un entorno con DOM.
 2. Tests de integración de RLS con usuarios de prueba.
 3. E2E de registro, lectura y quiz.
 4. CI con `npm run build`, pruebas y auditoría de dependencias.
@@ -292,11 +320,19 @@ Después, ejecutar las migraciones de `supabase/migrations/` en orden y luego `s
 - La seguridad de los quizzes se resuelve en la base de datos, no en la interfaz.
 - El perfil **no muestra cifras inventadas**: si no hay sesión ni progreso real, muestra cero.
 
-## 14. Contenido visual pendiente: banderas e imágenes
+## 14. Contenido visual
 
-Esta sección existe porque el rediseño «Atlas Nocturno» dejó la interfaz terminada
-y el material gráfico vacío. No es un adorno: un temario de historia sin una sola
-imagen es peor producto que uno con menos texto y con documentos que mirar.
+Esta sección nació porque el rediseño «Atlas Nocturno» dejó la interfaz terminada
+y el material gráfico vacío. **Implantada el 29/08/2026**: hay banderas en las tres
+vistas que las piden, una portada por tema y las primeras figuras dentro de las
+lecciones, todas con atribución. Lo que queda es editorial: más figuras.
+
+**Decisión de alojamiento (29/08/2026): `public/img/` en el repositorio**, no un
+bucket. La PWA funciona sin red, no hay que mantener RLS ni una vía de subida, y
+la CSP puede quedarse en `img-src 'self' data: blob:`, que es lo más estricto
+posible. El peso hoy es de unos 17 MB. Si algún día pasa a ser un problema, el
+bucket sigue disponible: hay que añadir el origen a `ALLOWED_IMAGE_ORIGINS` en
+`src/lib/images.ts` y a la CSP de `vercel.json`, y nada más.
 
 ### 14.1 Banderas de país
 
@@ -379,8 +415,20 @@ Las reglas 9 y 10 de §10 nacen aquí. En concreto:
 5. Si se automatiza la importación desde Commons o Europeana, ese script corre en
    el servidor con clave de servicio, nunca en el navegador (§10.1).
 
-### 14.4 Limpieza pendiente
+### 14.4 Limpieza
 
-`src/components/HelloWorld.vue` y `src/assets/{hero.png, vite.svg, vue.svg}` son
-restos del andamiaje inicial de Vite. No los importa nadie. Borrar al empezar esta
-tanda, para no confundirlos con material del proyecto.
+~~`src/components/HelloWorld.vue` y `src/assets/{hero.png, vite.svg, vue.svg}`~~
+Borrados el 29/08/2026 junto con la carpeta `src/assets/`.
+
+### 14.5 Lo que queda
+
+- **Más figuras.** Hay 35 portadas y 5 figuras; §14.2 pide entre dos y cuatro
+  figuras por tema. Es trabajo editorial: una entrada por imagen en
+  `scripts/images.json` y `npm run images`.
+- **Retratos y caricaturas.** `imperialismo` ya lleva la caricatura de Sambourne
+  para *Punch*. Falta explotar Daumier, Gillray y *Kladderadatsch* en
+  `gran-guerra`, `entreguerras` y `revolucion-rusa`.
+- **AVIF o WebP con `<picture>`.** Hoy se sirve el JPEG o PNG de Commons a
+  1200 px. Hace falta una herramienta de conversión que el proyecto no tiene.
+- **Peso.** Tres imágenes pasan del megabyte. Bajar `ANCHO` en
+  `scripts/fetch-images.mjs` y volver a descargarlas es la vía rápida.

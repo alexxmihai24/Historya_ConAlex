@@ -486,6 +486,13 @@ h1, h2, h3, h4 { margin: 0; font-family: var(--serif); font-weight: 400; letter-
   box-shadow: 0 0 16px var(--era, var(--ember));
 }
 
+/* Portada de la tarjeta. La atribución completa no cabe aquí y se muestra en el
+   pie de la misma imagen dentro de la lección, que está a un clic. */
+.library-cover {
+  display: block; width: 100%; height: 168px; object-fit: cover;
+  border-bottom: 1px solid var(--line-soft); background: var(--fill);
+}
+
 .library-card-body, .topic-content {
   display: flex; flex-direction: column; gap: 14px; flex: 1;
   padding: 20px 22px 22px;
@@ -501,6 +508,23 @@ h1, h2, h3, h4 { margin: 0; font-family: var(--serif); font-weight: 400; letter-
   font-family: var(--mono); font-size: 8px; letter-spacing: 0.06em; text-transform: uppercase;
   color: var(--text-45);
 }
+/* Banderas de país -----------------------------------------------------------
+   Solo donde el país aparece como lugar del mundo de hoy: panel del globo,
+   cabecera de la ficha y chip de la biblioteca. Nunca dentro de una lección:
+   una bandera moderna sobre «El Egipto de los faraones» es un anacronismo y
+   enseña algo falso (SPEC §14.1). El aspect-ratio evita el salto de maquetación
+   mientras el archivo carga. */
+.country-flag {
+  display: block; height: auto; aspect-ratio: 4 / 3; object-fit: cover;
+  border: 1px solid var(--line); border-radius: 3px;
+}
+.country-flag-sm { width: 15px; border-radius: 2px; }
+.country-flag-md { width: 30px; }
+.country-flag-lg { width: 46px; border-radius: 5px; border-color: rgb(255 255 255 / 45%); }
+.topic-country { display: inline-flex; align-items: center; gap: 6px; }
+.panel-flag { margin-top: 14px; }
+.country-hero-flag { margin-top: 14px; }
+
 .library-card h2, .topic-card h3 {
   font-family: var(--serif); font-size: 27px; line-height: 1.08; letter-spacing: -0.01em;
 }
@@ -577,6 +601,35 @@ h1, h2, h3, h4 { margin: 0; font-family: var(--serif); font-weight: 400; letter-
   font-size: 56px;
 }
 .study-visual small { color: rgb(255 255 255 / 75%); }
+
+/* Portada del tema en la cabecera de la lección. Ocupa el hueco del glifo, así
+   que comparte su ancho para que la cabecera no cambie de forma. */
+.study-cover { width: 260px; flex: none; margin: 0; }
+.study-cover img {
+  display: block; width: 100%; height: 176px; object-fit: cover;
+  border: 1px solid rgb(255 255 255 / 45%); border-radius: 20px;
+  background: rgb(0 0 0 / 18%);
+}
+
+/* Figuras dentro de un apartado. El pie lleva SIEMPRE la atribución: es
+   requisito de varias de las licencias admitidas y es el mismo rigor que ya
+   tiene el resto del contenido (SPEC §14.2). */
+.lesson-figure { margin: 6px 0; display: flex; flex-direction: column; gap: 10px; }
+.lesson-figure img {
+  display: block; width: 100%; height: auto;
+  border: 1px solid var(--line); border-radius: var(--r-md); background: var(--fill);
+}
+.lesson-figure figcaption { display: flex; flex-direction: column; gap: 4px; }
+.lesson-figure figcaption span { font-size: 13.5px; line-height: 1.55; color: var(--text-70); text-wrap: pretty; }
+.lesson-figure figcaption small {
+  font-family: var(--mono); font-size: 10px; line-height: 1.5;
+  letter-spacing: 0.02em; color: var(--text-45);
+}
+.study-cover figcaption { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
+.study-cover figcaption span { font-size: 12.5px; line-height: 1.5; color: rgb(255 255 255 / 88%); }
+.study-cover figcaption small {
+  font-family: var(--mono); font-size: 9px; line-height: 1.5; color: rgb(255 255 255 / 62%);
+}
 
 .study-layout { display: grid; gap: 30px; grid-template-columns: 268px minmax(0, 1fr); align-items: start; margin-top: 30px; }
 

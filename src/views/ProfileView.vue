@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
-import { supabase } from '../lib/supabase'
-import { useAuthStore } from '../stores/auth'
-import { useTopics } from '../composables/useTopics'
+import { supabase } from '../lib/supabase.ts'
+import { useAuthStore } from '../stores/auth.ts'
+import { useTopics } from '../composables/useTopics.ts'
 
 interface RecentProgress { title: string; slug: string; percent: number }
 interface QuizHistoryItem { scope: string; correct: number; total: number; date: string }

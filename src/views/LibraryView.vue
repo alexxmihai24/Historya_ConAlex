@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { eraColor, eras, type Era } from '../data/history'
-import { useTopics } from '../composables/useTopics'
+import { eraColor, eras, type Era } from '../data/history.ts'
+import { useTopics } from '../composables/useTopics.ts'
+import CountryFlag from '../components/CountryFlag.vue'
 
 const { topics, isLoading } = useTopics()
 const selectedEra = ref<Era | 'Todas'>('Todas')
@@ -87,10 +88,20 @@ const totalProgress = computed(() => {
         :class="`era-${eraColor(topic.era)}`"
         :to="`/estudiar/${topic.id}`"
       >
+        <img
+          v-if="topic.cover"
+          class="library-cover"
+          :src="topic.cover.src"
+          :alt="topic.cover.alt"
+          :width="topic.cover.width"
+          :height="topic.cover.height"
+          loading="lazy"
+          decoding="async"
+        />
         <div class="library-card-body">
           <div class="topic-meta">
             <span>{{ topic.era }}</span>
-            <span>{{ topic.country }}</span>
+            <span class="topic-country"><CountryFlag :country="topic.country" size="sm" />{{ topic.country }}</span>
           </div>
           <h2>{{ topic.title }}</h2>
           <div class="card-numbers">

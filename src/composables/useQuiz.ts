@@ -1,7 +1,7 @@
 import { ref } from 'vue'
-import { supabase } from '../lib/supabase'
-import { quizQuestions } from '../data/history'
-import { useAuthStore } from '../stores/auth'
+import { supabase } from '../lib/supabase.ts'
+import { quizQuestions } from '../data/history.ts'
+import { useAuthStore } from '../stores/auth.ts'
 
 export interface QuizOption {
   id: string

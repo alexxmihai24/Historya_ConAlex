@@ -1,4 +1,4 @@
-import { ES_NAMES } from './country-names'
+import { ES_NAMES } from './country-names.ts'
 
 /* Un `topic.country` no siempre es un país del atlas: hay regiones históricas
    («Península ibérica») y ámbitos que no son un territorio («Europa», «Mundo»).
@@ -11,8 +11,8 @@ const REGIONS: Record<string, string[]> = {
   Arabia: ['Arabia Saudí'],
   Europa: [],
   Mundo: [],
-  América: [],
-  África: [],
+  América: ['México', 'Guatemala', 'Perú', 'Bolivia'],
+  África: ['Malí', 'Etiopía', 'Zimbabue', 'Tanzania'],
 }
 
 const ATLAS_ES = new Set(Object.values(ES_NAMES))

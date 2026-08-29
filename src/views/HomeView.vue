@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { eraColor, eras, findTopic } from '../data/history'
-import { useTopics } from '../composables/useTopics'
-import { atlasCountries, coveredCountries } from '../lib/regions'
+import { eraColor, eras, findTopic } from '../data/history.ts'
+import { useTopics } from '../composables/useTopics.ts'
+import { atlasCountries, coveredCountries } from '../lib/regions.ts'
+import CountryFlag from '../components/CountryFlag.vue'
 import '../lib/globe.js'
 
 const { topics } = useTopics()
@@ -150,6 +151,7 @@ function back() {
         <div class="panel-head">
           <div>
             <p class="eyebrow eyebrow-light">Ficha de país</p>
+            <CountryFlag class="panel-flag" :country="selected" size="md" />
             <h1 class="panel-country">{{ selected }}</h1>
           </div>
           <historya-outline :country="selected" tone="ember" class="panel-outline"></historya-outline>
@@ -205,6 +207,7 @@ function back() {
         <div class="panel-head">
           <div>
             <p class="eyebrow">Sin lección todavía</p>
+            <CountryFlag class="panel-flag" :country="selected" size="md" />
             <h1 class="panel-country">{{ selected }}</h1>
           </div>
           <historya-outline :country="selected" tone="light" class="panel-outline faded"></historya-outline>

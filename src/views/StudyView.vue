@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
-import { useLesson } from '../composables/useLesson'
-import { useProgress } from '../composables/useProgress'
+import { useLesson } from '../composables/useLesson.ts'
+import { useProgress } from '../composables/useProgress.ts'
+import { imageCredit } from '../lib/images.ts'
 
 const route = useRoute()
 const { topic, isLoading } = useLesson(String(route.params.topicId))
@@ -17,6 +18,14 @@ function toggleSection(index: number) {
 /** El cuerpo de cada apartado guarda sus párrafos separados por una línea en blanco. */
 function paragraphs(body: string) {
   return body.split(/\n{2,}/).filter((paragraph) => paragraph.trim().length > 0)
+}
+
+/** Portada del tema. Sustituye al glifo tipográfico cuando existe (SPEC §14.2). */
+const cover = computed(() => topic.value?.images.find((image) => image.role === 'portada') ?? null)
+
+/** Figuras de un apartado. `section` es el índice del apartado tras el que van. */
+function figuresOf(index: number) {
+  return (topic.value?.images ?? []).filter((image) => image.role === 'figura' && image.section === index)
 }
 
 function scrollToSection(index: number) {
@@ -37,7 +46,14 @@ function scrollToSection(index: number) {
         <p>{{ topic.summary }}</p>
         <div class="study-meta"><span>{{ topic.years }}</span><span>{{ topic.duration }} de lectura</span><span>Nivel {{ topic.level }}</span></div>
       </div>
-      <div class="study-visual topic-visual" :class="`visual-${topic.color}`" role="img" :aria-label="`Ilustración editorial de ${topic.title}`"><span>{{ topic.visual }}</span><small>{{ topic.country.toUpperCase() }}</small></div>
+      <figure v-if="cover" class="study-cover">
+        <img :src="cover.src" :alt="cover.alt" :width="cover.width" :height="cover.height" decoding="async" />
+        <figcaption>
+          <span v-if="cover.caption">{{ cover.caption }}</span>
+          <small>{{ imageCredit(cover) }}<template v-if="cover.generated"> · Ilustración generada, no es un documento histórico</template></small>
+        </figcaption>
+      </figure>
+      <div v-else class="study-visual topic-visual" :class="`visual-${topic.color}`" role="img" :aria-label="`Ilustración editorial de ${topic.title}`"><span>{{ topic.visual }}</span><small>{{ topic.country.toUpperCase() }}</small></div>
     </header>
 
     <div class="shell study-layout">
@@ -53,6 +69,13 @@ function scrollToSection(index: number) {
           <p class="section-index">{{ String(index + 1).padStart(2, '0') }}</p><h2>{{ section.title }}</h2>
           <p v-for="(paragraph, paragraphIndex) in paragraphs(section.body)" :key="paragraphIndex">{{ paragraph }}</p>
           <aside v-if="section.callout" class="history-callout"><span>✦</span><p>{{ section.callout }}</p></aside>
+          <figure v-for="figure in figuresOf(index)" :key="figure.src" class="lesson-figure">
+            <img :src="figure.src" :alt="figure.alt" :width="figure.width" :height="figure.height" loading="lazy" decoding="async" />
+            <figcaption>
+              <span v-if="figure.caption">{{ figure.caption }}</span>
+              <small>{{ imageCredit(figure) }}<template v-if="figure.generated"> · Ilustración generada, no es un documento histórico</template></small>
+            </figcaption>
+          </figure>
           <button class="section-complete" type="button" :class="{ complete: completedSections.includes(index) }" @click="toggleSection(index)">{{ completedSections.includes(index) ? '✓ Apartado completado' : 'Marcar como leído' }}</button>
         </section>
 

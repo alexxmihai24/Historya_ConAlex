@@ -1,8 +1,9 @@
 import { ref } from 'vue'
-import { supabase } from '../lib/supabase'
-import { findTopic } from '../data/history'
-import type { Concept, Debate, Source } from '../data/types'
-import { TOPIC_SELECT, mapEducationLevel, type RawTopicRow, type EducationLevel } from './useTopics'
+import { supabase } from '../lib/supabase.ts'
+import { findTopic } from '../data/history.ts'
+import type { Concept, Debate, Source, TopicImage } from '../data/types.ts'
+import { safeImages } from '../lib/images.ts'
+import { TOPIC_SELECT, mapEducationLevel, type RawTopicRow, type EducationLevel } from './useTopics.ts'
 
 export type LessonBlock =
   | { type: 'section'; title: string; text: string; callout?: string | null }
@@ -10,6 +11,7 @@ export type LessonBlock =
   | { type: 'concepts'; items: Concept[] }
   | { type: 'debates'; items: Debate[] }
   | { type: 'sources'; items: Source[] }
+  | { type: 'images'; items: TopicImage[] }
 
 export interface StudySectionUI {
   title: string
@@ -39,6 +41,8 @@ export interface LessonView {
   concepts: Concept[]
   debates: Debate[]
   sources: Source[]
+  /** Ya validadas: lo que llega aquí se puede pintar sin más comprobaciones. */
+  images: TopicImage[]
 }
 
 function blocksToSections(body: LessonBlock[]) {
@@ -47,14 +51,17 @@ function blocksToSections(body: LessonBlock[]) {
   const concepts: Concept[] = []
   const debates: Debate[] = []
   const sources: Source[] = []
+  let images: TopicImage[] = []
   for (const block of body) {
     if (block.type === 'section') sections.push({ title: block.title, body: block.text, callout: block.callout ?? undefined })
     else if (block.type === 'timeline') keyDates.push(...block.items)
     else if (block.type === 'concepts') concepts.push(...block.items)
     else if (block.type === 'debates') debates.push(...block.items)
     else if (block.type === 'sources') sources.push(...block.items)
+    // Una `src` de la base de datos no se pinta sin validarla (SPEC §10.10).
+    else if (block.type === 'images') images = safeImages(block.items)
   }
-  return { sections, keyDates, concepts, debates, sources }
+  return { sections, keyDates, concepts, debates, sources, images }
 }
 
 function mapDemoLesson(slug: string): LessonView | null {
@@ -77,6 +84,7 @@ function mapDemoLesson(slug: string): LessonView | null {
     concepts: demo.concepts,
     debates: demo.debates,
     sources: demo.sources,
+    images: safeImages(demo.images ?? []),
   }
 }
 
@@ -107,7 +115,7 @@ export function useLesson(slug: string) {
         .maybeSingle()
       if (lessonError) throw lessonError
       const lesson = lessonRow as unknown as { id: string; body: LessonBlock[] } | null
-      const { sections, keyDates, concepts, debates, sources } = blocksToSections(lesson?.body ?? [])
+      const { sections, keyDates, concepts, debates, sources, images } = blocksToSections(lesson?.body ?? [])
       topic.value = {
         id: row.slug,
         lessonId: lesson?.id ?? null,
@@ -125,6 +133,7 @@ export function useLesson(slug: string) {
         concepts,
         debates,
         sources,
+        images,
       }
     } catch (err) {
       console.error('useLesson: no se pudo cargar la lección desde Supabase', err)

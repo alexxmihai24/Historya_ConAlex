@@ -31,6 +31,37 @@ export interface Source {
   note?: string
 }
 
+/** Una imagen de un tema, con su atribución completa.
+ *
+ *  Solo dominio público o licencia libre comprobada una por una (SPEC §14.2).
+ *  `author`, `title`, `year`, `source`, `license` y `url` son obligatorios porque
+ *  varias de esas licencias exigen atribución y porque el pie los muestra. */
+export interface TopicImage {
+  /** Ruta local bajo `/img/`. Se valida con `safeImageSrc` antes de pintarse. */
+  src: string
+  /** Qué se ve en la imagen. No repetir el título del tema. */
+  alt: string
+  width: number
+  height: number
+  /** `portada` sustituye al glifo tipográfico; `figura` va dentro de un apartado. */
+  role: 'portada' | 'figura'
+  /** Índice del apartado tras el que va la figura. Solo para `role: 'figura'`. */
+  section?: number
+  /** Pie descriptivo. La atribución se compone aparte y siempre se muestra. */
+  caption?: string
+  author: string
+  title: string
+  year: string
+  /** Institución o repositorio: Wikimedia Commons, Europeana, Rijksmuseum… */
+  source: string
+  /** Licencia exacta: «Dominio público», «CC BY-SA 4.0»… */
+  license: string
+  /** URL de la ficha original. Se muestra como texto, nunca como enlace ni como src. */
+  url: string
+  /** true solo si es una ilustración sintética. El pie la etiqueta como tal. */
+  generated?: boolean
+}
+
 export interface Topic {
   id: string
   era: Era
@@ -49,6 +80,7 @@ export interface Topic {
   concepts: Concept[]
   debates: Debate[]
   sources: Source[]
+  images?: TopicImage[]
 }
 
 export interface QuizQuestion {

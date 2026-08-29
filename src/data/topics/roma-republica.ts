@@ -1,4 +1,4 @@
-import type { TopicModule } from '../types'
+import type { TopicModule } from '../types.ts'
 
 export const romaRepublica: TopicModule = {
   topic: {

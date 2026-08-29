@@ -12,6 +12,8 @@
 import { readdir, writeFile } from 'node:fs/promises'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { dirname, join } from 'node:path'
+import { imageProblem } from '../src/lib/images.ts'
+import { TOPIC_IMAGES } from '../src/data/topic-images.ts'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const topicsDir = join(root, 'src', 'data', 'topics')
@@ -54,6 +56,24 @@ function checkTopic(topic) {
   if (!COLORS.includes(topic.color)) {
     throw new Error(`${topic.id}: color «${topic.color}» no permitido. Usa uno de: ${COLORS.join(', ')}`)
   }
+  // Las imágenes se validan AL GUARDAR y no solo al pintar (SPEC §10.10 y §14.3).
+  // Aquí es donde el contenido entra en la base de datos, así que una ruta que no
+  // pase la allowlist o una atribución incompleta tienen que parar el seed.
+  for (const image of topic.images ?? []) {
+    const problem = imageProblem(image)
+    if (problem) throw new Error(`${topic.id}: imagen inválida — ${problem}`)
+    if (image.role !== 'portada' && image.role !== 'figura') {
+      throw new Error(`${topic.id}: imagen con role «${image.role}»; solo valen portada y figura`)
+    }
+  }
+  if ((topic.images ?? []).filter((image) => image.role === 'portada').length > 1) {
+    throw new Error(`${topic.id}: hay más de una portada`)
+  }
+}
+
+/** La portada del tema, que sustituye al glifo en la tarjeta de la biblioteca. */
+function coverImage(topic) {
+  return (topic.images ?? []).find((image) => image.role === 'portada') ?? null
 }
 
 /** «Península ibérica» → «peninsula-iberica» */
@@ -77,6 +97,10 @@ async function loadModules() {
       if (isModule(value)) modules.push(value)
     }
   }
+  // Igual que en history.ts: las imágenes viven aparte y se enganchan al tema.
+  for (const module of modules) {
+    module.topic.images = TOPIC_IMAGES[module.topic.id] ?? []
+  }
   return modules
 }
 
@@ -96,6 +120,9 @@ function lessonBody(topic) {
   if (topic.debates?.length) blocks.push({ type: 'debates', items: topic.debates })
   if (topic.keyDates?.length) blocks.push({ type: 'timeline', items: topic.keyDates })
   if (topic.sources?.length) blocks.push({ type: 'sources', items: topic.sources })
+  // Las imágenes viajan como un bloque más, igual que el glosario o la
+  // bibliografía. No hizo falta migración para aquellos y tampoco para estas.
+  if (topic.images?.length) blocks.push({ type: 'images', items: topic.images })
   return blocks
 }
 
@@ -124,6 +151,10 @@ function render(modules) {
   out.push("    where table_schema = 'public' and table_name = 'topics' and column_name = 'period_label') then")
   out.push("    raise exception 'Falta la migración 20260827_content_metadata_and_answer_check.sql. Ejecuta las migraciones de supabase/migrations/ en orden antes que este seed.';")
   out.push('  end if;')
+  out.push("  if not exists (select 1 from information_schema.columns")
+  out.push("    where table_schema = 'public' and table_name = 'topics' and column_name = 'cover_image') then")
+  out.push("    raise exception 'Falta la migración 20260829_topic_cover_image.sql. Ejecuta las migraciones de supabase/migrations/ en orden antes que este seed.';")
+  out.push('  end if;')
   out.push('end $$;')
   out.push('')
 
@@ -144,17 +175,19 @@ function render(modules) {
   out.push('-- 3. Temas -------------------------------------------------------------------')
   for (const { topic } of modules) {
     const minutes = Number.parseInt(topic.duration, 10) || 30
-    out.push(`insert into public.topics (slug, era_id, country_id, title, summary, education_level, estimated_minutes, period_label, glyph, accent_color, published)`)
+    const cover = coverImage(topic)
+    out.push(`insert into public.topics (slug, era_id, country_id, title, summary, education_level, estimated_minutes, period_label, glyph, accent_color, cover_image, published)`)
     out.push(`select ${sql(topic.id)},`)
     out.push(`  (select id from public.eras where slug = ${sql(ERA_SLUG[topic.era])}),`)
     out.push(`  (select id from public.countries where slug = ${sql(slugify(topic.country))}),`)
     out.push(`  ${sql(topic.title)}, ${sql(topic.description)}, ${sql(LEVEL[topic.level])},`)
-    out.push(`  ${minutes}, ${sql(topic.years)}, ${sql(topic.visual)}, ${sql(topic.color)}, true`)
+    out.push(`  ${minutes}, ${sql(topic.years)}, ${sql(topic.visual)}, ${sql(topic.color)}, ${cover ? jsonb(cover) : 'null'}, true`)
     out.push('on conflict (slug) do update set')
     out.push('  era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,')
     out.push('  summary = excluded.summary, education_level = excluded.education_level,')
     out.push('  estimated_minutes = excluded.estimated_minutes, period_label = excluded.period_label,')
-    out.push('  glyph = excluded.glyph, accent_color = excluded.accent_color, published = excluded.published;')
+    out.push('  glyph = excluded.glyph, accent_color = excluded.accent_color,')
+    out.push('  cover_image = excluded.cover_image, published = excluded.published;')
     out.push('')
   }
 

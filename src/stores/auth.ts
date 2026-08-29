@@ -1,6 +1,6 @@
 import type { User } from '@supabase/supabase-js'
 import { defineStore } from 'pinia'
-import { isSupabaseConfigured, supabase } from '../lib/supabase'
+import { isSupabaseConfigured, supabase } from '../lib/supabase.ts'
 
 let authListenerAttached = false
 

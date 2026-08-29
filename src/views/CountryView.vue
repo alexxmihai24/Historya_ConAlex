@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
-import { eraColor, eras, findTopic, quizQuestions } from '../data/history'
-import { useTopics } from '../composables/useTopics'
-import { atlasCountries, coveredCountries } from '../lib/regions'
+import { eraColor, eras, findTopic, quizQuestions } from '../data/history.ts'
+import { useTopics } from '../composables/useTopics.ts'
+import { atlasCountries, coveredCountries } from '../lib/regions.ts'
+import CountryFlag from '../components/CountryFlag.vue'
 import '../lib/globe.js'
 
 const route = useRoute()
@@ -75,6 +76,7 @@ const otherCountries = computed(() =>
       <div class="country-hero-main">
         <div>
           <p class="eyebrow">Ficha de país</p>
+          <CountryFlag class="country-hero-flag" :country="country" size="lg" />
           <h1>{{ country }}</h1>
           <p class="country-lead">{{ countryTopics[0].description }}</p>
         </div>

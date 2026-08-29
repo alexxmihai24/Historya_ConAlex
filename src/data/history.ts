@@ -1,36 +1,53 @@
-import type { Era, QuizQuestion, Topic, TopicModule } from './types'
-import { prehistoria } from './topics/prehistoria'
-import { mesopotamia } from './topics/mesopotamia'
-import { egipto } from './topics/egipto'
-import { grecia } from './topics/grecia'
-import { helenismo } from './topics/helenismo'
-import { romaRepublica } from './topics/roma-republica'
-import { romaImperio } from './topics/roma-imperio'
-import { bizancio } from './topics/bizancio'
-import { islam } from './topics/islam'
-import { feudalismo } from './topics/feudalismo'
-import { andalus } from './topics/andalus'
-import { plenaEdadMedia } from './topics/plena-edad-media'
-import { crisisSigloXiv } from './topics/crisis-siglo-xiv'
-import { renacimiento } from './topics/renacimiento'
-import { descubrimientos } from './topics/descubrimientos'
-import { reforma } from './topics/reforma'
-import { absolutismo } from './topics/absolutismo'
-import { revolucionCientifica } from './topics/revolucion-cientifica'
-import { ilustracion } from './topics/ilustracion'
-import { revolucionFrancesa } from './topics/revolucion-francesa'
-import { industrializacion } from './topics/industrializacion'
-import { revolucionesLiberales } from './topics/revoluciones-liberales'
-import { imperialismo } from './topics/imperialismo'
-import { granGuerra } from './topics/gran-guerra'
-import { revolucionRusa } from './topics/revolucion-rusa'
+import type { Era, QuizQuestion, Topic, TopicModule } from './types.ts'
+import { prehistoria } from './topics/prehistoria.ts'
+import { mesopotamia } from './topics/mesopotamia.ts'
+import { egipto } from './topics/egipto.ts'
+import { grecia } from './topics/grecia.ts'
+import { helenismo } from './topics/helenismo.ts'
+import { romaRepublica } from './topics/roma-republica.ts'
+import { romaImperio } from './topics/roma-imperio.ts'
+import { bizancio } from './topics/bizancio.ts'
+import { islam } from './topics/islam.ts'
+import { feudalismo } from './topics/feudalismo.ts'
+import { andalus } from './topics/andalus.ts'
+import { plenaEdadMedia } from './topics/plena-edad-media.ts'
+import { crisisSigloXiv } from './topics/crisis-siglo-xiv.ts'
+import { renacimiento } from './topics/renacimiento.ts'
+import { descubrimientos } from './topics/descubrimientos.ts'
+import { reforma } from './topics/reforma.ts'
+import { absolutismo } from './topics/absolutismo.ts'
+import { revolucionCientifica } from './topics/revolucion-cientifica.ts'
+import { ilustracion } from './topics/ilustracion.ts'
+import { revolucionFrancesa } from './topics/revolucion-francesa.ts'
+import { industrializacion } from './topics/industrializacion.ts'
+import { revolucionesLiberales } from './topics/revoluciones-liberales.ts'
+import { imperialismo } from './topics/imperialismo.ts'
+import { granGuerra } from './topics/gran-guerra.ts'
+import { revolucionRusa } from './topics/revolucion-rusa.ts'
+import { entreguerras } from './topics/entreguerras.ts'
+import { segundaGuerra } from './topics/segunda-guerra.ts'
+import { guerraFria } from './topics/guerra-fria.ts'
+import { espanaSigloXx } from './topics/espana-siglo-xx.ts'
+import { mundoActual } from './topics/mundo-actual.ts'
+import { chinaImperial } from './topics/china-imperial.ts'
+import { india } from './topics/india.ts'
+import { japon } from './topics/japon.ts'
+import { africa } from './topics/africa.ts'
+import { americaPrecolombina } from './topics/america-precolombina.ts'
+import { TOPIC_IMAGES } from './topic-images.ts'
 
-export type { Era, EducationLevel, StudySection, Concept, Topic, QuizQuestion, TopicModule } from './types'
+export type { Era, EducationLevel, StudySection, Concept, Topic, QuizQuestion, TopicModule } from './types.ts'
 
 /** Orden de lectura de la biblioteca. Un módulo por tema. */
-const modules: TopicModule[] = [prehistoria, mesopotamia, egipto, grecia, helenismo, romaRepublica, romaImperio, bizancio, islam, feudalismo, andalus, plenaEdadMedia, crisisSigloXiv, renacimiento, descubrimientos, reforma, absolutismo, revolucionCientifica, ilustracion, revolucionFrancesa, industrializacion, revolucionesLiberales, imperialismo, granGuerra, revolucionRusa]
+const modules: TopicModule[] = [prehistoria, mesopotamia, egipto, grecia, helenismo, romaRepublica, romaImperio, bizancio, islam, feudalismo, andalus, plenaEdadMedia, crisisSigloXiv, renacimiento, descubrimientos, reforma, absolutismo, revolucionCientifica, ilustracion, revolucionFrancesa, industrializacion, revolucionesLiberales, imperialismo, granGuerra, revolucionRusa, entreguerras, segundaGuerra, guerraFria, espanaSigloXx, mundoActual, chinaImperial, india, japon, africa, americaPrecolombina]
 
-export const topics: Topic[] = modules.map((module) => module.topic)
+/* Las imágenes se enganchan aquí y no dentro de cada archivo de tema: se
+   generan desde `scripts/images.json` y su licencia se revisa por su cuenta,
+   así que una imagen se puede sustituir sin tocar el texto de la lección. */
+export const topics: Topic[] = modules.map((module) => ({
+  ...module.topic,
+  images: TOPIC_IMAGES[module.topic.id] ?? [],
+}))
 
 export const quizQuestions: QuizQuestion[] = modules.flatMap((module) => module.questions)
 

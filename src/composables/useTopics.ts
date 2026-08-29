@@ -1,6 +1,8 @@
 import { ref } from 'vue'
-import { supabase } from '../lib/supabase'
-import { topics as demoTopics } from '../data/history'
+import { supabase } from '../lib/supabase.ts'
+import { topics as demoTopics } from '../data/history.ts'
+import type { Topic, TopicImage } from '../data/types.ts'
+import { safeImage } from '../lib/images.ts'
 
 export type DbEducationLevel = 'eso' | 'bachillerato' | 'universidad' | 'curioso'
 export type EducationLevel = 'ESO' | 'Bachillerato' | 'Universidad' | 'Curioso'
@@ -18,7 +20,7 @@ export function mapEducationLevel(level: DbEducationLevel): EducationLevel {
 
 /** Columns shared by useTopics and useLesson when reading the `topics` table. */
 export const TOPIC_SELECT =
-  'id, slug, title, summary, education_level, estimated_minutes, period_label, glyph, accent_color, eras(title), countries(title)'
+  'id, slug, title, summary, education_level, estimated_minutes, period_label, glyph, accent_color, cover_image, eras(title), countries(title)'
 
 export interface RawTopicRow {
   id: string
@@ -30,6 +32,7 @@ export interface RawTopicRow {
   period_label: string | null
   glyph: string | null
   accent_color: string | null
+  cover_image: unknown
   eras: { title: string } | null
   countries: { title: string } | null
 }
@@ -46,6 +49,8 @@ export interface TopicCard {
   progress: number
   visual: string
   color: string
+  /** Portada validada, o null si el tema no tiene o la que hay no es de fiar. */
+  cover: TopicImage | null
 }
 
 export function mapTopicRow(row: RawTopicRow): TopicCard {
@@ -61,16 +66,28 @@ export function mapTopicRow(row: RawTopicRow): TopicCard {
     progress: 0,
     visual: row.glyph ?? '◆',
     color: row.accent_color ?? 'gold',
+    // Nunca se pinta una `src` de la base de datos sin validarla (SPEC §10.10).
+    cover: safeImage(row.cover_image),
   }
 }
 
+/** Los temas del repositorio, con la misma forma que los que vienen de Supabase. */
+function mapDemoTopic(topic: Topic): TopicCard {
+  return {
+    ...topic,
+    cover: safeImage(topic.images?.find((image) => image.role === 'portada')),
+  }
+}
+
+const demoCards: TopicCard[] = demoTopics.map(mapDemoTopic)
+
 export function useTopics() {
-  const topics = ref<TopicCard[]>(demoTopics)
+  const topics = ref<TopicCard[]>(demoCards)
   const isLoading = ref(Boolean(supabase))
 
   async function load() {
     if (!supabase) {
-      topics.value = demoTopics
+      topics.value = demoCards
       isLoading.value = false
       return
     }
@@ -81,7 +98,7 @@ export function useTopics() {
       topics.value = ((data ?? []) as unknown as RawTopicRow[]).map(mapTopicRow)
     } catch (err) {
       console.error('useTopics: no se pudo cargar el catálogo desde Supabase', err)
-      topics.value = demoTopics
+      topics.value = demoCards
     } finally {
       isLoading.value = false
     }
