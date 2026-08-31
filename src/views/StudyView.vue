@@ -4,6 +4,7 @@ import { RouterLink, useRoute } from 'vue-router'
 import { useLesson } from '../composables/useLesson.ts'
 import { useProgress } from '../composables/useProgress.ts'
 import { imageCredit } from '../lib/images.ts'
+import type { Concept, TopicImage } from '../data/types.ts'
 
 const route = useRoute()
 const { topic, isLoading } = useLesson(String(route.params.topicId))
@@ -26,6 +27,63 @@ const cover = computed(() => topic.value?.images.find((image) => image.role === 
 /** Figuras de un apartado. `section` es el índice del apartado tras el que van. */
 function figuresOf(index: number) {
   return (topic.value?.images ?? []).filter((image) => image.role === 'figura' && image.section === index)
+}
+
+/** Conceptos explicados al margen, como en un libro de texto: cada término va
+ *  junto al apartado donde aparece por primera vez, y solo una vez en toda la
+ *  lección. Los que no encajan en ningún apartado siguen estando en el
+ *  glosario del final, que no se toca. */
+const marginNotes = computed(() => {
+  const bySection = new Map<number, Concept[]>()
+  const used = new Set<string>()
+  const sections = topic.value?.sections ?? []
+  for (const [index, section] of sections.entries()) {
+    const haystack = `${section.title} ${section.body}`.toLowerCase()
+    for (const concept of topic.value?.concepts ?? []) {
+      if (used.has(concept.term)) continue
+      if (!haystack.includes(concept.term.toLowerCase())) continue
+      const notes = bySection.get(index) ?? []
+      // Dos por apartado como mucho: más convierte el margen en otro muro de texto.
+      if (notes.length >= 2) continue
+      used.add(concept.term)
+      bySection.set(index, [...notes, concept])
+    }
+  }
+  return bySection
+})
+
+type Block =
+  | { kind: 'p'; key: string; text: string }
+  | { kind: 'fig'; key: string; side: 'left' | 'right'; image: TopicImage }
+  | { kind: 'note'; key: string; side: 'left' | 'right'; concept: Concept }
+
+/** Los bloques de un apartado en orden de lectura. Las figuras y las notas de
+ *  margen se reparten entre los párrafos, alternando lado, en vez de caer todas
+ *  al final: es la diferencia entre una página de libro y un muro de texto. */
+function blocksOf(index: number): Block[] {
+  const paragraphList = paragraphs(topic.value?.sections[index]?.body ?? '')
+  type Floating =
+    | { kind: 'fig'; key: string; image: TopicImage }
+    | { kind: 'note'; key: string; concept: Concept }
+  const pending: Floating[] = [
+    ...figuresOf(index).map((image) => ({ kind: 'fig' as const, key: image.src, image })),
+    ...(marginNotes.value.get(index) ?? []).map((concept) => ({ kind: 'note' as const, key: concept.term, concept })),
+  ]
+  const blocks: Block[] = []
+  let placed = 0
+  const place = () => {
+    const next = pending.shift()
+    if (!next) return
+    const side = placed++ % 2 === 0 ? ('right' as const) : ('left' as const)
+    blocks.push({ ...next, side })
+  }
+  paragraphList.forEach((text, position) => {
+    blocks.push({ kind: 'p', key: `p${position}`, text })
+    // Uno cada dos párrafos, empezando por el segundo.
+    if (position % 2 === 1) place()
+  })
+  while (pending.length) place()
+  return blocks
 }
 
 function scrollToSection(index: number) {
@@ -67,15 +125,23 @@ function scrollToSection(index: number) {
         <div class="lesson-intro"><span class="drop-cap">{{ topic.title.charAt(0) }}</span><p>{{ topic.summary }}</p></div>
         <section v-for="(section, index) in topic.sections" :id="`section-${index}`" :key="section.title" class="lesson-section">
           <p class="section-index">{{ String(index + 1).padStart(2, '0') }}</p><h2>{{ section.title }}</h2>
-          <p v-for="(paragraph, paragraphIndex) in paragraphs(section.body)" :key="paragraphIndex">{{ paragraph }}</p>
+          <div class="lesson-flow">
+            <template v-for="block in blocksOf(index)" :key="block.key">
+              <p v-if="block.kind === 'p'">{{ block.text }}</p>
+              <figure v-else-if="block.kind === 'fig'" class="lesson-figure" :class="`float-${block.side}`">
+                <img :src="block.image.src" :alt="block.image.alt" :width="block.image.width" :height="block.image.height" loading="lazy" decoding="async" />
+                <figcaption>
+                  <span v-if="block.image.caption">{{ block.image.caption }}</span>
+                  <small>{{ imageCredit(block.image) }}<template v-if="block.image.generated"> · Ilustración generada, no es un documento histórico</template></small>
+                </figcaption>
+              </figure>
+              <aside v-else class="margin-note" :class="`float-${block.side}`">
+                <p class="margin-note-term">{{ block.concept.term }}</p>
+                <p class="margin-note-text">{{ block.concept.definition }}</p>
+              </aside>
+            </template>
+          </div>
           <aside v-if="section.callout" class="history-callout"><span>✦</span><p>{{ section.callout }}</p></aside>
-          <figure v-for="figure in figuresOf(index)" :key="figure.src" class="lesson-figure">
-            <img :src="figure.src" :alt="figure.alt" :width="figure.width" :height="figure.height" loading="lazy" decoding="async" />
-            <figcaption>
-              <span v-if="figure.caption">{{ figure.caption }}</span>
-              <small>{{ imageCredit(figure) }}<template v-if="figure.generated"> · Ilustración generada, no es un documento histórico</template></small>
-            </figcaption>
-          </figure>
           <button class="section-complete" type="button" :class="{ complete: completedSections.includes(index) }" @click="toggleSection(index)">{{ completedSections.includes(index) ? '✓ Apartado completado' : 'Marcar como leído' }}</button>
         </section>
 

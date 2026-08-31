@@ -1,7 +1,12 @@
 # Especificación del producto · Historya con Alex
 
-**Última actualización:** 29 de agosto de 2026
-**Estado:** temario completo a nivel universitario: 35 temas y 555 preguntas. Rediseño «Atlas Nocturno» implantado. Banderas e imágenes de tema en producción. **Supabase conectado; falta ejecutar la migración `20260829_topic_cover_image.sql` y volver a lanzar el seed.**
+**Última actualización:** 31 de agosto de 2026
+**Estado:** temario completo a nivel universitario: 35 temas y 555 preguntas. Rediseño «Atlas Nocturno» implantado, con la lección remaquetada como página de libro de texto. Manifiesto de 145 imágenes con licencia comprobada; 85 descargadas. **Pendiente: terminar `npm run images`, ejecutar la migración `20260829_topic_cover_image.sql` y volver a lanzar el seed.**
+
+> **Tres carencias que el cliente señaló el 31/08/2026 y que esta especificación no cubría.**
+> 1. **El nivel educativo no está implementado.** `EducationLevel` admite `ESO`, `Bachillerato` y `Universidad`, pero los 35 temas están en `Universidad`: el filtro de la biblioteca devuelve cero resultados para los otros dos. El cliente quiere **un temario propio por nivel**, con profundidad creciente, no el mismo texto filtrado. Es contenido nuevo por escribir y no está planificado en §12.
+> 2. **La lección era un muro de texto.** Corregido en parte el 31/08: figuras intercaladas y conceptos al margen (§14.6). Falta el documento comentado.
+> 3. **120 de los 142 países del atlas no tienen ficha.** §7 describe `/pais/:country` pero solo 22 países se encienden. Ver §14.7.
 
 ## 1. Visión
 
@@ -421,6 +426,20 @@ Las reglas 9 y 10 de §10 nacen aquí. En concreto:
 
 ~~`src/components/HelloWorld.vue` y `src/assets/{hero.png, vite.svg, vue.svg}`~~
 Borrados el 29/08/2026 junto con la carpeta `src/assets/`.
+
+### 14.6 Maquetado de la lección (31/08/2026)
+
+La lección se lee como una página de libro de texto, no como un bloque de párrafos:
+
+- **Figuras intercaladas.** Una cada dos párrafos, alternando izquierda y derecha, con el texto rodeándolas a partir de 900 px de ancho y apiladas a una columna por debajo. Antes se pintaban todas seguidas al final del apartado, detrás del texto.
+- **Conceptos al margen.** Cada término del glosario aparece explicado en un recuadro lateral junto al párrafo donde sale por primera vez, una sola vez en toda la lección y dos por apartado como mucho. No es contenido nuevo: son los `concepts[]` que ya existían, y el glosario del final se mantiene. Cubre 173 de los 208 apartados.
+- **Tres figuras por tema** declaradas en `scripts/images.json`: 145 entradas en total.
+
+**Lo que falta para que sea del todo un libro de texto:** el **documento comentado**, un extracto de fuente primaria en recuadro con una pregunta. `Source` guarda autor, título, año y nota, pero no el texto: hace falta un campo nuevo y escribir el extracto tema a tema.
+
+### 14.7 Fichas de país que faltan
+
+De los 142 países del atlas solo se encienden 22, y 17 de los 35 temas tienen `country` = «Europa» o «Mundo», que no apuntan a ningún país. La vía es **Wikidata, que es CC0** y por tanto no arrastra el problema de licencia que descartó el texto de Wikipedia (§13): da capital, población, superficie y cronología por país sin condiciones de share-alike.
 
 ### 14.5 Lo que queda
 

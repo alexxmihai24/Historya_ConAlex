@@ -84,8 +84,10 @@ async function pedirInfo(titulos) {
 
 const dormir = (ms) => new Promise((listo) => setTimeout(listo, ms))
 
-/** Commons devuelve 429 si se le piden archivos demasiado seguidos. Se espera y
- *  se reintenta con retardo creciente en vez de abandonar a medias. */
+/** Commons devuelve 429 si se le piden archivos demasiado seguidos, y el bloqueo
+ *  dura minutos, no segundos: con esperas cortas el script abandonaba a medias.
+ *  Se respeta `Retry-After` cuando viene, y si no, retardo creciente hasta unos
+ *  siete minutos en total. */
 async function descargar(url, destino) {
   for (let intento = 0; intento < 6; intento += 1) {
     const respuesta = await fetch(url, { headers: { 'User-Agent': UA } })
@@ -96,7 +98,8 @@ async function descargar(url, destino) {
     if (respuesta.status !== 429 && respuesta.status < 500) {
       throw new Error(`descarga ${respuesta.status}`)
     }
-    await dormir(5000 * (intento + 1))
+    const pedido = Number(respuesta.headers.get('retry-after'))
+    await dormir(Number.isFinite(pedido) && pedido > 0 ? pedido * 1000 : 20000 * (intento + 1))
   }
   throw new Error('descarga: 429 tras seis intentos. Vuelve a lanzar `npm run images`: lo ya descargado no se repite.')
 }
@@ -115,6 +118,11 @@ for (let i = 0; i < titulos.length; i += 40) {
 
 const porTema = new Map()
 const rechazadas = []
+/* Commons corta la tanda tras muchas descargas seguidas y el bloqueo dura
+   minutos. Al primer corte se deja de pedir archivos, pero lo ya descargado se
+   registra igual: antes, un solo fallo tiraba la ejecución entera y se perdía
+   todo el trabajo. Volver a lanzar `npm run images` recoge lo que falte. */
+let cortado = false
 
 for (const entrada of manifiesto) {
   const datos = info.get(entrada.file)
@@ -137,8 +145,19 @@ for (const entrada of manifiesto) {
   // Idempotente: si el archivo ya está, no se vuelve a pedir. Así una ejecución
   // interrumpida se retoma sin castigar de nuevo a los servidores de Commons.
   if (!(await existe(destino))) {
-    await descargar(datos.thumburl.split('?')[0], destino)
-    await dormir(1500)
+    if (cortado) {
+      rechazadas.push(`${entrada.file}: pendiente, Commons cortó la tanda`)
+      continue
+    }
+    try {
+      await descargar(datos.thumburl.split('?')[0], destino)
+    } catch (error) {
+      cortado = true
+      rechazadas.push(`${entrada.file}: ${error.message}`)
+      continue
+    }
+    // 3 s entre archivos. Con 1,5 s, Commons bloqueaba a las ochenta descargas.
+    await dormir(3000)
   }
 
   const imagen = {
