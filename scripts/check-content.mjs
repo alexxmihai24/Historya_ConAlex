@@ -23,6 +23,8 @@ import { dirname, join } from 'node:path'
 import { safeImageSrc, imageProblem } from '../src/lib/images.ts'
 import { multiplierFor, pointsFor, BASE_POINTS, TIME_BONUS, MAX_MULTIPLIER, SECONDS_PER_QUESTION } from '../src/lib/scoring.ts'
 import { shuffled } from '../src/lib/shuffle.ts'
+import { bodyForLevel, levelsOf, sectionsForLevel, showsDebates, showsSources } from '../src/lib/levels.ts'
+import { TOPIC_LEVELS } from '../src/data/levels/index.ts'
 import { FLAG_CODES, flagCodeByNumericId } from '../src/lib/country-codes.ts'
 import { topics, quizQuestions, eras } from '../src/data/history.ts'
 import { flagCode } from '../src/lib/country-names.ts'
@@ -109,6 +111,46 @@ for (const [posicion, veces] of reparto.entries()) {
   // 1000 esperadas de 4000. Un margen del 30 % deja pasar la variación normal y
   // sigue cazando un barajado que no baraja.
   ok(veces > 700 && veces < 1300, `la opción «b» cae ${veces} de 4000 veces en la posición ${posicion}`)
+}
+
+// 2.c Niveles educativos ----------------------------------------------------
+const apartadosDemo = [
+  { title: 'Uno', body: 'universidad', bodyEso: 'eso', bodyBachillerato: 'bach' },
+  { title: 'Dos', body: 'universidad' },
+  { title: 'Tres', body: 'universidad', bodyEso: '   ' },
+]
+ok(bodyForLevel(apartadosDemo[0], 'ESO') === 'eso', 'un apartado con texto de ESO lo devuelve')
+ok(bodyForLevel(apartadosDemo[1], 'ESO') === null, 'un apartado sin texto de ESO no se da en ESO')
+ok(bodyForLevel(apartadosDemo[2], 'ESO') === null, 'un texto en blanco cuenta como no dado')
+ok(bodyForLevel(apartadosDemo[1], 'Universidad') === 'universidad', 'Universidad usa siempre el texto base')
+ok(sectionsForLevel(apartadosDemo, 'ESO').length === 1, 'en ESO solo se lee el apartado que tiene texto de ESO')
+ok(sectionsForLevel(apartadosDemo, 'Universidad').length === 3, 'en Universidad se leen todos los apartados')
+// El índice tiene que ser el del temario completo: las figuras y el progreso
+// guardado apuntan a él. Si se renumerase, una figura saldría en otro apartado.
+ok(sectionsForLevel(apartadosDemo, 'Bachillerato')[0].index === 0, 'el índice es el del temario completo')
+ok(levelsOf(apartadosDemo).join() === 'ESO,Bachillerato,Universidad', 'los tres niveles están disponibles')
+ok(levelsOf([{ title: 'x', body: 'y' }]).join() === 'Universidad', 'sin textos de nivel solo hay Universidad')
+ok(levelsOf([]).length === 0, 'un tema sin apartados no está disponible en ningún nivel')
+ok(showsDebates('Universidad') && !showsDebates('Bachillerato') && !showsDebates('ESO'), 'el debate historiográfico es solo de Universidad')
+ok(showsSources('Universidad') && showsSources('Bachillerato') && !showsSources('ESO'), 'la bibliografía entra en Bachillerato')
+
+// Un texto de nivel en una posición que no existe se perdería en silencio, y el
+// tema aparecería en la biblioteca en un nivel que luego sale vacío.
+for (const [slug, niveles] of Object.entries(TOPIC_LEVELS)) {
+  const tema = topics.find((topic) => topic.id === slug)
+  ok(tema !== undefined, `src/data/levels/${slug}.ts no corresponde a ningún tema`)
+  if (!tema) continue
+  for (const nombre of ['eso', 'bachillerato']) {
+    const textos = niveles[nombre]
+    if (!textos) continue
+    ok(
+      textos.length <= tema.sections.length,
+      `${slug}: ${textos.length} textos de ${nombre} para ${tema.sections.length} apartados`,
+    )
+  }
+}
+for (const topic of topics) {
+  ok(levelsOf(topic.sections).includes('Universidad'), `${topic.id}: todo tema debe poder leerse en Universidad`)
 }
 
 // 3. Filtros de la biblioteca ----------------------------------------------

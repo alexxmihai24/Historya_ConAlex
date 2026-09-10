@@ -3,10 +3,19 @@ import { supabase } from '../lib/supabase.ts'
 import { findTopic } from '../data/history.ts'
 import type { Concept, Debate, Source, TopicImage } from '../data/types.ts'
 import { safeImages } from '../lib/images.ts'
-import { TOPIC_SELECT, mapEducationLevel, type RawTopicRow, type EducationLevel } from './useTopics.ts'
+import { TOPIC_SELECT, TOPIC_SELECT_SIN_LEVELS, mapEducationLevel, type RawTopicRow, type EducationLevel } from './useTopics.ts'
 
 export type LessonBlock =
-  | { type: 'section'; title: string; text: string; callout?: string | null }
+  | {
+      type: 'section'
+      title: string
+      /** Texto de Universidad: el nivel al que se escribió el temario. */
+      text: string
+      /** Mismo apartado para ESO y Bachillerato. Ausentes = no se da en ese nivel. */
+      textEso?: string | null
+      textBachillerato?: string | null
+      callout?: string | null
+    }
   | { type: 'timeline'; items: Array<{ date: string; event: string }> }
   | { type: 'concepts'; items: Concept[] }
   | { type: 'debates'; items: Debate[] }
@@ -16,6 +25,8 @@ export type LessonBlock =
 export interface StudySectionUI {
   title: string
   body: string
+  bodyEso?: string
+  bodyBachillerato?: string
   callout?: string
 }
 
@@ -53,7 +64,14 @@ function blocksToSections(body: LessonBlock[]) {
   const sources: Source[] = []
   let images: TopicImage[] = []
   for (const block of body) {
-    if (block.type === 'section') sections.push({ title: block.title, body: block.text, callout: block.callout ?? undefined })
+    if (block.type === 'section')
+      sections.push({
+        title: block.title,
+        body: block.text,
+        bodyEso: block.textEso ?? undefined,
+        bodyBachillerato: block.textBachillerato ?? undefined,
+        callout: block.callout ?? undefined,
+      })
     else if (block.type === 'timeline') keyDates.push(...block.items)
     else if (block.type === 'concepts') concepts.push(...block.items)
     else if (block.type === 'debates') debates.push(...block.items)
@@ -79,7 +97,13 @@ function mapDemoLesson(slug: string): LessonView | null {
     visual: demo.visual,
     color: demo.color,
     summary: demo.summary,
-    sections: demo.sections.map((section) => ({ title: section.title, body: section.body, callout: section.callout })),
+    sections: demo.sections.map((section) => ({
+      title: section.title,
+      body: section.body,
+      bodyEso: section.bodyEso,
+      bodyBachillerato: section.bodyBachillerato,
+      callout: section.callout,
+    })),
     keyDates: demo.keyDates,
     concepts: demo.concepts,
     debates: demo.debates,
@@ -100,7 +124,11 @@ export function useLesson(slug: string) {
     }
     isLoading.value = true
     try {
-      const { data: topicRow, error: topicError } = await supabase.from('topics').select(TOPIC_SELECT).eq('slug', slug).maybeSingle()
+      let { data: topicRow, error: topicError } = await supabase.from('topics').select(TOPIC_SELECT).eq('slug', slug).maybeSingle()
+      if (topicError) {
+        // Sin la migración 20260910 la columna `levels` no existe todavía.
+        ;({ data: topicRow, error: topicError } = await supabase.from('topics').select(TOPIC_SELECT_SIN_LEVELS).eq('slug', slug).maybeSingle())
+      }
       if (topicError) throw topicError
       const row = topicRow as unknown as RawTopicRow | null
       if (!row) {

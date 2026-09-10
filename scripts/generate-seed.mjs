@@ -18,6 +18,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import { dirname, join } from 'node:path'
 import { imageProblem } from '../src/lib/images.ts'
 import { TOPIC_IMAGES } from '../src/data/topic-images.ts'
+import { levelsOf } from '../src/lib/levels.ts'
+import { sectionsWithLevels } from '../src/data/levels/index.ts'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const topicsDir = join(root, 'src', 'data', 'topics')
@@ -48,6 +50,15 @@ const ERAS = [
 ]
 
 const LEVEL = { ESO: 'eso', Bachillerato: 'bachillerato', Universidad: 'universidad' }
+
+/* Los niveles en los que un tema se puede leer se DERIVAN de sus apartados, con
+   la misma función que usa el navegador. Escribirlos a mano en el archivo de
+   tema sería un segundo sitio donde equivocarse: bastaría añadir un apartado
+   sin texto de ESO para que la biblioteca ofreciera un nivel que no existe. */
+function levelArray(topic) {
+  const niveles = levelsOf(topic.sections).map((nivel) => sql(LEVEL[nivel]))
+  return `array[${niveles.join(', ')}]::public.education_level[]`
+}
 
 // Deben coincidir con el check de accent_color en supabase/migrations/ y con las
 // clases .visual-* de src/style.css. Un color fuera de esta lista rompía el seed
@@ -101,9 +112,11 @@ async function loadModules() {
       if (isModule(value)) modules.push(value)
     }
   }
-  // Igual que en history.ts: las imágenes viven aparte y se enganchan al tema.
+  // Igual que en history.ts, y con las mismas funciones: las imágenes y los
+  // textos de ESO y Bachillerato viven aparte y se enganchan al tema.
   for (const module of modules) {
     module.topic.images = TOPIC_IMAGES[module.topic.id] ?? []
+    module.topic.sections = sectionsWithLevels(module.topic.id, module.topic.sections)
   }
   return modules
 }
@@ -118,6 +131,11 @@ function lessonBody(topic) {
     type: 'section',
     title: section.title,
     text: section.body,
+    // Los textos de ESO y Bachillerato viajan en el mismo bloque que el
+    // universitario, no en columnas nuevas: es el mismo apartado contado con
+    // otra profundidad. `null` = ese apartado no se da en ese nivel.
+    textEso: section.bodyEso ?? null,
+    textBachillerato: section.bodyBachillerato ?? null,
     callout: section.callout ?? null,
   }))
   if (topic.concepts?.length) blocks.push({ type: 'concepts', items: topic.concepts })
@@ -188,15 +206,17 @@ function sentenciasCatalogo(modules, countries) {
     fuera.push(
       [
         `-- Tema: ${topic.id}`,
-        'insert into public.topics (slug, era_id, country_id, title, summary, education_level, estimated_minutes, period_label, glyph, accent_color, cover_image, published)',
+        'insert into public.topics (slug, era_id, country_id, title, summary, education_level, levels, estimated_minutes, period_label, glyph, accent_color, cover_image, published)',
         `select ${sql(topic.id)},`,
         `  (select id from public.eras where slug = ${sql(ERA_SLUG[topic.era])}),`,
         `  (select id from public.countries where slug = ${sql(slugify(topic.country))}),`,
         `  ${sql(topic.title)}, ${sql(topic.description)}, ${sql(LEVEL[topic.level])},`,
+        `  ${levelArray(topic)},`,
         `  ${minutes}, ${sql(topic.years)}, ${sql(topic.visual)}, ${sql(topic.color)}, ${cover ? jsonb(cover) : 'null'}, true`,
         'on conflict (slug) do update set',
         '  era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,',
         '  summary = excluded.summary, education_level = excluded.education_level,',
+        '  levels = excluded.levels,',
         '  estimated_minutes = excluded.estimated_minutes, period_label = excluded.period_label,',
         '  glyph = excluded.glyph, accent_color = excluded.accent_color,',
         '  cover_image = excluded.cover_image, published = excluded.published;',

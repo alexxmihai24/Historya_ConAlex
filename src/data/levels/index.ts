@@ -1,0 +1,35 @@
+/* Textos de ESO y Bachillerato, un archivo por tema.
+ *
+ * Viven aparte de `src/data/topics/` a propósito, por el mismo motivo que las
+ * imágenes: un archivo de tema son ya 400 líneas, y el temario de cada nivel se
+ * escribe y se revisa por su cuenta. `history.ts` los engancha a los apartados.
+ *
+ * Un tema que no aparezca en esta tabla existe solo en Universidad, que es como
+ * se escribió el temario. No es un error: es la cola de trabajo editorial.
+ *
+ * Al añadir un tema hay que importarlo aquí y comprobar que su array tiene la
+ * misma longitud que `sections`. `npm test` lo verifica.
+ */
+
+import type { StudySection, TopicLevels } from '../types.ts'
+import { prehistoria } from './prehistoria.ts'
+
+export const TOPIC_LEVELS: Record<string, TopicLevels> = {
+  prehistoria,
+}
+
+/** Los apartados de un tema con sus textos de ESO y Bachillerato enganchados.
+ *
+ *  Está aquí, y no repetida en `history.ts` y en `scripts/generate-seed.mjs`,
+ *  porque las dos la necesitan: el navegador para pintar la lección y el seed
+ *  para escribirla en la base de datos. Con dos copias, bastaba olvidarse de una
+ *  para que la web ofreciera un nivel que la base de datos no tenía. */
+export function sectionsWithLevels(topicId: string, sections: StudySection[]): StudySection[] {
+  const levels = TOPIC_LEVELS[topicId]
+  if (!levels) return sections
+  return sections.map((section, index) => ({
+    ...section,
+    bodyEso: levels.eso?.[index] || undefined,
+    bodyBachillerato: levels.bachillerato?.[index] || undefined,
+  }))
+}

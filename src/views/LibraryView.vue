@@ -9,11 +9,14 @@ const { topics, isLoading } = useTopics()
 const selectedEra = ref<Era | 'Todas'>('Todas')
 const selectedLevel = ref<'Todos' | 'ESO' | 'Bachillerato' | 'Universidad'>('Todos')
 
+/* Se filtra por los niveles en los que el tema SE PUEDE LEER, no por el nivel
+   al que está escrito. Comparar con `topic.level` era el motivo de que ESO y
+   Bachillerato devolvieran cero resultados: los 35 temas son de Universidad. */
 const filteredTopics = computed(() =>
   topics.value.filter(
     (topic) =>
       (selectedEra.value === 'Todas' || topic.era === selectedEra.value) &&
-      (selectedLevel.value === 'Todos' || topic.level === selectedLevel.value),
+      (selectedLevel.value === 'Todos' || topic.levels.includes(selectedLevel.value)),
   ),
 )
 
@@ -78,6 +81,9 @@ const totalProgress = computed(() => {
 
     <p class="results-count">
       {{ isLoading ? 'Cargando temas…' : `${filteredTopics.length} lecciones` }}
+      <template v-if="!isLoading && !filteredTopics.length && selectedLevel !== 'Todos'">
+        · todavía no hay temas adaptados a {{ selectedLevel }} en este filtro.
+      </template>
     </p>
 
     <div class="library-grid">
@@ -109,7 +115,9 @@ const totalProgress = computed(() => {
           </div>
           <span class="progress-line"><i :style="{ width: `${topic.progress}%` }"></i></span>
           <div class="library-card-footer">
-            <span class="level-tag">{{ topic.level }}</span>
+            <span class="level-tag-group">
+              <span v-for="level in topic.levels" :key="level" class="level-tag">{{ level }}</span>
+            </span>
             <span class="card-cta">{{ topic.progress ? 'Seguir' : 'Empezar' }} →</span>
           </div>
         </div>

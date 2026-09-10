@@ -4,7 +4,8 @@ import { RouterLink, useRoute } from 'vue-router'
 import { useLesson } from '../composables/useLesson.ts'
 import { useProgress } from '../composables/useProgress.ts'
 import { imageCredit } from '../lib/images.ts'
-import type { Concept, TopicImage } from '../data/types.ts'
+import type { Concept, EducationLevel, TopicImage } from '../data/types.ts'
+import { DEFAULT_LEVEL, levelsOf, sectionsForLevel, showsDebates, showsSources } from '../lib/levels.ts'
 
 const route = useRoute()
 const { topic, isLoading } = useLesson(String(route.params.topicId))
@@ -12,8 +13,49 @@ const lessonId = computed(() => topic.value?.lessonId ?? null)
 const { completedSections, toggleSection: saveSection } = useProgress(lessonId)
 const isBookmarked = ref(false)
 
+/* Nivel de lectura. Se recuerda entre lecciones porque quien estudia para un
+   curso concreto no quiere volver a elegirlo en cada tema. Si el guardado no
+   está disponible (navegación privada, almacenamiento bloqueado) se usa el
+   predeterminado: es una comodidad, no un dato que haga falta conservar. */
+const LEVEL_KEY = 'historya:nivel'
+
+function storedLevel(): EducationLevel {
+  try {
+    const saved = window.localStorage.getItem(LEVEL_KEY)
+    return saved === 'ESO' || saved === 'Bachillerato' || saved === 'Universidad' ? saved : DEFAULT_LEVEL
+  } catch {
+    return DEFAULT_LEVEL
+  }
+}
+
+const wantedLevel = ref<EducationLevel>(storedLevel())
+
+/** Niveles a los que este tema está escrito. */
+const availableLevels = computed(() => levelsOf(topic.value?.sections ?? []))
+
+/** El nivel elegido, o el más cercano que este tema sí tenga. */
+const level = computed<EducationLevel>(() => {
+  const available = availableLevels.value
+  if (!available.length) return 'Universidad'
+  return available.includes(wantedLevel.value) ? wantedLevel.value : available[available.length - 1]
+})
+
+function chooseLevel(next: EducationLevel) {
+  wantedLevel.value = next
+  try {
+    window.localStorage.setItem(LEVEL_KEY, next)
+  } catch {
+    /* Sin almacenamiento el nivel dura lo que la visita. No es un error. */
+  }
+}
+
+/** Apartados que se leen en el nivel activo, con su índice del temario completo. */
+const visibleSections = computed(() => sectionsForLevel(topic.value?.sections ?? [], level.value))
+
 function toggleSection(index: number) {
-  void saveSection(index, topic.value?.sections.length ?? 0)
+  // El total es el de los apartados del nivel que se está leyendo: con el del
+  // temario completo, quien lee en ESO no podría llegar nunca al 100 %.
+  void saveSection(index, visibleSections.value.length)
 }
 
 /** El cuerpo de cada apartado guarda sus párrafos separados por una línea en blanco. */
@@ -36,9 +78,10 @@ function figuresOf(index: number) {
 const marginNotes = computed(() => {
   const bySection = new Map<number, Concept[]>()
   const used = new Set<string>()
-  const sections = topic.value?.sections ?? []
-  for (const [index, section] of sections.entries()) {
-    const haystack = `${section.title} ${section.body}`.toLowerCase()
+  // Se busca en el texto del nivel activo: si no, en ESO saldrían al margen
+  // términos que solo aparecen en la versión universitaria del apartado.
+  for (const { section, index, text } of visibleSections.value) {
+    const haystack = `${section.title} ${text}`.toLowerCase()
     for (const concept of topic.value?.concepts ?? []) {
       if (used.has(concept.term)) continue
       if (!haystack.includes(concept.term.toLowerCase())) continue
@@ -60,8 +103,8 @@ type Block =
 /** Los bloques de un apartado en orden de lectura. Las figuras y las notas de
  *  margen se reparten entre los párrafos, alternando lado, en vez de caer todas
  *  al final: es la diferencia entre una página de libro y un muro de texto. */
-function blocksOf(index: number): Block[] {
-  const paragraphList = paragraphs(topic.value?.sections[index]?.body ?? '')
+function blocksOf(index: number, text: string): Block[] {
+  const paragraphList = paragraphs(text)
   type Floating =
     | { kind: 'fig'; key: string; image: TopicImage }
     | { kind: 'note'; key: string; concept: Concept }
@@ -102,7 +145,22 @@ function scrollToSection(index: number) {
         <p class="eyebrow"><span class="eyebrow-dot"></span> {{ topic.era }} · {{ topic.country }}</p>
         <h1>{{ topic.title }}</h1>
         <p>{{ topic.summary }}</p>
-        <div class="study-meta"><span>{{ topic.years }}</span><span>{{ topic.duration }} de lectura</span><span>Nivel {{ topic.level }}</span></div>
+        <div class="study-meta"><span>{{ topic.years }}</span><span>{{ topic.duration }} de lectura</span><span>{{ visibleSections.length }} apartados</span></div>
+        <div v-if="availableLevels.length > 1" class="level-switch" role="group" aria-label="Nivel de la lección">
+          <span class="level-switch-label">Nivel</span>
+          <button
+            v-for="option in availableLevels"
+            :key="option"
+            class="level-switch-option"
+            :class="{ active: option === level }"
+            type="button"
+            :aria-pressed="option === level"
+            @click="chooseLevel(option)"
+          >
+            {{ option }}
+          </button>
+        </div>
+        <p v-else class="level-switch-note">Este tema está escrito solo para {{ level }}.</p>
       </div>
       <figure v-if="cover" class="study-cover">
         <img :src="cover.src" :alt="cover.alt" :width="cover.width" :height="cover.height" decoding="async" />
@@ -117,16 +175,16 @@ function scrollToSection(index: number) {
     <div class="shell study-layout">
       <aside class="study-aside">
         <strong>En esta lección</strong>
-        <ol><li v-for="(section, index) in topic.sections" :key="section.title" :class="{ done: completedSections.includes(index) }"><button type="button" @click="scrollToSection(index)">{{ String(index + 1).padStart(2, '0') }} · {{ section.title }}</button></li></ol>
+        <ol><li v-for="(entry, position) in visibleSections" :key="entry.section.title" :class="{ done: completedSections.includes(entry.index) }"><button type="button" @click="scrollToSection(entry.index)">{{ String(position + 1).padStart(2, '0') }} · {{ entry.section.title }}</button></li></ol>
         <button class="bookmark-button" :class="{ saved: isBookmarked }" type="button" @click="isBookmarked = !isBookmarked">{{ isBookmarked ? '★ Guardado' : '☆ Guardar tema' }}</button>
       </aside>
 
       <article class="lesson-article">
         <div class="lesson-intro"><span class="drop-cap">{{ topic.title.charAt(0) }}</span><p>{{ topic.summary }}</p></div>
-        <section v-for="(section, index) in topic.sections" :id="`section-${index}`" :key="section.title" class="lesson-section">
-          <p class="section-index">{{ String(index + 1).padStart(2, '0') }}</p><h2>{{ section.title }}</h2>
+        <section v-for="(entry, position) in visibleSections" :id="`section-${entry.index}`" :key="entry.section.title" class="lesson-section">
+          <p class="section-index">{{ String(position + 1).padStart(2, '0') }}</p><h2>{{ entry.section.title }}</h2>
           <div class="lesson-flow">
-            <template v-for="block in blocksOf(index)" :key="block.key">
+            <template v-for="block in blocksOf(entry.index, entry.text)" :key="block.key">
               <p v-if="block.kind === 'p'">{{ block.text }}</p>
               <figure v-else-if="block.kind === 'fig'" class="lesson-figure" :class="`float-${block.side}`">
                 <img :src="block.image.src" :alt="block.image.alt" :width="block.image.width" :height="block.image.height" loading="lazy" decoding="async" />
@@ -141,8 +199,8 @@ function scrollToSection(index: number) {
               </aside>
             </template>
           </div>
-          <aside v-if="section.callout" class="history-callout"><span>✦</span><p>{{ section.callout }}</p></aside>
-          <button class="section-complete" type="button" :class="{ complete: completedSections.includes(index) }" @click="toggleSection(index)">{{ completedSections.includes(index) ? '✓ Apartado completado' : 'Marcar como leído' }}</button>
+          <aside v-if="entry.section.callout" class="history-callout"><span>✦</span><p>{{ entry.section.callout }}</p></aside>
+          <button class="section-complete" type="button" :class="{ complete: completedSections.includes(entry.index) }" @click="toggleSection(entry.index)">{{ completedSections.includes(entry.index) ? '✓ Apartado completado' : 'Marcar como leído' }}</button>
         </section>
 
         <section v-if="topic.concepts.length" class="concepts-card">
@@ -150,7 +208,9 @@ function scrollToSection(index: number) {
           <dl><template v-for="concept in topic.concepts" :key="concept.term"><dt>{{ concept.term }}</dt><dd>{{ concept.definition }}</dd></template></dl>
         </section>
 
-        <section v-if="topic.debates.length" class="debate-card">
+        <!-- El debate historiográfico es material universitario; la bibliografía
+             con fuentes primarias entra en Bachillerato. Ver src/lib/levels.ts. -->
+        <section v-if="topic.debates.length && showsDebates(level)" class="debate-card">
           <p class="eyebrow">DEBATE HISTORIOGRÁFICO</p><h2>Lo que los historiadores discuten</h2>
           <article v-for="debate in topic.debates" :key="debate.question" class="debate-item">
             <h3>{{ debate.question }}</h3>
@@ -160,7 +220,7 @@ function scrollToSection(index: number) {
         </section>
 
         <section class="timeline-card"><p class="eyebrow">LÍNEA TEMPORAL</p><h2>Fechas para orientarte</h2><ol><li v-for="item in topic.keyDates" :key="item.date"><strong>{{ item.date }}</strong><span>{{ item.event }}</span></li></ol></section>
-        <section v-if="topic.sources.length" class="sources-card">
+        <section v-if="topic.sources.length && showsSources(level)" class="sources-card">
           <p class="eyebrow">FUENTES Y BIBLIOGRAFÍA</p><h2>Para seguir leyendo</h2>
           <ul><li v-for="source in topic.sources" :key="source.title"><span class="source-kind" :class="`kind-${source.kind}`">{{ source.kind === 'primaria' ? 'Fuente primaria' : 'Estudio' }}</span><p><strong>{{ source.author }}</strong>, <em>{{ source.title }}</em> ({{ source.year }}).<template v-if="source.note"> {{ source.note }}</template></p></li></ul>
         </section>

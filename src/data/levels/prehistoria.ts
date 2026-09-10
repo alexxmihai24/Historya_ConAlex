@@ -1,0 +1,40 @@
+import type { TopicLevels } from '../types.ts'
+
+/* Un texto por apartado, en el mismo orden que `sections` de prehistoria.ts.
+   Cadena vacía = ese apartado no se da en ese nivel. */
+export const prehistoria: TopicLevels = {
+  eso: [
+    'La prehistoria es todo el tiempo anterior a la escritura, y es casi toda la historia de la humanidad: más del 99 % del tiempo que llevamos en la Tierra. Como no hay textos, se estudia con lo que quedó enterrado: huesos, herramientas de piedra, semillas, restos de hogueras. El carbono 14 permite fechar restos orgánicos de los últimos 50.000 años, y desde hace poco el ADN antiguo cuenta además de dónde venía cada población y con quién se mezcló.',
+    'Durante mucho tiempo la evolución humana se dibujó como una fila de figuras cada vez más erguidas. Hoy sabemos que no fue una escalera, sino un arbusto con muchas ramas que convivieron. Lucy, una Australopithecus de hace 3,2 millones de años, ya caminaba de pie: primero llegó la postura erguida y mucho después el cerebro grande. Neandertales y sapiens compartieron Europa miles de años y se cruzaron: casi todos los europeos de hoy llevan un pequeño porcentaje de ADN neandertal.',
+    'Durante cientos de miles de años vivimos de cazar, pescar y recolectar, en grupos pequeños que se movían siguiendo a los animales y a las estaciones. No era una vida de hambre permanente: en poblaciones parecidas estudiadas en el siglo XX, conseguir comida ocupaba menos horas al día que una jornada laboral actual. Lo que no había era manera de acumular, así que el grupo no podía crecer mucho ni quedarse quieto en un sitio.',
+    'Hacia 40.000 años aparece el arte: bisontes y caballos en cuevas como Altamira o Chauvet, figuras talladas como la Venus de Willendorf, collares hechos con conchas traídas de muy lejos. No sabemos qué significaban, pero sí lo que demuestran: pensamiento simbólico, técnicas que se enseñaban de una generación a otra y redes de intercambio de cientos de kilómetros.',
+    'Hacia 8500 a. C., en el Creciente Fértil, varias poblaciones empiezan a sembrar trigo y cebada y a criar ovejas y cabras. No fue un invento afortunado y sin más: los primeros agricultores trabajaban más horas, comían una dieta más pobre y enfermaban más que los cazadores. A cambio, de la misma tierra salía más comida, así que podía vivir más gente junta. De ahí salen los poblados permanentes, la propiedad, las diferencias de riqueza y, al final, las ciudades.',
+    'Con la agricultura llegan las primeras obras colectivas enormes: los dólmenes y los círculos de piedra del Atlántico, Stonehenge entre ellos, que exigían organizar a cientos de personas durante generaciones. Después se aprende a fundir metal, primero cobre y luego bronce, más duro y mejor para armas y herramientas. Cuando hacia 3300 a. C. aparecen la escritura y el bronce en Mesopotamia, se cierra por convención la prehistoria.',
+  ],
+  bachillerato: [
+    [
+      'La prehistoria es el periodo anterior a la escritura, y por eso es una categoría relativa: no termina a la vez en todas partes. Mesopotamia sale de ella hacia 3300 a. C., y otras regiones milenios después. Esa definición se ha criticado porque convierte el saber escribir en la puerta de entrada a la historia, con una carga eurocéntrica clara; de ahí que hoy se prefiera hablar de sociedades sin escritura.',
+      'Sin textos, todo depende de las fuentes materiales y del laboratorio. El radiocarbono, desarrollado en 1949, permitió por primera vez dar fechas absolutas hasta unos 50.000 años; para horizontes más antiguos se usan el potasio-argón o el uranio-torio. El polen y los isótopos de los sondeos de hielo reconstruyen el clima. Y la paleogenética, desde que en 2010 se secuenció el genoma neandertal, ha reescrito el mapa de las migraciones humanas.',
+    ].join('\n\n'),
+    [
+      'La imagen de la evolución humana como una progresión lineal es falsa. Lo que muestra el registro fósil es un arbusto de especies que coexistieron: en un mismo momento podían convivir varios homínidos distintos. El bipedismo llegó primero, y Lucy lo demuestra hace 3,2 millones de años; el aumento del cerebro vino mucho más tarde y no fue constante.',
+      'Los neandertales no fueron una rama torpe ni fracasada. Enterraban a sus muertos, cuidaban heridos, fabricaban adhesivos y usaban pigmentos. Convivieron con los sapiens en Europa durante milenios y hubo mestizaje, algo que solo se demostró con ADN antiguo. Por qué desaparecieron como población diferenciada sigue discutiéndose: se apunta a la competencia por recursos, al clima y a una demografía siempre al límite, probablemente a las tres cosas combinadas.',
+    ].join('\n\n'),
+    [
+      'Las sociedades del Paleolítico vivían de la caza, la pesca y la recolección, en grupos móviles de pocas decenas de personas. La movilidad no era una carencia, era la estrategia: seguir los recursos evitaba agotarlos. Los estudios sobre poblaciones cazadoras-recolectoras actuales obligaron a abandonar la idea de una vida de miseria permanente, aunque extrapolar de ellas al Paleolítico tiene límites evidentes.',
+      'La consecuencia decisiva es que sin acumulación de excedente no hay desigualdad estable ni poder heredado. El grupo se regula por reciprocidad y parentesco, y su tamaño queda limitado por lo que el territorio da cada estación. Todo lo que cambia en el Neolítico arranca de ahí: en el momento en que se puede almacenar, se puede también controlar quién reparte.',
+    ].join('\n\n'),
+    [
+      'Hacia 40.000 años el registro se llena de objetos que no sirven para comer ni para cazar: pinturas en cuevas, figuras femeninas talladas, cuentas de collar, instrumentos musicales de hueso. Lo que señalan no es un despertar súbito de la inteligencia, porque hay indicios simbólicos muy anteriores, sino una intensificación: el símbolo pasa a organizar la vida social.',
+      'Las interpretaciones del arte paleolítico han ido cambiando con la moda teórica: magia propiciatoria para la caza, tótems de grupo, trance chamánico, marcadores de territorio. Ninguna se puede demostrar. Lo que sí es comprobable es otra cosa, y es más útil: las conchas y los pigmentos viajaban cientos de kilómetros, así que existían redes de intercambio estables entre grupos que no se veían a diario.',
+    ].join('\n\n'),
+    [
+      'La neolitización es la adopción de la agricultura y la ganadería, y ocurrió de forma independiente en al menos siete focos del mundo. En el Creciente Fértil empieza hacia 8500 a. C. con trigo, cebada, oveja y cabra. No fue un descubrimiento repentino, sino siglos de manejo cada vez más intenso de plantas y animales que ya se usaban.',
+      'Por qué se dio el paso es la pregunta difícil, porque a corto plazo se vivía peor: los esqueletos de los primeros agricultores muestran más caries, más anemia, menos estatura y más enfermedades infecciosas por vivir junto a animales y en poblados densos. La explicación más sólida combina el clima estable del Holoceno, la presión demográfica y el hecho de que la agricultura da más calorías por hectárea aunque cueste más trabajo por caloría. Lo que siguió fue irreversible: excedente almacenable, propiedad, jerarquía.',
+    ].join('\n\n'),
+    [
+      'El Neolítico europeo deja monumentos que no se explican por necesidad práctica: dólmenes, túmulos y círculos de piedra desde Portugal hasta Escandinavia. Stonehenge se construyó en fases a lo largo de más de mil años y mover sus bloques exigía coordinar a cientos de personas. Construir así supone autoridad capaz de movilizar trabajo, y una memoria colectiva que mantiene el proyecto durante generaciones.',
+      'La metalurgia llega después: primero cobre, blando y más de prestigio que de uso, y luego bronce, una aleación con estaño que sí mejora armas y herramientas. El estaño escaseaba y eso creó rutas comerciales de largo alcance y élites que las controlaban. Cuando hacia 3300 a. C. coinciden bronce y escritura en Mesopotamia se cierra la prehistoria, pero conviene recordar que ese límite es una convención administrativa, no un cambio en la vida de la gente.',
+    ].join('\n\n'),
+  ],
+}

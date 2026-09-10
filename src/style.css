@@ -614,6 +614,24 @@ h1, h2, h3, h4 { margin: 0; font-family: var(--serif); font-weight: 400; letter-
 /* Figuras dentro de un apartado. El pie lleva SIEMPRE la atribución: es
    requisito de varias de las licencias admitidas y es el mismo rigor que ya
    tiene el resto del contenido (SPEC §14.2). */
+/* Selector de nivel de la lección. El mismo tema contado para ESO,
+   Bachillerato o Universidad; ver src/lib/levels.ts. */
+.level-switch { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.level-switch-label {
+  font-weight: 700; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: rgb(255 255 255 / 62%);
+}
+.level-switch-option {
+  padding: 8px 14px; border-radius: var(--r-pill);
+  border: 1px solid rgb(255 255 255 / 35%); color: rgb(255 255 255 / 82%);
+  font-weight: 700; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.level-switch-option:hover { border-color: #fff; color: #fff; }
+.level-switch-option.active { background: rgb(255 255 255 / 92%); border-color: #fff; color: #1a1208; }
+.level-switch-note { margin-top: 14px; font-size: 12.5px; color: rgb(255 255 255 / 62%); }
+
+.level-tag-group { display: flex; flex-wrap: wrap; gap: 6px; }
+
 /* El cuerpo del apartado. Flujo de bloque, no flex, porque las figuras y las
    notas de margen flotan a un lado y el texto las rodea, como en un libro de
    texto. El ::after cierra los flotantes para que el botón de «leído» no suba. */
