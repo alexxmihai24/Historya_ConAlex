@@ -21,7 +21,8 @@ import { access, readdir, readFile, stat } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { safeImageSrc, imageProblem } from '../src/lib/images.ts'
-import { multiplierFor, pointsFor, BASE_POINTS, TIME_BONUS, MAX_MULTIPLIER } from '../src/lib/scoring.ts'
+import { multiplierFor, pointsFor, BASE_POINTS, TIME_BONUS, MAX_MULTIPLIER, SECONDS_PER_QUESTION } from '../src/lib/scoring.ts'
+import { shuffled } from '../src/lib/shuffle.ts'
 import { FLAG_CODES, flagCodeByNumericId } from '../src/lib/country-codes.ts'
 import { topics, quizQuestions, eras } from '../src/data/history.ts'
 import { flagCode } from '../src/lib/country-names.ts'
@@ -86,8 +87,29 @@ ok(multiplierFor(-5) === 1, 'una racha negativa no rompe el multiplicador')
 ok(pointsFor(1, 0) === BASE_POINTS, 'un acierto sin tiempo restante vale los puntos base')
 ok(pointsFor(1, 10) === BASE_POINTS + 10 * TIME_BONUS, 'el tiempo restante suma')
 ok(pointsFor(2, 0) === BASE_POINTS * 2, 'la racha multiplica los puntos base')
-ok(pointsFor(1, 999) === BASE_POINTS + 20 * TIME_BONUS, 'el tiempo restante se limita al del reloj')
+// Con la constante, no con el 20 escrito a mano: al subir el reloj a 40 s este
+// caso pasaba a comprobar un tope que ya no existía.
+ok(pointsFor(1, 999) === BASE_POINTS + SECONDS_PER_QUESTION * TIME_BONUS, 'el tiempo restante se limita al del reloj')
 ok(pointsFor(1, -3) === BASE_POINTS, 'un tiempo negativo no resta puntos')
+ok(SECONDS_PER_QUESTION >= 30, 'el reloj debe dar tiempo a leer el enunciado y las cuatro opciones')
+
+// 2.b Barajado de las opciones ---------------------------------------------
+// La respuesta correcta está en la segunda posición en el 85 % de las preguntas
+// escritas. Si el barajado dejara de aplicarse, el quiz volvería a aprobarse
+// contestando siempre la «b», así que se comprueba que reparte de verdad.
+const original = ['a', 'b', 'c', 'd']
+ok(shuffled(original).length === 4, 'barajar no debe perder ni añadir opciones')
+ok(new Set(shuffled(original)).size === 4, 'barajar no debe repetir opciones')
+ok(shuffled(original).every((x) => original.includes(x)), 'barajar no debe inventar opciones')
+ok(original.join('') === 'abcd', 'barajar no debe modificar el array que recibe')
+
+const reparto = [0, 0, 0, 0]
+for (let i = 0; i < 4000; i += 1) reparto[shuffled(original).indexOf('b')] += 1
+for (const [posicion, veces] of reparto.entries()) {
+  // 1000 esperadas de 4000. Un margen del 30 % deja pasar la variación normal y
+  // sigue cazando un barajado que no baraja.
+  ok(veces > 700 && veces < 1300, `la opción «b» cae ${veces} de 4000 veces en la posición ${posicion}`)
+}
 
 // 3. Filtros de la biblioteca ----------------------------------------------
 const EPOCAS = new Set(eras.map((era) => era.name))

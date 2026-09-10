@@ -2,6 +2,7 @@ import { ref } from 'vue'
 import { supabase } from '../lib/supabase.ts'
 import { quizQuestions } from '../data/history.ts'
 import { useAuthStore } from '../stores/auth.ts'
+import { shuffled } from '../lib/shuffle.ts'
 
 export interface QuizOption {
   id: string
@@ -43,7 +44,9 @@ function demoQuestions(topicSlug: string | null): QuizQuestionUI[] {
     era: question.era,
     topic: question.topic,
     prompt: question.question,
-    options: question.options.map((label, index) => ({ id: String(index), label })),
+    // El `id` es el índice original y es lo que compara `checkAnswer`; el orden
+    // en que se pintan lo decide `shuffled`. Ver src/lib/shuffle.ts.
+    options: shuffled(question.options.map((label, index) => ({ id: String(index), label }))),
   }))
 }
 
@@ -64,7 +67,9 @@ export function useQuiz() {
         era: row.era_title,
         topic: row.topic_slug.replaceAll('-', ' '),
         prompt: row.prompt,
-        options: row.options,
+        // El orden que devuelve la base de datos arrastra el mismo sesgo que el
+        // repositorio, porque el seed se genera de ahí. Se baraja igualmente.
+        options: shuffled(row.options),
       }))
     } catch (err) {
       console.error('useQuiz: no se pudieron cargar preguntas desde Supabase', err)

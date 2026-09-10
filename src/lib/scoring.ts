@@ -12,7 +12,12 @@
  * aquí nunca puede aceptarse tal cual en la base de datos.
  */
 
-export const SECONDS_PER_QUESTION = 20
+/* 40 s por pregunta desde el 10/09/2026. Con 20 no daba tiempo a leer un
+   enunciado de nivel universitario y las cuatro opciones. Sube el bonus máximo
+   por tiempo de 100 a 200 puntos, que es inofensivo mientras la puntuación sea
+   de la sesión; el día que se persista habrá que fijar TIME_BONUS con el
+   servidor delante (SPEC §10.4). */
+export const SECONDS_PER_QUESTION = 40
 export const LIVES = 3
 export const BASE_POINTS = 100
 export const TIME_BONUS = 5
