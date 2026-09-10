@@ -6,7 +6,7 @@
 > **Carencias señaladas por el cliente y su estado.**
 > 1. **Nivel educativo.** ✅ Implementado el 10/09/2026. Ver §15.
 > 2. **La lección era un muro de texto.** ✅ Corregido en lo técnico (§14.6). Falta el documento comentado.
-> 3. **120 de los 142 países del atlas no tienen ficha.** ❌ Pendiente. §7 describe `/pais/:country` pero solo 22 países se encienden. Ver §14.7.
+> 3. **120 de los 142 países del atlas no tenían ficha.** ✅ Resuelto el 10/09/2026 con datos de Wikidata (CC0). Ver §14.7.
 > 4. **La respuesta del quiz era la «b» en el 85 % de las preguntas.** ✅ Corregido con barajado al servir. Ver §16.
 > 5. **Poco tiempo por pregunta.** ✅ 40 s en lugar de 20.
 
@@ -441,9 +441,17 @@ La lección se lee como una página de libro de texto, no como un bloque de pár
 
 **Lo que falta para que sea del todo un libro de texto:** el **documento comentado**, un extracto de fuente primaria en recuadro con una pregunta. `Source` guarda autor, título, año y nota, pero no el texto: hace falta un campo nuevo y escribir el extracto tema a tema.
 
-### 14.7 Fichas de país que faltan
+### 14.7 Fichas de país
 
-De los 142 países del atlas solo se encienden 22, y 17 de los 35 temas tienen `country` = «Europa» o «Mundo», que no apuntan a ningún país. La vía es **Wikidata, que es CC0** y por tanto no arrastra el problema de licencia que descartó el texto de Wikipedia (§13): da capital, población, superficie y cronología por país sin condiciones de share-alike.
+**Resuelto el 10/09/2026.** De los 142 países del atlas solo 22 tienen lección escrita, y al pinchar en cualquiera de los otros 120 no aparecía nada. Ahora **los 142 tienen ficha**.
+
+- **Fuente: Wikidata, que es CC0**, y por eso sus datos sí se pueden usar sin arrastrar el share-alike que descartó el texto de Wikipedia (§13). Se cita la fuente en la ficha de todas formas, aunque la licencia no lo exija.
+- **Empaquetados, no pedidos en tiempo de ejecución.** `npm run countries` ejecuta una consulta SPARQL y genera `src/data/country-facts.ts` con capital, población, superficie y continente de los 142. La PWA sigue funcionando sin red y la CSP no necesita `connect-src` hacia Wikidata. El script corre en Node, nunca en el navegador (§14.3.5).
+- **Un dato ausente no se pinta.** `factRows` en `src/lib/countries.ts` devuelve solo los campos que existen, de modo que un país sin capital registrada no enseña una fila vacía ni un guión. Hoy solo falta una capital de 142.
+- **Dónde se ve:** el panel del globo, para un país sin lección, muestra sus datos en vez de un mensaje suelto, y `/pais/:country` abre ficha para cualquier país del atlas, con las lecciones si las tiene y con enlaces a los que sí las tienen si no.
+- `npm test` comprueba que **cada uno de los 142 países del atlas tiene ficha**: si alguno se queda sin ella vuelve a haber un agujero en el globo, y sin esa comprobación nadie se enteraría.
+
+**Lo que sigue pendiente y es decisión del cliente:** 17 de los 35 temas tienen `country` = «Europa» o «Mundo». Esos temas no se alcanzan desde el globo porque no apuntan a ningún país concreto. Mapearlos en `src/lib/regions.ts` encendería más países, pero asignar «Prehistoria» o «Segunda Guerra Mundial» a un país concreto es una decisión editorial discutible.
 
 ### 14.5 Lo que queda
 

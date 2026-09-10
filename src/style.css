@@ -614,6 +614,20 @@ h1, h2, h3, h4 { margin: 0; font-family: var(--serif); font-weight: 400; letter-
 /* Figuras dentro de un apartado. El pie lleva SIEMPRE la atribución: es
    requisito de varias de las licencias admitidas y es el mismo rigor que ya
    tiene el resto del contenido (SPEC §14.2). */
+/* Datos de Wikidata de un país. Se pintan tenga o no lección escrita: sin
+   ellos, 120 de los 142 países del globo no mostraban nada al pincharlos. */
+.country-facts, .panel-facts {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 14px;
+  margin-top: 20px; padding: 20px 22px;
+  border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--fill);
+}
+.country-facts > div, .panel-facts > div { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.country-facts-source {
+  grid-column: 1 / -1; margin: 4px 0 0;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.02em; color: var(--text-45);
+}
+.country-empty { display: flex; flex-direction: column; gap: 14px; align-items: flex-start; margin-top: 30px; }
+
 /* Selector de nivel de la lección. El mismo tema contado para ESO,
    Bachillerato o Universidad; ver src/lib/levels.ts. */
 .level-switch { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 16px; }

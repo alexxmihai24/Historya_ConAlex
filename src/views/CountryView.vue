@@ -5,6 +5,7 @@ import { eraColor, eras, findTopic, quizQuestions } from '../data/history.ts'
 import { useTopics } from '../composables/useTopics.ts'
 import { atlasCountries, coveredCountries } from '../lib/regions.ts'
 import CountryFlag from '../components/CountryFlag.vue'
+import { countryFacts, factRows } from '../lib/countries.ts'
 import '../lib/globe.js'
 
 const route = useRoute()
@@ -58,6 +59,12 @@ const milestones = computed(() =>
   ),
 )
 
+/* Datos de Wikidata. Existen para los 142 países del atlas, tengan lección o
+   no: sin ellos, pinchar en cualquiera de los 120 sin lección no mostraba nada. */
+const facts = computed(() => countryFacts(country.value))
+const factList = computed(() => factRows(facts.value))
+const isAtlasCountry = computed(() => facts.value !== null)
+
 const otherCountries = computed(() =>
   coveredCountries(topics.value.map((topic) => topic.country))
     .filter((name) => name !== country.value)
@@ -66,11 +73,11 @@ const otherCountries = computed(() =>
 </script>
 
 <template>
-  <section v-if="countryTopics.length" class="country-page shell">
+  <section v-if="countryTopics.length || isAtlasCountry" class="country-page shell">
     <header class="country-hero">
       <div class="country-hero-top">
         <RouterLink class="country-back" to="/">← Globo</RouterLink>
-        <span class="country-tag">{{ countryTopics.length }} lecciones</span>
+        <span class="country-tag">{{ countryTopics.length ? `${countryTopics.length} lecciones` : "Sin lección todavía" }}</span>
       </div>
 
       <div class="country-hero-main">
@@ -78,14 +85,23 @@ const otherCountries = computed(() =>
           <p class="eyebrow">Ficha de país</p>
           <CountryFlag class="country-hero-flag" :country="country" size="lg" />
           <h1>{{ country }}</h1>
-          <p class="country-lead">{{ countryTopics[0].description }}</p>
+          <p v-if="countryTopics.length" class="country-lead">{{ countryTopics[0].description }}</p>
+          <p v-else class="country-lead">Todavía no hemos escrito la historia de {{ country }}. Estos son sus datos básicos mientras tanto.</p>
         </div>
         <div class="country-outline-frame">
           <historya-outline :country="country" tone="light" class="country-outline"></historya-outline>
         </div>
       </div>
 
-      <div class="country-stats">
+      <div v-if="factList.length" class="country-facts">
+        <div v-for="fact in factList" :key="fact.k">
+          <span class="stat-key">{{ fact.k }}</span>
+          <span class="stat-value">{{ fact.v }}</span>
+        </div>
+        <p class="country-facts-source">Datos de Wikidata (CC0)</p>
+      </div>
+
+      <div v-if="countryTopics.length" class="country-stats">
         <div v-for="stat in stats" :key="stat.k">
           <span class="stat-value">{{ stat.v }}</span>
           <span class="stat-key">{{ stat.k }}</span>
@@ -93,7 +109,7 @@ const otherCountries = computed(() =>
       </div>
     </header>
 
-    <div class="country-body">
+    <div v-if="countryTopics.length" class="country-body">
       <div class="country-main">
         <p class="panel-label">Línea de tiempo de épocas</p>
         <div class="era-track">
@@ -169,6 +185,21 @@ const otherCountries = computed(() =>
           </div>
         </div>
       </aside>
+    </div>
+
+    <div v-else class="country-empty">
+      <p class="panel-label">Países con lección escrita</p>
+      <div class="era-legend">
+        <RouterLink
+          v-for="name in otherCountries"
+          :key="name"
+          class="chip-button"
+          :to="`/pais/${encodeURIComponent(name)}`"
+        >
+          {{ name }}
+        </RouterLink>
+      </div>
+      <RouterLink class="button button-primary" to="/biblioteca">Ver toda la biblioteca →</RouterLink>
     </div>
   </section>
 

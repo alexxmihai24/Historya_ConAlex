@@ -11,7 +11,8 @@
     "seed": "node --experimental-strip-types scripts/generate-seed.mjs",
     "flags": "node --experimental-strip-types scripts/copy-flags.mjs",
     "images": "node --experimental-strip-types scripts/fetch-images.mjs",
-    "check:backend": "node scripts/check-backend.mjs"
+    "check:backend": "node scripts/check-backend.mjs",
+    "countries": "node --experimental-strip-types scripts/fetch-countries.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.4",

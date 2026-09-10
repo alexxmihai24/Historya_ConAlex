@@ -5,6 +5,7 @@ import { eraColor, eras, findTopic } from '../data/history.ts'
 import { useTopics } from '../composables/useTopics.ts'
 import { atlasCountries, coveredCountries } from '../lib/regions.ts'
 import CountryFlag from '../components/CountryFlag.vue'
+import { countryFacts, factRows } from '../lib/countries.ts'
 import '../lib/globe.js'
 
 const { topics } = useTopics()
@@ -60,6 +61,10 @@ const starters = computed(() =>
       meta: list.length === 1 ? list[0].era : `${list.length} lecciones`,
     })),
 )
+
+/* Datos de Wikidata del país elegido. Los 142 del atlas los tienen, así que el
+   panel nunca se queda vacío aunque el país no tenga lección escrita. */
+const selectedFacts = computed(() => (selected.value ? factRows(countryFacts(selected.value)) : []))
 
 function onHover(event: Event) {
   hovered.value = (event as CustomEvent<{ name: string } | null>).detail?.name ?? null
@@ -213,9 +218,25 @@ function back() {
           <historya-outline :country="selected" tone="light" class="panel-outline faded"></historya-outline>
         </div>
         <p class="globe-lead">
-          Todavía no hemos escrito la historia de {{ selected }}. Está en la lista.
+          Todavía no hemos escrito la historia de {{ selected }}. Estos son sus datos
+          básicos mientras tanto.
         </p>
-        <p class="panel-label">Mientras tanto</p>
+
+        <div v-if="selectedFacts.length" class="panel-facts">
+          <div v-for="fact in selectedFacts" :key="fact.k">
+            <span class="stat-key">{{ fact.k }}</span>
+            <span class="stat-value">{{ fact.v }}</span>
+          </div>
+          <p class="country-facts-source">Datos de Wikidata (CC0)</p>
+        </div>
+
+        <div class="panel-actions">
+          <RouterLink class="button button-quiet panel-grow" :to="`/pais/${encodeURIComponent(selected)}`">
+            Abrir ficha completa
+          </RouterLink>
+        </div>
+
+        <p class="panel-label">Países con lección</p>
         <div class="era-legend">
           <button
             v-for="starter in starters"

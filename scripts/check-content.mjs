@@ -29,6 +29,8 @@ import { FLAG_CODES, flagCodeByNumericId } from '../src/lib/country-codes.ts'
 import { topics, quizQuestions, eras } from '../src/data/history.ts'
 import { flagCode } from '../src/lib/country-names.ts'
 import { atlasCountries } from '../src/lib/regions.ts'
+import { countryFacts, factRows, formatPopulation, formatArea } from '../src/lib/countries.ts'
+import { ES_NAMES } from '../src/lib/country-names.ts'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const fallos = []
@@ -152,6 +154,29 @@ for (const [slug, niveles] of Object.entries(TOPIC_LEVELS)) {
 for (const topic of topics) {
   ok(levelsOf(topic.sections).includes('Universidad'), `${topic.id}: todo tema debe poder leerse en Universidad`)
 }
+
+// 2.d Fichas de país --------------------------------------------------------
+// El globo dibuja 142 países y solo 22 tienen lección: sin estos datos, pinchar
+// en cualquiera de los otros 120 no mostraba nada. Si un país del atlas se queda
+// sin ficha, vuelve a haber un agujero en el globo y nadie se entera.
+for (const nombre of Object.values(ES_NAMES)) {
+  ok(countryFacts(nombre) !== null, `${nombre} es país del atlas y no tiene ficha de datos`)
+}
+ok(countryFacts('Europa') === null, '«Europa» no es un país del atlas y no debe tener ficha')
+ok(countryFacts('Mundo') === null, '«Mundo» no es un país del atlas y no debe tener ficha')
+
+// Un dato ausente no se pinta, en vez de enseñar un hueco o un guión.
+ok(formatPopulation(null) === null, 'sin población no se pinta la fila')
+ok(formatPopulation(0) === null, 'una población de cero no se pinta')
+ok(formatPopulation(-5) === null, 'una población negativa no se pinta')
+ok(formatArea(null) === null, 'sin superficie no se pinta la fila')
+ok(formatPopulation(41454761).includes('M'), 'las poblaciones de millones se abrevian')
+ok(formatArea(652230).endsWith('km²'), 'la superficie lleva unidad')
+ok(factRows(null).length === 0, 'sin ficha no hay filas que pintar')
+ok(
+  factRows({ code: 'xx', name: 'X', capital: null, continent: null, population: null, area: null }).length === 0,
+  'una ficha sin ningún dato no pinta filas vacías',
+)
 
 // 3. Filtros de la biblioteca ----------------------------------------------
 const EPOCAS = new Set(eras.map((era) => era.name))
