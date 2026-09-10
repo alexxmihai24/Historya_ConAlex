@@ -1,12 +1,14 @@
 # Especificación del producto · Historya con Alex
 
-**Última actualización:** 31 de agosto de 2026
-**Estado:** temario completo a nivel universitario: 35 temas y 555 preguntas. Rediseño «Atlas Nocturno» implantado, con la lección remaquetada como página de libro de texto. Manifiesto de 145 imágenes con licencia comprobada; 85 descargadas. **Pendiente: terminar `npm run images`, ejecutar la migración `20260829_topic_cover_image.sql` y volver a lanzar el seed.**
+**Última actualización:** 10 de septiembre de 2026
+**Estado:** temario completo a nivel universitario: 35 temas y 555 preguntas. Rediseño «Atlas Nocturno» implantado, con la lección remaquetada como página de libro de texto. 145 imágenes con licencia comprobada, descargadas y enganchadas. Temario escrito en los tres niveles educativos. **Pendiente: ejecutar en el SQL Editor las migraciones `20260829_topic_cover_image.sql` y `20260910_topic_levels.sql`, y después los ocho archivos de `supabase/seed/`.**
 
-> **Tres carencias que el cliente señaló el 31/08/2026 y que esta especificación no cubría.**
-> 1. **El nivel educativo no está implementado.** `EducationLevel` admite `ESO`, `Bachillerato` y `Universidad`, pero los 35 temas están en `Universidad`: el filtro de la biblioteca devuelve cero resultados para los otros dos. El cliente quiere **un temario propio por nivel**, con profundidad creciente, no el mismo texto filtrado. Es contenido nuevo por escribir y no está planificado en §12.
-> 2. **La lección era un muro de texto.** Corregido en parte el 31/08: figuras intercaladas y conceptos al margen (§14.6). Falta el documento comentado.
-> 3. **120 de los 142 países del atlas no tienen ficha.** §7 describe `/pais/:country` pero solo 22 países se encienden. Ver §14.7.
+> **Carencias señaladas por el cliente y su estado.**
+> 1. **Nivel educativo.** ✅ Implementado el 10/09/2026. Ver §15.
+> 2. **La lección era un muro de texto.** ✅ Corregido en lo técnico (§14.6). Falta el documento comentado.
+> 3. **120 de los 142 países del atlas no tienen ficha.** ❌ Pendiente. §7 describe `/pais/:country` pero solo 22 países se encienden. Ver §14.7.
+> 4. **La respuesta del quiz era la «b» en el 85 % de las preguntas.** ✅ Corregido con barajado al servir. Ver §16.
+> 5. **Poco tiempo por pregunta.** ✅ 40 s en lugar de 20.
 
 ## 1. Visión
 
@@ -86,8 +88,8 @@ Ya no queda ningún tema con el texto corto de la demo inicial: `_pendientes.ts`
 - **Diseño «Atlas Nocturno»** (entrega del cliente del 29/08/2026, en `design/`): fondo oscuro con auroras en deriva y grano, Instrument Serif para los títulos, Archivo para la interfaz y IBM Plex Mono para cifras, acento brasa `#ff4a1c` y superficies de cristal. Aplicado a las siete vistas, a los iconos PWA, al manifest y a la página offline.
 - **Home con globo interactivo**: proyección ortográfica sobre Natural Earth 110m, modo noche con atmósfera y terminador, arrastre para girar, rueda para acercar, y los países con lección encendidos en brasa. Al elegir uno, el globo vuela hasta él y el panel lateral muestra su ficha breve.
 - **Ficha de país** en `/pais/:country`: hitos, línea de épocas, lecciones del país y acceso a su quiz. Sin mapa histórico ni narración de audio, por decisión del cliente.
-- **Quiz contrarreloj**: 20 segundos por pregunta, 3 vidas, racha con multiplicador hasta ×4 y bonus por tiempo restante.
-- Biblioteca filtrable por época y nivel, lectura de lección, perfil y acceso.
+- **Quiz contrarreloj**: 40 segundos por pregunta, 3 vidas, racha con multiplicador hasta ×4 y bonus por tiempo restante.
+- Biblioteca filtrable por época y **por nivel educativo real** (§15), lectura de lección con selector de nivel, perfil y acceso.
 - Lectura de lección con apartados multipárrafo, glosario, debate historiográfico, línea temporal y bibliografía.
 - Quiz global o por tema, con corrección inmediata y explicación.
 - Composables `useTopics`, `useLesson`, `useQuiz` y `useProgress` que leen de Supabase y **caen al contenido local** si no hay backend configurado.
@@ -112,6 +114,8 @@ Ya no queda ningún tema con el texto corto de la demo inicial: `_pendientes.ts`
 - Tests de componentes con DOM y pipeline de despliegue. `npm test` cubre la lógica pura y la integridad del contenido, no el renderizado.
 - **Puntos del quiz persistidos.** `submit_quiz_attempt` guarda aciertos calculados en el servidor; los puntos, la racha y el tiempo son de la sesión. Guardarlos exigiría una función que reciba los tiempos por respuesta, con el reloj en manos del cliente.
 - **Formatos de pregunta `mapa` y `huecos`.** El diseño los contempla; el banco solo tiene `opciones`. Faltan la columna de tipo, el seed y las preguntas.
+- **Documento comentado en la lección**: extracto de fuente primaria en recuadro. `Source` no guarda el texto (§14.6).
+- **Fichas de país para los 120 países del atlas que no tienen lección** (§14.7).
 - **Mapa histórico y narración de audio** de la ficha de país: retirados a propósito, no hay datos ni grabaciones.
 
 ## 5. Stack tecnológico
@@ -453,3 +457,27 @@ De los 142 países del atlas solo se encienden 22, y 17 de los 35 temas tienen `
   1200 px. Hace falta una herramienta de conversión que el proyecto no tiene.
 - **Peso.** Tres imágenes pasan del megabyte. Bajar `ANCHO` en
   `scripts/fetch-images.mjs` y volver a descargarlas es la vía rápida.
+
+## 15. Niveles educativos
+
+Implementado el 10/09/2026. `EducationLevel` existía desde el principio, pero los 35 temas estaban escritos en `Universidad` y la biblioteca filtraba comparando con `topic.level`: elegir ESO o Bachillerato devolvía cero resultados.
+
+**El modelo es el mismo tema contado con distinta profundidad**, no tres temarios sin relación. Cada apartado puede llevar `bodyEso` y `bodyBachillerato` además de `body`, que es el texto universitario. **Un apartado sin texto para un nivel no se da en ese nivel**, y de ahí sale que un tema en ESO tenga menos apartados que el mismo tema en Universidad.
+
+- **Dónde vive:** `src/data/levels/<slug>.ts`, aparte del archivo de tema, por el mismo motivo que las imágenes: un tema son 400 líneas y cada temario se escribe y se revisa por su cuenta. `sectionsWithLevels`, en `src/data/levels/index.ts`, los engancha, y **la usan tanto `history.ts` como `scripts/generate-seed.mjs`**: con dos copias de esa mezcla bastaba olvidarse de una para que la web ofreciera un nivel que la base de datos no tenía.
+- **La disponibilidad se deriva, no se declara.** `levelsOf` en `src/lib/levels.ts` calcula en qué niveles se puede leer un tema a partir de sus apartados, y el seed usa esa misma función para escribir la columna. Un campo escrito a mano se quedaría desfasado en cuanto alguien añadiera un apartado.
+- **Qué cambia además del texto:** el debate historiográfico es material universitario y la bibliografía con fuentes primarias entra en Bachillerato. En ESO se omiten también los apartados que tratan de cómo se hace historia y no de qué pasó.
+- **Interfaz:** la lección lleva selector de nivel, que se recuerda en `localStorage` envuelto en `try/catch` —si el almacenamiento no está disponible se usa Bachillerato, que es el predeterminado—. El progreso cuenta sobre los apartados del nivel que se lee, para que quien estudia en ESO pueda llegar al 100 %, y los índices de apartado siguen siendo los del temario completo para no descolocar las figuras ni el progreso guardado al cambiar de nivel.
+- **Base de datos:** migración `20260910_topic_levels.sql`, columna `topics.levels` con check de forma. La biblioteca lista temas sin tocar `lessons`, igual que pasaba con la portada, así que necesita la columna. `useTopics` y `useLesson` reintentan el select sin ella si la migración no se ha ejecutado, para no obligar a desplegar el SQL y el código a la vez, y los valores que llegan de la base de datos se filtran contra los tres niveles conocidos antes de pintarse.
+
+**Estado:** 35 de 35 temas en los tres niveles. 194 apartados de ESO y 208 de Bachillerato escritos.
+
+## 16. Barajado de las opciones del quiz
+
+La respuesta correcta estaba en la segunda posición en **474 de las 555 preguntas**, un 85 %: el quiz se aprobaba contestando siempre la «b» sin leer el enunciado.
+
+Se baraja **al servir**, en `useQuiz`, con `shuffled` de `src/lib/shuffle.ts`, y no en los datos. Así queda arreglado a la vez el contenido local y el que viene de Supabase, sin reescribir 555 preguntas ni volver a sembrar, y cada intento sale en un orden distinto.
+
+**La corrección va por `id` de opción y nunca por posición**, así que cambiar el orden no puede romperla; la letra A/B/C/D la pone `QuizView` al pintar y el `id` no llega al DOM. El barajado es orden de presentación, **no una medida de seguridad**: quien protege la respuesta correcta sigue siendo `check_quiz_answer` en el servidor (§10.3).
+
+`npm test` comprueba que barajar no pierde, repite ni inventa opciones, que no modifica el array recibido y que reparte de verdad: 4000 barajados y la misma opción tiene que caer en las cuatro posiciones.

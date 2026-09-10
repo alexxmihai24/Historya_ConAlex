@@ -1,4 +1,4 @@
--- Historya con Alex · contenido publicable — parte 01 de 7 (catalogo)
+-- Historya con Alex · contenido publicable — parte 01 de 8 (catalogo)
 --
 -- ARCHIVO GENERADO. No editar a mano: los cambios se pierden.
 -- Fuente: src/data/topics/ y src/data/topic-images.ts. Regenerar con `npm run seed`.
@@ -61,7 +61,7 @@ select 'absolutismo',
   (select id from public.eras where slug = 'edad-moderna'),
   (select id from public.countries where slug = 'europa'),
   'El Estado moderno y el absolutismo', 'Cómo unas monarquías compuestas y endeudadas construyeron administración, ejército e impuestos sin dejar de negociar con las élites.', 'universidad',
-  array['universidad']::public.education_level[],
+  array['eso', 'bachillerato', 'universidad']::public.education_level[],
   55, '1576–1715', '⚜', 'blue', '{"src":"/img/absolutismo/portada.jpg","alt":"Retrato de cuerpo entero de Luis XIV con manto de armiño y flores de lis, peluca larga y espada al costado","width":1200,"height":1705,"role":"portada","caption":"Luis XIV retratado por Hyacinthe Rigaud en 1701.","author":"Hyacinthe Rigaud","title":"Portrait de Louis XIV en costume de sacre Portrait of Louis XIV","year":"1701","source":"Wikimedia Commons","license":"Public domain","url":"https://commons.wikimedia.org/wiki/File:Louis_XIV_of_France.jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
@@ -77,7 +77,7 @@ select 'africa',
   (select id from public.eras where slug = 'edad-media'),
   (select id from public.countries where slug = 'africa'),
   'Reinos africanos: Malí, Songhay, Etiopía y Gran Zimbabue', 'Estados, universidades y redes comerciales de un continente al que la historiografía europea negó durante siglos el derecho a tener historia.', 'universidad',
-  array['universidad']::public.education_level[],
+  array['eso', 'bachillerato', 'universidad']::public.education_level[],
   55, 'siglos IV–XVII', '◈', 'green', '{"src":"/img/africa/portada.jpg","alt":"Detalle de carta náutica medieval con un rey coronado sentado en su trono sosteniendo una pepita de oro","width":1200,"height":856,"role":"portada","caption":"El mansa Musa en el Atlas catalán de 1375, con una pepita de oro en la mano.","author":"attributed to Abraham Cresques","title":"Detail from the Catalan Atlas Sheet 6 showing Mansa Musa","year":"1375","source":"Wikimedia Commons","license":"Public domain","url":"https://commons.wikimedia.org/wiki/File:Catalan_Atlas_BNF_Sheet_6_Mansa_Musa.jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
@@ -93,7 +93,7 @@ select 'america-precolombina',
   (select id from public.eras where slug = 'antiguedad'),
   (select id from public.countries where slug = 'america'),
   'Mesoamérica y los Andes', 'Dos focos civilizatorios que inventaron por su cuenta la agricultura, la ciudad, la escritura y el Estado, sin contacto con el resto del mundo.', 'universidad',
-  array['universidad']::public.education_level[],
+  array['eso', 'bachillerato', 'universidad']::public.education_level[],
   60, '3000 a. C.–1533', '☀', 'terracotta', '{"src":"/img/america-precolombina/portada.jpg","alt":"Vista de Machu Picchu con sus terrazas escalonadas y recintos de piedra sobre la cresta de la montaña","width":1200,"height":800,"role":"portada","caption":"Machu Picchu, construido en el siglo XV bajo Pachacútec.","author":"Pedro Szekely at https://www.flickr.com/photos/pedrosz/","title":"Machu Picchu, Peru","year":"2007","source":"Wikimedia Commons","license":"CC BY-SA 2.0","url":"https://commons.wikimedia.org/wiki/File:Machu_Picchu%2C_Peru.jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
@@ -141,7 +141,7 @@ select 'china-imperial',
   (select id from public.eras where slug = 'edad-media'),
   (select id from public.countries where slug = 'china'),
   'China imperial', 'Dos mil años de un Estado burocrático que se reconstruyó una y otra vez, fue la economía más avanzada del mundo y perdió esa posición en el siglo XIX.', 'universidad',
-  array['universidad']::public.education_level[],
+  array['eso', 'bachillerato', 'universidad']::public.education_level[],
   60, '221 a. C.–1912', '龍', 'red', '{"src":"/img/china-imperial/portada.jpg","alt":"Detalle de rollo pintado con un puente de madera abarrotado, barcazas en el río y puestos de mercado","width":1200,"height":600,"role":"portada","caption":"Detalle de A lo largo del río durante el festival Qingming, de Zhang Zeduan, época Song.","author":"Zhang Zeduan","title":"Along the River During the Qingming Festival","year":"1085","source":"Wikimedia Commons","license":"Public domain","url":"https://commons.wikimedia.org/wiki/File:Along_the_River_During_the_Qingming_Festival_(detail_of_original).jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
@@ -173,7 +173,7 @@ select 'descubrimientos',
   (select id from public.eras where slug = 'edad-moderna'),
   (select id from public.countries where slug = 'mundo'),
   'Expansión atlántica y conquista de América', 'Navegación, conquista, colapso demográfico y la primera economía de escala planetaria.', 'universidad',
-  array['universidad']::public.education_level[],
+  array['eso', 'bachillerato', 'universidad']::public.education_level[],
   55, '1415–1600', '⚓', 'gold', '{"src":"/img/descubrimientos/portada.jpg","alt":"Carta náutica manuscrita de 1502 con las costas conocidas, banderas y líneas de rumbo trazadas sobre pergamino","width":1200,"height":564,"role":"portada","caption":"El planisferio de Cantino (1502), sacado clandestinamente de Portugal.","author":"anonymous Portuguese (1502)","title":"Cantino planisphere (1502)","year":"1502","source":"Wikimedia Commons","license":"Public domain","url":"https://commons.wikimedia.org/wiki/File:Cantino_planisphere_(1502).jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
@@ -205,7 +205,7 @@ select 'entreguerras',
   (select id from public.eras where slug = 'edad-contemporanea'),
   (select id from public.countries where slug = 'europa'),
   'Crisis de 1929 y fascismos', 'Veinte años entre dos guerras: una paz que no estabilizó nada, un hundimiento económico global y una respuesta política que destruyó las democracias por dentro.', 'universidad',
-  array['universidad']::public.education_level[],
+  array['eso', 'bachillerato', 'universidad']::public.education_level[],
   55, '1919–1939', '↯', 'plum', '{"src":"/img/entreguerras/portada.jpg","alt":"Multitud de hombres con sombrero agolpada en la calle frente al edificio de la Bolsa de Nueva York","width":1200,"height":1711,"role":"portada","caption":"Concentración frente a la Bolsa de Nueva York tras el hundimiento de octubre de 1929.","author":"US-gov","title":"Crowd outside nyse","year":"1929","source":"Wikimedia Commons","license":"Public domain","url":"https://commons.wikimedia.org/wiki/File:Crowd_outside_nyse.jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
@@ -221,7 +221,7 @@ select 'espana-siglo-xx',
   (select id from public.eras where slug = 'edad-contemporanea'),
   (select id from public.countries where slug = 'espana'),
   'España en el siglo XX', 'Del Desastre del 98 a la entrada en Europa: un siglo con dos dictaduras, una república, una guerra civil y una transición que sigue discutiéndose.', 'universidad',
-  array['universidad']::public.education_level[],
+  array['eso', 'bachillerato', 'universidad']::public.education_level[],
   60, '1898–1986', '✶', 'terracotta', '{"src":"/img/espana-siglo-xx/portada.jpg","alt":"Calle de Guernica reducida a escombros y fachadas vacías tras el bombardeo","width":1200,"height":878,"role":"portada","caption":"Ruinas de Guernica tras el bombardeo del 26 de abril de 1937.","author":"Unknown author Unknown author","title":"Guernica, Ruinen","year":"1937","source":"Wikimedia Commons","license":"CC BY-SA 3.0 de","url":"https://commons.wikimedia.org/wiki/File:Bundesarchiv_Bild_183-H25224%2C_Guernica%2C_Ruinen.jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
@@ -253,7 +253,7 @@ select 'gran-guerra',
   (select id from public.eras where slug = 'edad-contemporanea'),
   (select id from public.countries where slug = 'europa'),
   'Primera Guerra Mundial', 'Cómo una crisis diplomática de cinco semanas se convirtió en cuatro años de desgaste industrial y liquidó cuatro imperios.', 'universidad',
-  array['universidad']::public.education_level[],
+  array['eso', 'bachillerato', 'universidad']::public.education_level[],
   55, '1914–1918', '✚', 'green', '{"src":"/img/gran-guerra/portada.jpg","alt":"Soldados británicos en una trinchera estrecha del Somme, uno de guardia con el fusil y el resto descansando contra la pared de tierra","width":1200,"height":916,"role":"portada","caption":"Trinchera del Regimiento de Cheshire en el Somme, 1916.","author":"John Warwick Brooke","title":"Cheshire Regiment trench Somme 1916","year":"1916","source":"Wikimedia Commons","license":"Public domain","url":"https://commons.wikimedia.org/wiki/File:Cheshire_Regiment_trench_Somme_1916.jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
@@ -285,7 +285,7 @@ select 'guerra-fria',
   (select id from public.eras where slug = 'edad-contemporanea'),
   (select id from public.countries where slug = 'mundo'),
   'Guerra Fría y descolonización', 'Cuarenta y cinco años de enfrentamiento entre dos superpotencias que nunca combatieron entre sí, y el desmantelamiento simultáneo de los imperios coloniales europeos.', 'universidad',
-  array['universidad']::public.education_level[],
+  array['eso', 'bachillerato', 'universidad']::public.education_level[],
   60, '1945–1991', '☢', 'gold', '{"src":"/img/guerra-fria/portada.jpg","alt":"Obreros levantando un muro de bloques de hormigón en una calle de Berlín, vigilados por soldados","width":1200,"height":832,"role":"portada","caption":"Construcción del Muro de Berlín, noviembre de 1961.","author":"National Archives","title":"Berlin Wall 1961-11-20","year":"1961","source":"Wikimedia Commons","license":"Public domain","url":"https://commons.wikimedia.org/wiki/File:Berlin_Wall_1961-11-20.jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
@@ -317,7 +317,7 @@ select 'ilustracion',
   (select id from public.eras where slug = 'edad-moderna'),
   (select id from public.countries where slug = 'europa'),
   'La Ilustración', 'Una práctica de crítica pública más que un sistema de ideas: cafés, enciclopedias, tolerancia y sus propios puntos ciegos.', 'universidad',
-  array['universidad']::public.education_level[],
+  array['eso', 'bachillerato', 'universidad']::public.education_level[],
   55, '1689–1789', '✷', 'gold', '{"src":"/img/ilustracion/portada.jpg","alt":"Grabado alegórico con la Verdad rodeada de figuras que representan la razón, la filosofía y las artes","width":1200,"height":1891,"role":"portada","caption":"Frontispicio de la Encyclopédie de Diderot y D''Alembert, grabado por Bonaventure-Louis Prévost.","author":"Benoît-Louis Prévost / Charles-Nicolas Cochin","title":"Encyclopedie frontispice full","year":"1764","source":"Wikimedia Commons","license":"Public domain","url":"https://commons.wikimedia.org/wiki/File:Encyclopedie_frontispice_full.jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
@@ -333,7 +333,7 @@ select 'imperialismo',
   (select id from public.eras where slug = 'edad-contemporanea'),
   (select id from public.countries where slug = 'mundo'),
   'Imperialismo y colonialismo', 'Cómo un puñado de Estados europeos pasó a administrar una cuarta parte del planeta en cuarenta años, con qué medios y con qué coartada.', 'universidad',
-  array['universidad']::public.education_level[],
+  array['eso', 'bachillerato', 'universidad']::public.education_level[],
   55, '1870–1914', '⊕', 'blue', '{"src":"/img/imperialismo/portada.png","alt":"Caricatura de Cecil Rhodes representado como un coloso a horcajadas sobre África, de El Cairo a Ciudad del Cabo","width":1200,"height":1555,"role":"portada","caption":"El coloso de Rodas, caricatura de Edward Linley Sambourne para Punch, 10 de diciembre de 1892.","author":"Edward Linley Sambourne","title":"Punch Rhodes Colossus","year":"1892","source":"Wikimedia Commons","license":"Public domain","url":"https://commons.wikimedia.org/wiki/File:Punch_Rhodes_Colossus.png"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
@@ -349,7 +349,7 @@ select 'india',
   (select id from public.eras where slug = 'edad-media'),
   (select id from public.countries where slug = 'india'),
   'India: de los Mauryas a los mogoles', 'Dos mil años de imperios, religiones y comercio en un subcontinente que casi nunca estuvo unificado y que sin embargo produjo una civilización reconocible.', 'universidad',
-  array['universidad']::public.education_level[],
+  array['eso', 'bachillerato', 'universidad']::public.education_level[],
   60, '322 a. C.–1707', '☸', 'gold', '{"src":"/img/india/portada.jpg","alt":"El Taj Mahal de mármol blanco con su cúpula bulbosa y los cuatro minaretes, reflejado en el estanque del jardín","width":1200,"height":989,"role":"portada","caption":"El Taj Mahal, mausoleo mogol construido entre 1632 y 1653.","author":"Dhirad , picture edited by J. A. Knudsen","title":"Taj Mahal in March 2004","year":"2004","source":"Wikimedia Commons","license":"CC BY-SA 3.0","url":"https://commons.wikimedia.org/wiki/File:Taj_Mahal_in_March_2004.jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
@@ -365,7 +365,7 @@ select 'industrializacion',
   (select id from public.eras where slug = 'edad-contemporanea'),
   (select id from public.countries where slug = 'reino-unido'),
   'La revolución industrial', 'Por qué empezó en una isla del Atlántico norte, qué costó vivirla y cuándo empezó realmente a notarse en el bolsillo.', 'universidad',
-  array['universidad']::public.education_level[],
+  array['eso', 'bachillerato', 'universidad']::public.education_level[],
   55, '1760–1914', '⚙', 'terracotta', '{"src":"/img/industrializacion/portada.jpg","alt":"Paisaje nocturno con las llamas y el humo rojizo de unos altos hornos iluminando el valle","width":1200,"height":767,"role":"portada","caption":"Coalbrookdale de noche, de Philip James de Loutherbourg (1801).","author":"Philip James de Loutherbourg","title":"Coalbrookdale by Night","year":"1801","source":"Wikimedia Commons","license":"Public domain","url":"https://commons.wikimedia.org/wiki/File:Philipp_Jakob_Loutherbourg_d._J._002.jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
@@ -397,7 +397,7 @@ select 'japon',
   (select id from public.eras where slug = 'edad-media'),
   (select id from public.countries where slug = 'japon'),
   'Japón: de Heian a Meiji', 'Mil años entre una corte aristocrática y una potencia industrial: el archipiélago que adoptó modelos ajenos sin ser conquistado nunca.', 'universidad',
-  array['universidad']::public.education_level[],
+  array['eso', 'bachillerato', 'universidad']::public.education_level[],
   55, '794–1912', '⛩', 'plum', '{"src":"/img/japon/portada.jpg","alt":"Estampa japonesa con una ola enorme de cresta espumosa a punto de romper sobre tres barcas, y el Fuji al fondo","width":1200,"height":828,"role":"portada","caption":"La gran ola de Kanagawa, de Katsushika Hokusai, hacia 1831.","author":"After Katsushika Hokusai","title":"The Great Wave off Kanagawa","year":"1930","source":"Wikimedia Commons","license":"Public domain","url":"https://commons.wikimedia.org/wiki/File:The_Great_Wave_off_Kanagawa.jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
@@ -429,7 +429,7 @@ select 'mundo-actual',
   (select id from public.eras where slug = 'edad-contemporanea'),
   (select id from public.countries where slug = 'mundo'),
   'El mundo desde 1991', 'Del momento unipolar y la globalización acelerada al retorno de la geopolítica: tres décadas que exigen historia y no solo actualidad.', 'universidad',
-  array['universidad']::public.education_level[],
+  array['eso', 'bachillerato', 'universidad']::public.education_level[],
   55, '1991–hoy', '⊛', 'green', '{"src":"/img/mundo-actual/portada.jpg","alt":"Representación gráfica de las conexiones de internet como una maraña radial de líneas de colores sobre fondo negro","width":1200,"height":1200,"role":"portada","caption":"Mapa parcial de internet trazado a partir de rutas de red. Ilustración de datos, no una fotografía.","author":"The Opte Project","title":"Internet map 1024","year":"2005","source":"Wikimedia Commons","license":"CC BY 2.5","url":"https://commons.wikimedia.org/wiki/File:Internet_map_1024.jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
@@ -477,7 +477,7 @@ select 'reforma',
   (select id from public.eras where slug = 'edad-moderna'),
   (select id from public.countries where slug = 'europa'),
   'Reforma, Contrarreforma y guerras de religión', 'De una disputa universitaria sobre indulgencias a la partición confesional del continente.', 'universidad',
-  array['universidad']::public.education_level[],
+  array['eso', 'bachillerato', 'universidad']::public.education_level[],
   55, '1517–1648', '☩', 'red', '{"src":"/img/reforma/portada.jpg","alt":"Retrato de medio cuerpo de Martín Lutero con hábito oscuro sobre fondo azul","width":1200,"height":1286,"role":"portada","caption":"Martín Lutero retratado por Lucas Cranach el Viejo en 1529.","author":"Lucas Cranach the Elder","title":"Martin Luther","year":"1529","source":"Wikimedia Commons","license":"Public domain","url":"https://commons.wikimedia.org/wiki/File:Martin_Luther%2C_1529.jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
@@ -493,7 +493,7 @@ select 'renacimiento',
   (select id from public.eras where slug = 'edad-moderna'),
   (select id from public.countries where slug = 'europa'),
   'Renacimiento y Humanismo', 'Un método filológico, un mercado del arte y un concepto historiográfico en disputa.', 'universidad',
-  array['universidad']::public.education_level[],
+  array['eso', 'bachillerato', 'universidad']::public.education_level[],
   55, 'c. 1350–1600', '✦', 'plum', '{"src":"/img/renacimiento/portada.jpg","alt":"Venus emerge del mar de pie sobre una concha, con vientos a su izquierda y una figura que le ofrece un manto a su derecha","width":1200,"height":754,"role":"portada","caption":"El nacimiento de Venus, de Sandro Botticelli (hacia 1485).","author":"Sandro Botticelli","title":"Narodziny Wenus The Birth of Venus","year":"1485","source":"Wikimedia Commons","license":"Public domain","url":"https://commons.wikimedia.org/wiki/File:Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
@@ -509,7 +509,7 @@ select 'revolucion-cientifica',
   (select id from public.eras where slug = 'edad-moderna'),
   (select id from public.countries where slug = 'europa'),
   'La revolución científica', 'De la caída del cosmos aristotélico a los Principia: cómo cambió lo que Europa consideraba un conocimiento fiable.', 'universidad',
-  array['universidad']::public.education_level[],
+  array['eso', 'bachillerato', 'universidad']::public.education_level[],
   55, '1543–1687', '☉', 'green', '{"src":"/img/revolucion-cientifica/portada.jpg","alt":"Retrato de Galileo Galilei anciano, de tres cuartos, con barba blanca y gola oscura","width":1200,"height":1524,"role":"portada","caption":"Galileo retratado por Justus Sustermans en 1636, ya condenado y bajo arresto domiciliario.","author":"Justus Sustermans","title":"Portrait of Galileo Galilei","year":"1636","source":"Wikimedia Commons","license":"Public domain","url":"https://commons.wikimedia.org/wiki/File:Justus_Sustermans_-_Portrait_of_Galileo_Galilei%2C_1636.jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
@@ -525,7 +525,7 @@ select 'revolucion-francesa',
   (select id from public.eras where slug = 'edad-contemporanea'),
   (select id from public.countries where slug = 'francia'),
   'Revolución francesa y era napoleónica', 'De una quiebra fiscal a la invención de la política moderna, el Terror y un imperio que exportó el código civil a cañonazos.', 'universidad',
-  array['universidad']::public.education_level[],
+  array['eso', 'bachillerato', 'universidad']::public.education_level[],
   60, '1789–1815', '⚑', 'red', '{"src":"/img/revolucion-francesa/portada.jpg","alt":"Pintura del asalto a la Bastilla, con humo de artillería y multitud armada frente a las torres de la fortaleza","width":1200,"height":912,"role":"portada","caption":"La toma de la Bastilla, 14 de julio de 1789, por Jean-Pierre Houël.","author":"Jean-Pierre Houël","title":"Prise de la Bastille","year":"1789","source":"Wikimedia Commons","license":"Public domain","url":"https://commons.wikimedia.org/wiki/File:Prise_de_la_Bastille.jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
@@ -541,7 +541,7 @@ select 'revolucion-rusa',
   (select id from public.eras where slug = 'edad-contemporanea'),
   (select id from public.countries where slug = 'rusia'),
   'Revolución rusa y URSS', 'Del hundimiento del zarismo al Estado estalinista: cómo un partido minoritario tomó el poder y qué construyó con él.', 'universidad',
-  array['universidad']::public.education_level[],
+  array['eso', 'bachillerato', 'universidad']::public.education_level[],
   55, '1905–1953', '☭', 'red', '{"src":"/img/revolucion-rusa/portada.jpg","alt":"Multitud dispersándose en desbandada por una avenida amplia mientras suenan los disparos, con cuerpos y objetos en el suelo","width":1200,"height":780,"role":"portada","caption":"Dispersión a tiros de una manifestación en la avenida Nevski de Petrogrado, julio de 1917.","author":"Viktor Bulla","title":"19170704 Riot on Nevsky prosp Petrograd","year":"1917","source":"Wikimedia Commons","license":"Public domain","url":"https://commons.wikimedia.org/wiki/File:19170704_Riot_on_Nevsky_prosp_Petrograd.jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
@@ -557,7 +557,7 @@ select 'revoluciones-liberales',
   (select id from public.eras where slug = 'edad-contemporanea'),
   (select id from public.countries where slug = 'europa'),
   'Liberalismo, nacionalismo y unificaciones', 'De la Restauración a los Estados nacionales: constituciones, oleadas revolucionarias y unificaciones.', 'universidad',
-  array['universidad']::public.education_level[],
+  array['eso', 'bachillerato', 'universidad']::public.education_level[],
   55, '1815–1871', '✺', 'red', '{"src":"/img/revoluciones-liberales/portada.jpg","alt":"La Libertad personificada avanza con la bandera tricolor y un fusil sobre una barricada cubierta de cadáveres","width":1200,"height":950,"role":"portada","caption":"La Libertad guiando al pueblo, de Eugène Delacroix (1830), sobre las jornadas de julio de ese año.","author":"Eugène Delacroix","title":"Liberty Leading the People","year":"1830","source":"Wikimedia Commons","license":"Public domain","url":"https://commons.wikimedia.org/wiki/File:Eug%C3%A8ne_Delacroix_-_La_libert%C3%A9_guidant_le_peuple.jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
@@ -605,7 +605,7 @@ select 'segunda-guerra',
   (select id from public.eras where slug = 'edad-contemporanea'),
   (select id from public.countries where slug = 'mundo'),
   'Segunda Guerra Mundial y Holocausto', 'La guerra más letal de la historia y el genocidio que se cometió dentro de ella: dos procesos entrelazados que hay que estudiar juntos y distinguir con precisión.', 'universidad',
-  array['universidad']::public.education_level[],
+  array['eso', 'bachillerato', 'universidad']::public.education_level[],
   60, '1939–1945', '✠', 'blue', '{"src":"/img/segunda-guerra/portada.jpg","alt":"Soldados desembarcando desde una lancha con la rampa abierta y avanzando con el agua por la cintura hacia la playa","width":1200,"height":966,"role":"portada","caption":"Desembarco en la playa de Omaha, 6 de junio de 1944, fotografiado por Robert F. Sargent.","author":"Chief Photographer''s Mate (CPHoM) Robert F. Sargent","title":"Second World War: Europe; \" Into the Jaws of Death — U.S. Troops wading through water and Nazi gunfire”, circa 1944-06-0","year":"1944","source":"Wikimedia Commons","license":"Public domain","url":"https://commons.wikimedia.org/wiki/File:Into_the_Jaws_of_Death_23-0455M_edit.jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,

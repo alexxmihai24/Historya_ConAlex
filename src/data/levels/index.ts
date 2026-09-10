@@ -40,6 +40,13 @@ import { revolucionRusa } from './revolucion-rusa.ts'
 import { entreguerras } from './entreguerras.ts'
 import { segundaGuerra } from './segunda-guerra.ts'
 import { guerraFria } from './guerra-fria.ts'
+import { espanaSigloXx } from './espana-siglo-xx.ts'
+import { mundoActual } from './mundo-actual.ts'
+import { chinaImperial } from './china-imperial.ts'
+import { india } from './india.ts'
+import { japon } from './japon.ts'
+import { africa } from './africa.ts'
+import { americaPrecolombina } from './america-precolombina.ts'
 
 export const TOPIC_LEVELS: Record<string, TopicLevels> = {
   prehistoria,
@@ -70,6 +77,13 @@ export const TOPIC_LEVELS: Record<string, TopicLevels> = {
   entreguerras,
   'segunda-guerra': segundaGuerra,
   'guerra-fria': guerraFria,
+  'espana-siglo-xx': espanaSigloXx,
+  'mundo-actual': mundoActual,
+  'china-imperial': chinaImperial,
+  india,
+  japon,
+  africa,
+  'america-precolombina': americaPrecolombina,
 }
 
 /** Los apartados de un tema con sus textos de ESO y Bachillerato enganchados.

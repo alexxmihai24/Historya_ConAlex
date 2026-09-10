@@ -19,6 +19,22 @@ export function mapEducationLevel(level: DbEducationLevel): EducationLevel {
   return LEVEL_LABEL[level]
 }
 
+/** Los niveles de un tema tal como los devuelve la base de datos.
+ *
+ *  Se descarta lo que no sea uno de los tres valores conocidos en vez de
+ *  confiar en la columna: una fila editada a mano desde el panel de Supabase
+ *  puede traer `curioso`, que no es un nivel de lectura, o un valor añadido al
+ *  enum después. Sin este filtro, `mapEducationLevel` devolvería `undefined` y
+ *  la tarjeta pintaría una etiqueta vacía. Misma regla que con `cover_image`:
+ *  nada que venga de la base de datos se pinta sin validar (SPEC §10.10). */
+function mapLevels(row: RawTopicRow): EducationLevel[] {
+  const raw = row.levels?.length ? row.levels : [row.education_level]
+  const levels = raw.map(mapEducationLevel).filter((level) => level === 'ESO' || level === 'Bachillerato' || level === 'Universidad')
+  // Sin niveles válidos el tema desaparecería de la biblioteca en todos los
+  // filtros. Se cae al nivel escrito, que es el comportamiento anterior.
+  return levels.length ? levels : ['Universidad']
+}
+
 /** Columns shared by useTopics and useLesson when reading the `topics` table. */
 export const TOPIC_SELECT =
   'id, slug, title, summary, education_level, estimated_minutes, period_label, glyph, accent_color, cover_image, levels, eras(title), countries(title)'
@@ -74,9 +90,7 @@ export function mapTopicRow(row: RawTopicRow): TopicCard {
     description: row.summary,
     duration: `${row.estimated_minutes} min`,
     level: mapEducationLevel(row.education_level),
-    // Sin la columna, el tema se ofrece solo en su nivel escrito: es lo que había
-    // antes de la migración y no deja la biblioteca vacía.
-    levels: (row.levels ?? [row.education_level]).map(mapEducationLevel),
+    levels: mapLevels(row),
     progress: 0,
     visual: row.glyph ?? '◆',
     color: row.accent_color ?? 'gold',
