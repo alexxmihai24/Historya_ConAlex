@@ -31,6 +31,15 @@ import { reforma } from './reforma.ts'
 import { absolutismo } from './absolutismo.ts'
 import { revolucionCientifica } from './revolucion-cientifica.ts'
 import { ilustracion } from './ilustracion.ts'
+import { revolucionFrancesa } from './revolucion-francesa.ts'
+import { industrializacion } from './industrializacion.ts'
+import { revolucionesLiberales } from './revoluciones-liberales.ts'
+import { imperialismo } from './imperialismo.ts'
+import { granGuerra } from './gran-guerra.ts'
+import { revolucionRusa } from './revolucion-rusa.ts'
+import { entreguerras } from './entreguerras.ts'
+import { segundaGuerra } from './segunda-guerra.ts'
+import { guerraFria } from './guerra-fria.ts'
 
 export const TOPIC_LEVELS: Record<string, TopicLevels> = {
   prehistoria,
@@ -52,6 +61,15 @@ export const TOPIC_LEVELS: Record<string, TopicLevels> = {
   absolutismo,
   'revolucion-cientifica': revolucionCientifica,
   ilustracion,
+  'revolucion-francesa': revolucionFrancesa,
+  industrializacion,
+  'revoluciones-liberales': revolucionesLiberales,
+  imperialismo,
+  'gran-guerra': granGuerra,
+  'revolucion-rusa': revolucionRusa,
+  entreguerras,
+  'segunda-guerra': segundaGuerra,
+  'guerra-fria': guerraFria,
 }
 
 /** Los apartados de un tema con sus textos de ESO y Bachillerato enganchados.
