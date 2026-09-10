@@ -13,9 +13,33 @@
 
 import type { StudySection, TopicLevels } from '../types.ts'
 import { prehistoria } from './prehistoria.ts'
+import { mesopotamia } from './mesopotamia.ts'
+import { egipto } from './egipto.ts'
+import { grecia } from './grecia.ts'
+import { helenismo } from './helenismo.ts'
+import { romaRepublica } from './roma-republica.ts'
+import { romaImperio } from './roma-imperio.ts'
+import { bizancio } from './bizancio.ts'
+import { islam } from './islam.ts'
+import { feudalismo } from './feudalismo.ts'
+import { andalus } from './andalus.ts'
+import { plenaEdadMedia } from './plena-edad-media.ts'
+import { crisisSigloXiv } from './crisis-siglo-xiv.ts'
 
 export const TOPIC_LEVELS: Record<string, TopicLevels> = {
   prehistoria,
+  mesopotamia,
+  egipto,
+  grecia,
+  helenismo,
+  'roma-republica': romaRepublica,
+  'roma-imperio': romaImperio,
+  bizancio,
+  islam,
+  feudalismo,
+  andalus,
+  'plena-edad-media': plenaEdadMedia,
+  'crisis-siglo-xiv': crisisSigloXiv,
 }
 
 /** Los apartados de un tema con sus textos de ESO y Bachillerato enganchados.

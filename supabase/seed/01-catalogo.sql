@@ -109,7 +109,7 @@ select 'andalus',
   (select id from public.eras where slug = 'edad-media'),
   (select id from public.countries where slug = 'peninsula-iberica'),
   'Al-Ándalus y los reinos cristianos', 'Ocho siglos peninsulares: conquista, califato, frontera, expansión cristiana y 1492.', 'universidad',
-  array['universidad']::public.education_level[],
+  array['eso', 'bachillerato', 'universidad']::public.education_level[],
   55, '711–1492', '⌁', 'green', '{"src":"/img/andalus/portada.jpg","alt":"Fuente de los Leones de la Alhambra, con doce leones de piedra sosteniendo la taza central","width":1200,"height":850,"role":"portada","caption":"El patio de los Leones de la Alhambra, del siglo XIV nazarí.","author":"Jebulon","title":"Fountain patio de los Leones Alhambra Granada Spain","year":"2012","source":"Wikimedia Commons","license":"CC0","url":"https://commons.wikimedia.org/wiki/File:Fountain_patio_de_los_Leones_Alhambra_Granada_Spain.jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
@@ -125,7 +125,7 @@ select 'bizancio',
   (select id from public.eras where slug = 'edad-media'),
   (select id from public.countries where slug = 'turquia'),
   'El Imperio bizantino', 'Mil años de continuidad romana en Oriente: derecho, ortodoxia, iconoclasia y caída.', 'universidad',
-  array['universidad']::public.education_level[],
+  array['eso', 'bachillerato', 'universidad']::public.education_level[],
   45, '330–1453', '☨', 'plum', '{"src":"/img/bizancio/portada.jpg","alt":"Santa Sofía de Estambul con su gran cúpula central y los minaretes añadidos en época otomana","width":1200,"height":801,"role":"portada","caption":"Santa Sofía, terminada en 537 bajo Justiniano.","author":"Arild Vågen","title":"Hagia Sophia Mars 2013","year":"2013","source":"Wikimedia Commons","license":"CC BY-SA 3.0","url":"https://commons.wikimedia.org/wiki/File:Hagia_Sophia_Mars_2013.jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
@@ -157,7 +157,7 @@ select 'crisis-siglo-xiv',
   (select id from public.eras where slug = 'edad-media'),
   (select id from public.countries where slug = 'europa'),
   'Peste negra y crisis bajomedieval', 'Hambre, peste, guerra y cisma: qué se hundió, qué salió reforzado y quién ganó con ello.', 'universidad',
-  array['universidad']::public.education_level[],
+  array['eso', 'bachillerato', 'universidad']::public.education_level[],
   55, 'c. 1300–1450', '⌛', 'blue', '{"src":"/img/crisis-siglo-xiv/portada.jpg","alt":"Pintura de un paisaje devastado en el que ejércitos de esqueletos arrasan a hombres y mujeres de toda condición","width":1200,"height":856,"role":"portada","caption":"El triunfo de la Muerte, de Pieter Brueghel el Viejo (hacia 1562). Es muy posterior a la peste negra y recoge su memoria.","author":"Pieter Brueghel the Elder","title":"De triomf van de Doods The Triumph of Death","year":"1562","source":"Wikimedia Commons","license":"Public domain","url":"https://commons.wikimedia.org/wiki/File:The_Triumph_of_Death_by_Pieter_Bruegel_the_Elder.jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
@@ -189,7 +189,7 @@ select 'egipto',
   (select id from public.eras where slug = 'antiguedad'),
   (select id from public.countries where slug = 'egipto'),
   'El Egipto de los faraones', 'Estado, ecología fluvial, ideología real y religión funeraria en tres milenios de historia egipcia.', 'universidad',
-  array['universidad']::public.education_level[],
+  array['eso', 'bachillerato', 'universidad']::public.education_level[],
   45, 'c. 3100–30 a. C.', '☥', 'gold', '{"src":"/img/egipto/portada.jpg","alt":"Las tres grandes pirámides de Guiza alineadas sobre la arena del desierto al atardecer","width":1200,"height":798,"role":"portada","caption":"La necrópolis de Guiza, levantada durante la IV dinastía.","author":"Ricardo Liberato","title":"All Gizah Pyramids","year":"2006","source":"Wikimedia Commons","license":"CC BY-SA 2.0","url":"https://commons.wikimedia.org/wiki/File:All_Gizah_Pyramids.jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
@@ -237,7 +237,7 @@ select 'feudalismo',
   (select id from public.eras where slug = 'edad-media'),
   (select id from public.countries where slug = 'europa'),
   'La Europa feudal', 'Vasallaje, señorío, campesinado y la discusión sobre si el feudalismo existió.', 'universidad',
-  array['universidad']::public.education_level[],
+  array['eso', 'bachillerato', 'universidad']::public.education_level[],
   45, 'c. 800–1200', '⚔', 'red', '{"src":"/img/feudalismo/portada.jpg","alt":"Miniatura medieval con campesinos segando y agavillando heno frente a una ciudad amurallada","width":1200,"height":1937,"role":"portada","caption":"El mes de junio en las Très Riches Heures del duque de Berry, hacia 1412-1416.","author":"Limbourg brothers / Barthélemy d''Eyck / Jean Colombe","title":"Très Riches Heures du duc de Berry Folio 6, verso : June","year":"1412","source":"Wikimedia Commons","license":"Public domain","url":"https://commons.wikimedia.org/wiki/File:Les_Tr%C3%A8s_Riches_Heures_du_duc_de_Berry_juin.jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
@@ -269,7 +269,7 @@ select 'grecia',
   (select id from public.eras where slug = 'antiguedad'),
   (select id from public.countries where slug = 'grecia'),
   'Grecia arcaica y clásica', 'La polis, la invención de la política, la democracia ateniense y sus límites.', 'universidad',
-  array['universidad']::public.education_level[],
+  array['eso', 'bachillerato', 'universidad']::public.education_level[],
   50, 'c. 800–323 a. C.', '⌂', 'blue', '{"src":"/img/grecia/portada.jpg","alt":"El Partenón visto desde el oeste, con las columnas dóricas de su fachada en pie","width":1200,"height":843,"role":"portada","caption":"El Partenón, construido en la Acrópolis de Atenas entre 447 y 432 a. C.","author":"Steve Swayne","title":"The Parthenon in Athens","year":"1978","source":"Wikimedia Commons","license":"CC BY 2.0","url":"https://commons.wikimedia.org/wiki/File:The_Parthenon_in_Athens.jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
@@ -301,7 +301,7 @@ select 'helenismo',
   (select id from public.eras where slug = 'antiguedad'),
   (select id from public.countries where slug = 'mediterraneo-oriental'),
   'Alejandro y el mundo helenístico', 'De la Macedonia de Filipo a los reinos helenísticos: conquista, koiné y negociación cultural.', 'universidad',
-  array['universidad']::public.education_level[],
+  array['eso', 'bachillerato', 'universidad']::public.education_level[],
   55, '359–30 a. C.', 'Ω', 'gold', '{"src":"/img/helenismo/portada.jpg","alt":"Detalle de mosaico romano con Alejandro Magno a caballo, coraza y lanza, cargando en la batalla","width":1200,"height":828,"role":"portada","caption":"Alejandro en el mosaico de Issos, copia romana de una pintura helenística.","author":"Ruthven ( talk · contribs )","title":"BattleofIssus333BC-mosaic-detail1","year":"2005","source":"Wikimedia Commons","license":"Public domain","url":"https://commons.wikimedia.org/wiki/File:BattleofIssus333BC-mosaic-detail1.jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
@@ -381,7 +381,7 @@ select 'islam',
   (select id from public.eras where slug = 'edad-media'),
   (select id from public.countries where slug = 'arabia'),
   'Nacimiento y expansión del islam', 'De Arabia al Atlántico: revelación, califato, ciencia y fragmentación política.', 'universidad',
-  array['universidad']::public.education_level[],
+  array['eso', 'bachillerato', 'universidad']::public.education_level[],
   50, '610–1258', '☾', 'green', '{"src":"/img/islam/portada.jpg","alt":"Bosque de columnas y arcos de dovelas rojas y blancas en el interior de la mezquita de Córdoba","width":1200,"height":743,"role":"portada","caption":"Los arcos bicolores de la mezquita de Córdoba, iniciada en 786.","author":"James (Jim) Gordon","title":"Mosque of Cordoba","year":"2007","source":"Wikimedia Commons","license":"CC BY 2.0","url":"https://commons.wikimedia.org/wiki/File:Mosque_of_Cordoba.jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
@@ -413,7 +413,7 @@ select 'mesopotamia',
   (select id from public.eras where slug = 'antiguedad'),
   (select id from public.countries where slug = 'irak'),
   'Mesopotamia y el nacimiento del Estado', 'Urbanización, escritura, derecho y los primeros imperios entre el Tigris y el Éufrates.', 'universidad',
-  array['universidad']::public.education_level[],
+  array['eso', 'bachillerato', 'universidad']::public.education_level[],
   45, 'c. 4000–539 a. C.', '𒀭', 'blue', '{"src":"/img/mesopotamia/portada.jpg","alt":"Panel de mosaico con incrustaciones de concha y lapislázuli en tres registros con carros, soldados y prisioneros","width":1200,"height":525,"role":"portada","caption":"Cara de la guerra del Estandarte de Ur, hacia 2600 a. C.","author":"Unknown author Unknown author","title":"Standard of Ur - War","year":"2600","source":"Wikimedia Commons","license":"Public domain","url":"https://commons.wikimedia.org/wiki/File:Standard_of_Ur_-_War.jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
@@ -445,7 +445,7 @@ select 'plena-edad-media',
   (select id from public.eras where slug = 'edad-media'),
   (select id from public.countries where slug = 'europa'),
   'Ciudades, comercio y universidades', 'El despegue de los siglos centrales: campo, mercado, comuna, crédito y corporación universitaria.', 'universidad',
-  array['universidad']::public.education_level[],
+  array['eso', 'bachillerato', 'universidad']::public.education_level[],
   55, 'c. 1000–1300', '⚖', 'terracotta', '{"src":"/img/plena-edad-media/portada.jpg","alt":"Miniatura de una clase universitaria medieval: un maestro lee desde una cátedra elevada ante alumnos sentados en bancos","width":1200,"height":969,"role":"portada","caption":"Clase en la Universidad de Bolonia, miniatura de Laurentius de Voltolina, siglo XIV.","author":"Laurentius de Voltolina","title":"Liber ethicorum des Henricus de Alemannia , single sheet. Scena: Henricus de Alemannia con i suoi studenti","year":"571","source":"Wikimedia Commons","license":"Public domain","url":"https://commons.wikimedia.org/wiki/File:Laurentius_de_Voltolina_001.jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
@@ -573,7 +573,7 @@ select 'roma-imperio',
   (select id from public.eras where slug = 'antiguedad'),
   (select id from public.countries where slug = 'italia'),
   'El Imperio romano y su transformación', 'Principado, romanización, crisis del siglo III, cristianización y el debate sobre la caída.', 'universidad',
-  array['universidad']::public.education_level[],
+  array['eso', 'bachillerato', 'universidad']::public.education_level[],
   50, '27 a. C.–476 d. C.', '⚵', 'gold', '{"src":"/img/roma-imperio/portada.jpg","alt":"El Coliseo de Roma visto desde el exterior, con sus arcadas superpuestas y la fachada parcialmente derruida","width":1200,"height":704,"role":"portada","caption":"El anfiteatro Flavio, inaugurado en el año 80.","author":"Diliff","title":"Colosseum in Rome, Italy - April 2007","year":"2007","source":"Wikimedia Commons","license":"CC BY-SA 2.5","url":"https://commons.wikimedia.org/wiki/File:Colosseum_in_Rome%2C_Italy_-_April_2007.jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
@@ -589,7 +589,7 @@ select 'roma-republica',
   (select id from public.eras where slug = 'antiguedad'),
   (select id from public.countries where slug = 'italia'),
   'Roma: la República', 'Instituciones republicanas, conflicto patricio-plebeyo, expansión mediterránea y crisis final.', 'universidad',
-  array['universidad']::public.education_level[],
+  array['eso', 'bachillerato', 'universidad']::public.education_level[],
   50, '509–27 a. C.', 'SPQR', 'terracotta', '{"src":"/img/roma-republica/portada.jpg","alt":"Pintura del siglo XIX con Cicerón de pie ante el Senado romano mientras Catilina aparece aislado en un banco","width":1200,"height":748,"role":"portada","caption":"Cicerón denuncia a Catilina, según Cesare Maccari (1888). Es una reconstrucción del XIX, no un documento antiguo.","author":"Cesare Maccari","title":"Cicerone denuncia Catilina Cicero Denounces Catiline","year":"1889","source":"Wikimedia Commons","license":"Public domain","url":"https://commons.wikimedia.org/wiki/File:Maccari-Cicero.jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
