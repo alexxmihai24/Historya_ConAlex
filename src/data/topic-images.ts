@@ -665,18 +665,18 @@ export const TOPIC_IMAGES: Record<string, TopicImage[]> =
     },
     {
       "src": "/img/espana-siglo-xx/republica-1931.jpg",
-      "alt": "Fotografía de una plaza abarrotada de gente frente a un edificio institucional con banderas en el balcón",
+      "alt": "Fotografía de una multitud ocupando una calle amplia, con gente encaramada a un vehículo y banderas en alto",
       "width": 1200,
-      "height": 873,
+      "height": 771,
       "role": "figura",
       "section": 1,
-      "caption": "Proclamación de la República en la plaza de Sant Jaume de Barcelona, 14 de abril de 1931. Llegó tras unas elecciones municipales, no tras una revolución.",
-      "author": "Banda Municipal de Barcelona",
-      "title": "Fitxer Proclamació de la República Plaça Sant Jaume. Fotògraf Josep Maria Sagarra, 1931",
-      "year": "2009",
+      "caption": "Proclamación de la Segunda República en Madrid, 14 de abril de 1931. Llegó tras unas elecciones municipales, no tras una revolución.",
+      "author": "Unknown Unknown",
+      "title": "Madrid, Ausrufung der Zweiten Spanischen Republik",
+      "year": "1931",
       "source": "Wikimedia Commons",
-      "license": "Public domain",
-      "url": "https://commons.wikimedia.org/wiki/File:Fitxer_Proclamaci%C3%B3_de_la_Rep%C3%BAblica_Pla%C3%A7a_Sant_Jaume._Fot%C3%B2graf_Josep_Maria_Sagarra%2C_1931.jpg"
+      "license": "CC BY-SA 3.0 de",
+      "url": "https://commons.wikimedia.org/wiki/File:Bundesarchiv_Bild_102-11543%2C_Madrid%2C_Ausrufung_der_Zweiten_Spanischen_Republik.jpg"
     },
     {
       "src": "/img/espana-siglo-xx/miliciana.jpg",

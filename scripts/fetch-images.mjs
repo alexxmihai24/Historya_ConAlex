@@ -25,8 +25,72 @@ const manifestPath = join(root, 'scripts', 'images.json')
 const API = 'https://commons.wikimedia.org/w/api.php'
 const UA = 'HistoryaConAlex/1.0 (proyecto educativo; contacto vía repositorio)'
 
+const dormir = (ms) => new Promise((listo) => setTimeout(listo, ms))
+
+/* Commons corta por ritmo, y el corte dura minutos. TODO lo que habla con
+   Commons pasa por aquí: la consulta a la API, la comprobación de tamaño y la
+   descarga. Antes solo reintentaba la descarga, así que un 429 en la consulta
+   tiraba la ejecución entera antes de bajar nada, y un 429 en la comprobación
+   de tamaño se tragaba en silencio y hacía descargar la imagen a tamaño
+   completo. Los dos eran el mismo error: una vía de fallo sin tratar. */
+async function pedirAComons(url, opciones = {}, intentos = 6) {
+  for (let intento = 0; intento < intentos; intento += 1) {
+    const respuesta = await fetch(url, { ...opciones, headers: { 'User-Agent': UA, ...(opciones.headers ?? {}) } })
+    if (respuesta.ok) return respuesta
+    if (respuesta.status !== 429 && respuesta.status < 500) return respuesta
+    const pedido = Number(respuesta.headers.get('retry-after'))
+    await dormir(Number.isFinite(pedido) && pedido > 0 ? pedido * 1000 : 20000 * (intento + 1))
+  }
+  throw new Error('Commons sigue rechazando tras seis intentos. Vuelve a lanzar `npm run images`: lo ya descargado no se repite.')
+}
+
 /** Ancho al que se pide la miniatura. Commons la genera al vuelo. */
 const ANCHO = 1200
+
+/* Presupuesto por archivo. Pedir 1200 px sin más dejaba PNG de 4 MB dentro de
+   una lección: con tres figuras y portada, la página pasaba de 8 MB, que en
+   móvil es inaceptable. Si la miniatura de 1200 no cabe, se pide más pequeña.
+
+   OJO, aquí me equivoqué antes: NO se puede reescribir el ancho dentro de la
+   URL de la miniatura («/1200px-» por «/500px-»). Wikimedia solo sirve las URLs
+   que genera ella y devuelve 400 a cualquier otra. Hay que volver a preguntar a
+   la API con otro `iiurlwidth`. La primera versión reescribía la URL, recibía
+   400, se lo tragaba y descargaba el original: el presupuesto no hacía nada y
+   además avisaba de que esas imágenes «no se podían reducir», que era falso. */
+const MAX_BYTES = 600 * 1024
+const ANCHOS = [1200, 950, 800, 650, 520, 420]
+
+async function pesa(url) {
+  const respuesta = await pedirAComons(url, { method: 'HEAD' })
+  const tamano = Number(respuesta.headers.get('content-length'))
+  return respuesta.ok && Number.isFinite(tamano) ? tamano : null
+}
+
+/** La miniatura más grande que cabe en el presupuesto, preguntando a la API.
+ *
+ *  Devuelve también el ancho y el alto reales: van al HTML como `width` y
+ *  `height`, y si no se actualizan al bajar de escalón la página da un salto
+ *  al cargar la imagen. */
+async function miniaturaQueQuepa(titulo, datosIniciales) {
+  let mejor = { url: datosIniciales.thumburl.split('?')[0], width: datosIniciales.thumbwidth, height: datosIniciales.thumbheight }
+  let tamano = await pesa(mejor.url)
+  if (tamano !== null && tamano <= MAX_BYTES) return { ...mejor, tamano }
+
+  for (const ancho of ANCHOS.slice(1)) {
+    const info = (await pedirInfo([titulo], ancho)).get(titulo)
+    if (!info?.thumburl) break
+    const url = info.thumburl.split('?')[0]
+    const peso = await pesa(url)
+    if (peso === null) break
+    mejor = { url, width: info.thumbwidth, height: info.thumbheight }
+    tamano = peso
+    if (peso <= MAX_BYTES) return { ...mejor, tamano }
+    await dormir(1500)
+  }
+  // Ni el escalón más pequeño cabe. Se descarga igualmente y se avisa al final:
+  // una imagen enorme no puede pasar desapercibida.
+  return { ...mejor, tamano }
+}
 
 /** Licencias admitidas. Cualquier otra cosa se rechaza sin descargar. */
 const LICENCIAS_OK = [/^public domain$/i, /^cc0/i, /^cc by(-sa)?[ -]/i, /^pd-/i]
@@ -63,15 +127,15 @@ function anio(valor) {
   return encontrado ? encontrado[0] : ''
 }
 
-async function pedirInfo(titulos) {
+async function pedirInfo(titulos, ancho = ANCHO) {
   const url = new URL(API)
   url.searchParams.set('action', 'query')
   url.searchParams.set('format', 'json')
   url.searchParams.set('prop', 'imageinfo')
   url.searchParams.set('iiprop', 'url|extmetadata|size')
-  url.searchParams.set('iiurlwidth', String(ANCHO))
+  url.searchParams.set('iiurlwidth', String(ancho))
   url.searchParams.set('titles', titulos.map((t) => `File:${t}`).join('|'))
-  const respuesta = await fetch(url, { headers: { 'User-Agent': UA } })
+  const respuesta = await pedirAComons(url)
   if (!respuesta.ok) throw new Error(`Commons respondió ${respuesta.status}`)
   const datos = await respuesta.json()
   const porTitulo = new Map()
@@ -82,26 +146,14 @@ async function pedirInfo(titulos) {
   return porTitulo
 }
 
-const dormir = (ms) => new Promise((listo) => setTimeout(listo, ms))
-
 /** Commons devuelve 429 si se le piden archivos demasiado seguidos, y el bloqueo
  *  dura minutos, no segundos: con esperas cortas el script abandonaba a medias.
  *  Se respeta `Retry-After` cuando viene, y si no, retardo creciente hasta unos
  *  siete minutos en total. */
 async function descargar(url, destino) {
-  for (let intento = 0; intento < 6; intento += 1) {
-    const respuesta = await fetch(url, { headers: { 'User-Agent': UA } })
-    if (respuesta.ok) {
-      await writeFile(destino, Buffer.from(await respuesta.arrayBuffer()))
-      return
-    }
-    if (respuesta.status !== 429 && respuesta.status < 500) {
-      throw new Error(`descarga ${respuesta.status}`)
-    }
-    const pedido = Number(respuesta.headers.get('retry-after'))
-    await dormir(Number.isFinite(pedido) && pedido > 0 ? pedido * 1000 : 20000 * (intento + 1))
-  }
-  throw new Error('descarga: 429 tras seis intentos. Vuelve a lanzar `npm run images`: lo ya descargado no se repite.')
+  const respuesta = await pedirAComons(url)
+  if (!respuesta.ok) throw new Error(`descarga ${respuesta.status}`)
+  await writeFile(destino, Buffer.from(await respuesta.arrayBuffer()))
 }
 
 const existe = async (ruta) => access(ruta).then(() => true, () => false)
@@ -118,6 +170,7 @@ for (let i = 0; i < titulos.length; i += 40) {
 
 const porTema = new Map()
 const rechazadas = []
+const pesadas = []
 /* Commons corta la tanda tras muchas descargas seguidas y el bloqueo dura
    minutos. Al primer corte se deja de pedir archivos, pero lo ya descargado se
    registra igual: antes, un solo fallo tiraba la ejecución entera y se perdía
@@ -150,7 +203,13 @@ for (const entrada of manifiesto) {
       continue
     }
     try {
-      await descargar(datos.thumburl.split('?')[0], destino)
+      const elegida = await miniaturaQueQuepa(entrada.file, datos)
+      if (elegida.tamano && elegida.tamano > MAX_BYTES) {
+        pesadas.push(`${entrada.slug}/${nombreArchivo}: ${Math.round(elegida.tamano / 1024)} KB a ${elegida.width} px`)
+      }
+      datos.thumbwidth = elegida.width
+      datos.thumbheight = elegida.height
+      await descargar(elegida.url, destino)
     } catch (error) {
       cortado = true
       rechazadas.push(`${entrada.file}: ${error.message}`)
@@ -197,6 +256,11 @@ await writeFile(join(root, 'src', 'data', 'topic-images.ts'), salida, 'utf8')
 
 const total = [...porTema.values()].reduce((n, lista) => n + lista.length, 0)
 console.log(`imágenes: ${total} descargadas en ${porTema.size} temas.`)
+if (pesadas.length) {
+  console.warn(`
+no caben en ${Math.round(MAX_BYTES / 1024)} KB ni al ancho mínimo (${pesadas.length}):`)
+  for (const linea of pesadas) console.warn(`  - ${linea}`)
+}
 if (rechazadas.length) {
   console.warn(`\nrechazadas (${rechazadas.length}):`)
   for (const motivo of rechazadas) console.warn(`  - ${motivo}`)
