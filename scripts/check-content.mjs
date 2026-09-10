@@ -98,6 +98,27 @@ ok(pointsFor(1, 999) === BASE_POINTS + SECONDS_PER_QUESTION * TIME_BONUS, 'el ti
 ok(pointsFor(1, -3) === BASE_POINTS, 'un tiempo negativo no resta puntos')
 ok(SECONDS_PER_QUESTION >= 30, 'el reloj debe dar tiempo a leer el enunciado y las cuatro opciones')
 
+// 2.a.2 Las reglas de puntuación están escritas dos veces --------------------
+// En src/lib/scoring.ts, para el navegador, y en la migración 20260910, para el
+// servidor, que es quien manda (SPEC §10.4). Con las reglas duplicadas, la única
+// forma de que no se separen en silencio es comparar los dos sitios.
+const reglasSql = await readFile(join(root, 'supabase', 'migrations', '20260910_quiz_score.sql'), 'utf8')
+const constantes = reglasSql.match(/select\s+(\d+),\s*(\d+),\s*(\d+),\s*(\d+);/)
+ok(constantes !== null, 'no se encuentran las constantes de puntuación en 20260910_quiz_score.sql')
+if (constantes) {
+  const [, base, bonus, tope, segundos] = constantes.map(Number)
+  ok(base === BASE_POINTS, `BASE_POINTS: ${BASE_POINTS} en scoring.ts y ${base} en la migración`)
+  ok(bonus === TIME_BONUS, `TIME_BONUS: ${TIME_BONUS} en scoring.ts y ${bonus} en la migración`)
+  ok(tope === MAX_MULTIPLIER, `MAX_MULTIPLIER: ${MAX_MULTIPLIER} en scoring.ts y ${tope} en la migración`)
+  ok(segundos === SECONDS_PER_QUESTION, `SECONDS_PER_QUESTION: ${SECONDS_PER_QUESTION} en scoring.ts y ${segundos} en la migración`)
+}
+// Lo que el servidor NO puede verificar tiene que estar acotado: si el recorte
+// del tiempo desapareciera, un cliente modificado inflaría la puntuación.
+ok(reglasSql.includes('least(floor(answer.seconds_left)::integer, rules.seconds_per_question)'),
+  'la migración debe recortar los segundos declarados por el cliente')
+ok(reglasSql.includes('distinct on (question_id)'),
+  'la migración debe quedarse con una sola respuesta por pregunta')
+
 // 2.b Barajado de las opciones ---------------------------------------------
 // La respuesta correcta está en la segunda posición en el 85 % de las preguntas
 // escritas. Si el barajado dejara de aplicarse, el quiz volvería a aprobarse

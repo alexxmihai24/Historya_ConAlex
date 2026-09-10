@@ -25,7 +25,7 @@ const activeQuestions = ref<QuizQuestionUI[]>([])
 const currentIndex = ref(0)
 const selectedOptionId = ref<string | null>(null)
 const currentFeedback = ref<AnswerResult | null>(null)
-const answers = ref<Array<{ questionId: string; optionId: string; isCorrect: boolean }>>([])
+const answers = ref<Array<{ questionId: string; optionId: string; isCorrect: boolean; secondsLeft: number }>>([])
 const results = ref<boolean[]>([])
 const finished = ref(false)
 
@@ -147,9 +147,12 @@ function chooseOption(optionId: string) {
   stopTimer()
   selectedOptionId.value = optionId
   const question = currentQuestion.value
+  // Se toma ANTES de esperar a la respuesta del servidor: si no, la latencia de
+  // la red descontaría segundos que el jugador no ha gastado.
+  const secondsLeft = timeLeft.value
   void checkAnswer(question.id, optionId).then((result) => {
     currentFeedback.value = result
-    answers.value.push({ questionId: question.id, optionId, isCorrect: result.isCorrect })
+    answers.value.push({ questionId: question.id, optionId, isCorrect: result.isCorrect, secondsLeft })
     register(result.isCorrect)
   })
 }

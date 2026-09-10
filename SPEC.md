@@ -112,7 +112,7 @@ Ya no queda ningún tema con el texto corto de la demo inicial: `_pendientes.ts`
 - **Más figuras por lección.** Hay 35 portadas y 5 figuras; §14.2 pide entre dos y cuatro figuras por tema, así que faltan alrededor de un centenar. El trabajo restante es editorial, no técnico: añadir entradas a `scripts/images.json` y ejecutar `npm run images`.
 - **Formatos AVIF y WebP con `<picture>`.** Hoy se sirve el JPEG o PNG de Commons a 1200 px de ancho. Convertirlos exigiría una herramienta de imagen que el proyecto no tiene.
 - Tests de componentes con DOM y pipeline de despliegue. `npm test` cubre la lógica pura y la integridad del contenido, no el renderizado.
-- **Puntos del quiz persistidos.** `submit_quiz_attempt` guarda aciertos calculados en el servidor; los puntos, la racha y el tiempo son de la sesión. Guardarlos exigiría una función que reciba los tiempos por respuesta, con el reloj en manos del cliente.
+
 - **Formatos de pregunta `mapa` y `huecos`.** El diseño los contempla; el banco solo tiene `opciones`. Faltan la columna de tipo, el seed y las preguntas.
 
 - **Mapa histórico y narración de audio** de la ficha de país: retirados a propósito, no hay datos ni grabaciones.
@@ -240,7 +240,8 @@ user_roles (separada de profiles)
 | --- | --- | --- |
 | `get_quiz_questions(topic_slug, limit)` | Anónimo o autenticado | Devuelve opciones sin exponer cuál es correcta |
 | `check_quiz_answer(question_id, option_id)` | Anónimo o autenticado | Corrige una respuesta en el servidor |
-| `submit_quiz_attempt(scope, answers)` | Autenticado | Calcula y guarda el resultado en PostgreSQL |
+| `submit_quiz_attempt(scope, answers)` | Autenticado | Calcula y guarda resultado **y puntuación** en PostgreSQL. La racha sale del orden de las respuestas; el tiempo declarado por el cliente va acotado (§10.4) |
+| `quiz_scoring_rules()` | Anónimo o autenticado | Las constantes de puntuación, en un solo sitio |
 | `replace_user_preferences(preferences)` | Autenticado | Sustituye preferencias en una operación atómica |
 
 ## 10. Seguridad: requisitos no negociables

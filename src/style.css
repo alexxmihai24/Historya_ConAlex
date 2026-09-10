@@ -614,6 +614,10 @@ h1, h2, h3, h4 { margin: 0; font-family: var(--serif); font-weight: 400; letter-
 /* Figuras dentro de un apartado. El pie lleva SIEMPRE la atribución: es
    requisito de varias de las licencias admitidas y es el mismo rigor que ya
    tiene el resto del contenido (SPEC §14.2). */
+.quiz-history-points {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.02em; color: var(--ember-light);
+}
+
 /* Documento comentado: extracto de fuente primaria con su pregunta. Es lo que
    más distingue una página de libro de texto de un artículo. Va al final del
    apartado y a todo el ancho, porque se lee entero. */

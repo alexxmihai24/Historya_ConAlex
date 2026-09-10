@@ -101,13 +101,25 @@ export function useQuiz() {
     }
   }
 
-  async function finishQuiz(scope: string, answers: Array<{ questionId: string; optionId: string }>) {
+  /* El orden del array es el orden de juego y el servidor lo respeta: la racha
+     depende de él. `secondsLeft` es lo único que aporta el cliente, y allí se
+     acota a [0, SECONDS_PER_QUESTION]; la corrección y la racha las calcula el
+     servidor, que es lo que exige SPEC §10.4. Aquí no se envía ninguna
+     puntuación: enviarla sería pedirle a la base de datos que se fíe. */
+  async function finishQuiz(
+    scope: string,
+    answers: Array<{ questionId: string; optionId: string; secondsLeft?: number }>,
+  ) {
     const auth = useAuthStore()
     if (!supabase || isDemoMode.value || !auth.isAuthenticated) return
     try {
       const { error } = await supabase.rpc('submit_quiz_attempt', {
         p_scope: scope,
-        p_answers: answers.map((answer) => ({ question_id: answer.questionId, option_id: answer.optionId })),
+        p_answers: answers.map((answer) => ({
+          question_id: answer.questionId,
+          option_id: answer.optionId,
+          seconds_left: Math.max(0, Math.round(answer.secondsLeft ?? 0)),
+        })),
       })
       if (error) throw error
     } catch (err) {

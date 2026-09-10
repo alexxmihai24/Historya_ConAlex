@@ -6,7 +6,7 @@ import { useAuthStore } from '../stores/auth.ts'
 import { useTopics } from '../composables/useTopics.ts'
 
 interface RecentProgress { title: string; slug: string; percent: number }
-interface QuizHistoryItem { scope: string; correct: number; total: number; date: string }
+interface QuizHistoryItem { scope: string; correct: number; total: number; points: number; streak: number; date: string }
 
 const auth = useAuthStore()
 const { topics } = useTopics()
@@ -62,16 +62,30 @@ async function loadDashboard() {
       ? { title: latest.lessons.topics.title, slug: latest.lessons.topics.slug, percent: latest.percent_complete }
       : null
 
-    const { data: attemptRows, error: attemptError } = await supabase
-      .from('quiz_attempts')
-      .select('quiz_scope, total_questions, correct_answers, completed_at')
-      .order('completed_at', { ascending: false })
-      .limit(5)
-    if (attemptError) throw attemptError
-    quizHistory.value = ((attemptRows ?? []) as unknown as Array<{ quiz_scope: string; total_questions: number; correct_answers: number; completed_at: string }>).map((row) => ({
+    /* Sin la migración 20260910 no existen `points` ni `best_streak`, y pedirlas
+       haría fallar el select entero. Se reintenta sin ellas para no dejar el
+       historial vacío hasta que se ejecute el SQL, igual que con `levels`. */
+    async function ultimosIntentos(columnas: string) {
+      return supabase!
+        .from('quiz_attempts')
+        .select(columnas)
+        .order('completed_at', { ascending: false })
+        .limit(5)
+    }
+    let intentos = await ultimosIntentos('quiz_scope, total_questions, correct_answers, points, best_streak, completed_at')
+    if (intentos.error) {
+      intentos = await ultimosIntentos('quiz_scope, total_questions, correct_answers, completed_at')
+    }
+    if (intentos.error) throw intentos.error
+    const attemptRows = intentos.data
+    quizHistory.value = ((attemptRows ?? []) as unknown as Array<{ quiz_scope: string; total_questions: number; correct_answers: number; points: number | null; best_streak: number | null; completed_at: string }>).map((row) => ({
       scope: row.quiz_scope,
       correct: row.correct_answers,
       total: row.total_questions,
+      // Los calcula el servidor en submit_quiz_attempt; nunca los envía el
+      // cliente (SPEC §10.4). Nulos en los intentos anteriores a la migración.
+      points: row.points ?? 0,
+      streak: row.best_streak ?? 0,
       date: new Date(row.completed_at).toLocaleDateString('es-ES'),
     }))
   } catch (err) {
@@ -115,7 +129,7 @@ watch(() => auth.user?.id, () => { void loadPreferences(); void loadDashboard() 
 
       <article class="dashboard-card">
         <p class="eyebrow">ÚLTIMOS QUIZZES</p>
-        <ul v-if="quizHistory.length" class="quiz-history"><li v-for="(attempt, index) in quizHistory" :key="index"><strong>{{ attempt.scope }}</strong><span>{{ attempt.correct }}/{{ attempt.total }}</span><small>{{ attempt.date }}</small></li></ul>
+        <ul v-if="quizHistory.length" class="quiz-history"><li v-for="(attempt, index) in quizHistory" :key="index"><strong>{{ attempt.scope }}</strong><span>{{ attempt.correct }}/{{ attempt.total }}</span><span v-if="attempt.points" class="quiz-history-points">{{ attempt.points }} pts<template v-if="attempt.streak > 1"> · racha {{ attempt.streak }}</template></span><small>{{ attempt.date }}</small></li></ul>
         <p v-else>Aquí verás tus resultados cuando completes un quiz con la sesión iniciada.</p>
       </article>
     </div>
