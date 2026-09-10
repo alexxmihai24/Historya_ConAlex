@@ -13,7 +13,8 @@
     "images": "node --experimental-strip-types scripts/fetch-images.mjs",
     "check:backend": "node scripts/check-backend.mjs",
     "countries": "node --experimental-strip-types scripts/fetch-countries.mjs",
-    "check:security": "node --experimental-strip-types scripts/check-security.mjs"
+    "check:security": "node --experimental-strip-types scripts/check-security.mjs",
+    "check:sql": "node scripts/check-sql.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.4",
@@ -25,6 +26,7 @@
     "world-atlas": "^2.0.2"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.2.17",
     "@types/node": "^24.13.3",
     "@vitejs/plugin-vue": "^6.0.8",
     "@vue/tsconfig": "^0.9.1",

@@ -1,7 +1,7 @@
 # Especificación del producto · Historya con Alex
 
 **Última actualización:** 10 de septiembre de 2026
-**Estado:** temario completo a nivel universitario: 35 temas y 555 preguntas. Rediseño «Atlas Nocturno» implantado, con la lección remaquetada como página de libro de texto. 145 imágenes con licencia comprobada, descargadas y enganchadas. Temario escrito en los tres niveles educativos. **Pendiente: ejecutar en el SQL Editor las migraciones `20260829_topic_cover_image.sql` y `20260910_topic_levels.sql`, y después los ocho archivos de `supabase/seed/`.**
+**Estado:** temario completo a nivel universitario: 35 temas y 555 preguntas. Rediseño «Atlas Nocturno» implantado, con la lección remaquetada como página de libro de texto. 145 imágenes con licencia comprobada, descargadas y enganchadas. Temario escrito en los tres niveles educativos. **Pendiente: ejecutar en el SQL Editor, en este orden, `20260829_topic_cover_image.sql`, `20260910_quiz_score.sql` y `20260910_topic_levels.sql`, y después los ocho archivos de `supabase/seed/`. No volver a ejecutar `20260826` ni `20260827`: ya están aplicadas. Antes de pegar nada, `npm run check:sql` (§17.1).**
 
 > **Carencias señaladas por el cliente y su estado.**
 > 1. **Nivel educativo.** ✅ Implementado el 10/09/2026. Ver §15.
@@ -526,9 +526,17 @@ Lo que hay que entender de la arquitectura antes de leer el resultado: **este pr
 | E3 | Los errores no cuentan de más | Sin trazas, sin rutas, sin nombres internos |
 | E4 | Cabeceras del alojamiento | `nosniff`, `Referrer-Policy`, HSTS y `Permissions-Policy` |
 
-**Las tres que faltan exigen dos cuentas reales abiertas a la vez** —B2 con sesión ajena, E1 dos cuentas en paralelo y E2 recorrer la app con la de menor privilegio— y crearlas es decisión del dueño del proyecto, no de un script. Las políticas comparan con `auth.uid()`, que es la condición estructural, pero eso hay que verlo con dos sesiones.
+**Las tres que faltan exigen dos cuentas reales abiertas a la vez** —B2 con sesión ajena, E1 dos cuentas en paralelo y E2 recorrer la app con la de menor privilegio— y crearlas es decisión del dueño del proyecto, no de un script. **B2 ya está comprobado contra las políticas** con `npm run check:sql` (ver §17.1): con dos usuarios simulados, B no ve nada de A. Lo que falta es repetirlo contra producción, porque producción puede no coincidir con los archivos.
 
 **Dos matices que el resultado en verde no debe ocultar:**
 
 1. **Con PostgREST el esquema es descubrible.** El error de E3 nombra la tabla consultada, y cualquiera puede listar las tablas expuestas. No es un fallo: es cómo funciona el modelo, y por eso la defensa **no es la oscuridad sino RLS**. Todo lo que no debe leerse ya está cerrado.
 2. **`style-src` admite `unsafe-inline`.** Lo exigen los estilos ligados con `:style` de Vue, como las barras de progreso. Es una relajación conocida y acotada: `script-src` sigue sin `unsafe-inline`, que es lo que importa para XSS.
+
+### 17.1 El SQL se ejecuta antes de llegar a Supabase
+
+`npm run check:sql` ejecuta todas las migraciones y los ocho archivos del seed contra un Postgres de verdad —PGlite, Postgres compilado a WebAssembly, en memoria—, sin Docker, sin la clave `service_role` y sin tocar Supabase. Comprueba que corren sobre una base limpia, que las posteriores al esquema inicial se pueden repetir, que el contenido llega completo, que el `CHECK` de niveles rechaza lo que debe, y prueba las políticas RLS y el cálculo de puntos con dos usuarios simulados.
+
+**Existe por un fallo concreto.** El 10/09/2026 se entregaron tres migraciones que nunca se habían ejecutado, y dos fallaron al pegarlas en el SQL Editor. `20260910_topic_levels.sql` tenía una subconsulta dentro de un `CHECK`, que Postgres no admite, y además dejaba pasar un array vacío porque `array_length('{}')` devuelve `NULL` y un `CHECK` solo rechaza lo que da falso. Leer el SQL no encuentra ninguno de los dos: hay que ejecutarlo.
+
+**Lo que no prueba** es que producción coincida con los archivos. Para eso está `npm run check:security`, contra el servidor real.

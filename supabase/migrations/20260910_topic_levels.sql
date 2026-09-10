@@ -28,13 +28,28 @@ alter table public.topics
 -- Se exige que haya al menos un nivel y que no haya repetidos. `curioso` es un
 -- valor del enum que el temario no usa como nivel de lectura, así que se excluye:
 -- si apareciera aquí, la biblioteca mostraría un filtro que no existe.
+--
+-- Los repetidos se comprueban con una función y no dentro del CHECK: Postgres
+-- no admite subconsultas en una restricción CHECK («cannot use subquery in check
+-- constraint»). La primera versión de esta migración la tenía y fallaba al
+-- ejecutarse. Llamar a una función inmutable sí está permitido.
+--
+-- Y «al menos un nivel» se mide con cardinality(), no con array_length():
+-- array_length de un array vacío devuelve NULL, no 0, y un CHECK solo rechaza
+-- lo que da FALSE. Con array_length, '{}' pasaba la restricción.
+create or replace function public.education_levels_have_duplicates(p_levels public.education_level[])
+returns boolean
+language sql immutable set search_path = public as $$
+  select count(*) <> count(distinct nivel) from unnest(p_levels) as nivel;
+$$;
+
 alter table public.topics
   drop constraint if exists topics_levels_shape;
 
 alter table public.topics
   add constraint topics_levels_shape check (
-    array_length(levels, 1) >= 1
-    and array_length(levels, 1) = (select count(distinct nivel) from unnest(levels) as nivel)
+    cardinality(levels) >= 1
+    and not public.education_levels_have_duplicates(levels)
     and not ('curioso' = any (levels))
   );
 
