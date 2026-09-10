@@ -5,7 +5,7 @@
 
 > **Carencias señaladas por el cliente y su estado.**
 > 1. **Nivel educativo.** ✅ Implementado el 10/09/2026. Ver §15.
-> 2. **La lección era un muro de texto.** ✅ Corregido en lo técnico (§14.6). Falta el documento comentado.
+> 2. **La lección era un muro de texto.** ✅ Resuelto. Figuras intercaladas, conceptos al margen y documento comentado (§14.6 y §14.8).
 > 3. **120 de los 142 países del atlas no tenían ficha.** ✅ Resuelto el 10/09/2026 con datos de Wikidata (CC0). Ver §14.7.
 > 4. **La respuesta del quiz era la «b» en el 85 % de las preguntas.** ✅ Corregido con barajado al servir. Ver §16.
 > 5. **Poco tiempo por pregunta.** ✅ 40 s en lugar de 20.
@@ -114,8 +114,7 @@ Ya no queda ningún tema con el texto corto de la demo inicial: `_pendientes.ts`
 - Tests de componentes con DOM y pipeline de despliegue. `npm test` cubre la lógica pura y la integridad del contenido, no el renderizado.
 - **Puntos del quiz persistidos.** `submit_quiz_attempt` guarda aciertos calculados en el servidor; los puntos, la racha y el tiempo son de la sesión. Guardarlos exigiría una función que reciba los tiempos por respuesta, con el reloj en manos del cliente.
 - **Formatos de pregunta `mapa` y `huecos`.** El diseño los contempla; el banco solo tiene `opciones`. Faltan la columna de tipo, el seed y las preguntas.
-- **Documento comentado en la lección**: extracto de fuente primaria en recuadro. `Source` no guarda el texto (§14.6).
-- **Fichas de país para los 120 países del atlas que no tienen lección** (§14.7).
+
 - **Mapa histórico y narración de audio** de la ficha de país: retirados a propósito, no hay datos ni grabaciones.
 
 ## 5. Stack tecnológico
@@ -439,7 +438,7 @@ La lección se lee como una página de libro de texto, no como un bloque de pár
 - **Conceptos al margen.** Cada término del glosario aparece explicado en un recuadro lateral junto al párrafo donde sale por primera vez, una sola vez en toda la lección y dos por apartado como mucho. No es contenido nuevo: son los `concepts[]` que ya existían, y el glosario del final se mantiene. Cubre 173 de los 208 apartados.
 - **Tres figuras por tema** declaradas en `scripts/images.json`: 145 entradas en total.
 
-**Lo que falta para que sea del todo un libro de texto:** el **documento comentado**, un extracto de fuente primaria en recuadro con una pregunta. `Source` guarda autor, título, año y nota, pero no el texto: hace falta un campo nuevo y escribir el extracto tema a tema.
+- **Documento comentado** al final del apartado que lo tiene: extracto de fuente primaria, su cita y una pregunta al lector. Ver §14.8.
 
 ### 14.7 Fichas de país
 
@@ -489,3 +488,12 @@ Se baraja **al servir**, en `useQuiz`, con `shuffled` de `src/lib/shuffle.ts`, y
 **La corrección va por `id` de opción y nunca por posición**, así que cambiar el orden no puede romperla; la letra A/B/C/D la pone `QuizView` al pintar y el `id` no llega al DOM. El barajado es orden de presentación, **no una medida de seguridad**: quien protege la respuesta correcta sigue siendo `check_quiz_answer` en el servidor (§10.3).
 
 `npm test` comprueba que barajar no pierde, repite ni inventa opciones, que no modifica el array recibido y que reparte de verdad: 4000 barajados y la misma opción tiene que caer en las cuatro posiciones.
+
+### 14.8 Documentos comentados
+
+**Implantado el 10/09/2026.** Es la pieza que más distingue una página de libro de texto de un artículo: no basta con contar lo que pasó, hay que poner delante un texto de la época y pedirle al lector que lo lea.
+
+- **Modelo de datos:** el tipo `TopicDocument` en `src/data/types.ts` —apartado, título, extracto, cita, nota y **pregunta**—. Los documentos viven en `src/data/documents.ts` y viajan a la base de datos como un bloque `documents` dentro de `lessons.body`, igual que el glosario o las imágenes: no hizo falta migración.
+- **La pregunta no es opcional.** Un extracto sin pregunta es una cita; lo que lo convierte en documento comentado es el ejercicio. `npm test` lo exige, y exige también que el apartado al que apunta exista: un documento con un índice equivocado no se pintaría nunca y nadie se enteraría.
+- **Licencia, regla dura.** Los originales son todos de dominio público. **El riesgo real está en las traducciones**, que pueden tener derechos vivos aunque el original tenga tres mil años: cuando el original no está en español la versión es propia y el pie lo dice. Los textos ya en español —Montesinos, Cádiz, la Constitución de 1978, el Acuerdo de París— se citan como tales.
+- **Cobertura:** 34 documentos en 34 temas. `prehistoria` no tiene, y es deliberado: es por definición el periodo anterior a la escritura. La comprobación de `npm test` lo fija por escrito para que se lea como decisión y no como descuido.

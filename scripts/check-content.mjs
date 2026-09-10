@@ -25,6 +25,7 @@ import { multiplierFor, pointsFor, BASE_POINTS, TIME_BONUS, MAX_MULTIPLIER, SECO
 import { shuffled } from '../src/lib/shuffle.ts'
 import { bodyForLevel, levelsOf, sectionsForLevel, showsDebates, showsSources } from '../src/lib/levels.ts'
 import { TOPIC_LEVELS } from '../src/data/levels/index.ts'
+import { TOPIC_DOCUMENTS } from '../src/data/documents.ts'
 import { FLAG_CODES, flagCodeByNumericId } from '../src/lib/country-codes.ts'
 import { topics, quizQuestions, eras } from '../src/data/history.ts'
 import { flagCode } from '../src/lib/country-names.ts'
@@ -154,6 +155,28 @@ for (const [slug, niveles] of Object.entries(TOPIC_LEVELS)) {
 for (const topic of topics) {
   ok(levelsOf(topic.sections).includes('Universidad'), `${topic.id}: todo tema debe poder leerse en Universidad`)
 }
+
+// 2.c.2 Documentos comentados ------------------------------------------------
+// Un documento apuntando a un apartado que no existe no se pintaría nunca, y
+// nadie se enteraría de que falta. Y un documento sin pregunta es una cita, no
+// un ejercicio: la pregunta es lo que lo convierte en documento COMENTADO.
+for (const [slug, docs] of Object.entries(TOPIC_DOCUMENTS)) {
+  const tema = topics.find((topic) => topic.id === slug)
+  ok(tema !== undefined, `documents.ts tiene «${slug}», que no es ningún tema`)
+  if (!tema) continue
+  for (const doc of docs) {
+    ok(
+      Number.isInteger(doc.section) && doc.section >= 0 && doc.section < tema.sections.length,
+      `${slug}: documento «${doc.title}» apunta al apartado ${doc.section}, que no existe`,
+    )
+    ok(doc.text.trim().length > 0, `${slug}: documento «${doc.title}» sin texto`)
+    ok(doc.source.trim().length > 0, `${slug}: documento «${doc.title}» sin fuente citada`)
+    ok(doc.question.trim().length > 0, `${slug}: documento «${doc.title}» sin pregunta`)
+  }
+}
+// prehistoria no tiene documento a propósito: es el periodo anterior a la
+// escritura. Se comprueba para que quede claro que es decisión, no descuido.
+ok(TOPIC_DOCUMENTS.prehistoria === undefined, 'prehistoria no debe tener documento: no hay fuentes escritas')
 
 // 2.d Fichas de país --------------------------------------------------------
 // El globo dibuja 142 países y solo 22 tienen lección: sin estos datos, pinchar

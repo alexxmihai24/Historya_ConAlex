@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import { supabase } from '../lib/supabase.ts'
 import { findTopic } from '../data/history.ts'
-import type { Concept, Debate, Source, TopicImage } from '../data/types.ts'
+import type { Concept, Debate, Source, TopicImage, TopicDocument } from '../data/types.ts'
 import { safeImages } from '../lib/images.ts'
 import { TOPIC_SELECT, TOPIC_SELECT_SIN_LEVELS, mapEducationLevel, type RawTopicRow, type EducationLevel } from './useTopics.ts'
 
@@ -21,6 +21,7 @@ export type LessonBlock =
   | { type: 'debates'; items: Debate[] }
   | { type: 'sources'; items: Source[] }
   | { type: 'images'; items: TopicImage[] }
+  | { type: 'documents'; items: TopicDocument[] }
 
 export interface StudySectionUI {
   title: string
@@ -54,6 +55,7 @@ export interface LessonView {
   sources: Source[]
   /** Ya validadas: lo que llega aquí se puede pintar sin más comprobaciones. */
   images: TopicImage[]
+  documents: TopicDocument[]
 }
 
 function blocksToSections(body: LessonBlock[]) {
@@ -63,6 +65,7 @@ function blocksToSections(body: LessonBlock[]) {
   const debates: Debate[] = []
   const sources: Source[] = []
   let images: TopicImage[] = []
+  const documents: TopicDocument[] = []
   for (const block of body) {
     if (block.type === 'section')
       sections.push({
@@ -78,8 +81,9 @@ function blocksToSections(body: LessonBlock[]) {
     else if (block.type === 'sources') sources.push(...block.items)
     // Una `src` de la base de datos no se pinta sin validarla (SPEC §10.10).
     else if (block.type === 'images') images = safeImages(block.items)
+    else if (block.type === 'documents') documents.push(...block.items)
   }
-  return { sections, keyDates, concepts, debates, sources, images }
+  return { sections, keyDates, concepts, debates, sources, images, documents }
 }
 
 function mapDemoLesson(slug: string): LessonView | null {
@@ -109,6 +113,7 @@ function mapDemoLesson(slug: string): LessonView | null {
     debates: demo.debates,
     sources: demo.sources,
     images: safeImages(demo.images ?? []),
+    documents: demo.documents ?? [],
   }
 }
 
@@ -143,7 +148,7 @@ export function useLesson(slug: string) {
         .maybeSingle()
       if (lessonError) throw lessonError
       const lesson = lessonRow as unknown as { id: string; body: LessonBlock[] } | null
-      const { sections, keyDates, concepts, debates, sources, images } = blocksToSections(lesson?.body ?? [])
+      const { sections, keyDates, concepts, debates, sources, images, documents } = blocksToSections(lesson?.body ?? [])
       topic.value = {
         id: row.slug,
         lessonId: lesson?.id ?? null,
@@ -162,6 +167,7 @@ export function useLesson(slug: string) {
         debates,
         sources,
         images,
+        documents,
       }
     } catch (err) {
       console.error('useLesson: no se pudo cargar la lección desde Supabase', err)

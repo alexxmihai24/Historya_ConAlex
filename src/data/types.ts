@@ -100,6 +100,7 @@ export interface Topic {
   debates: Debate[]
   sources: Source[]
   images?: TopicImage[]
+  documents?: TopicDocument[]
 }
 
 export interface QuizQuestion {
@@ -117,6 +118,33 @@ export interface QuizQuestion {
 export interface TopicModule {
   topic: Topic
   questions: QuizQuestion[]
+}
+
+/** Un documento comentado: extracto de fuente primaria con su pregunta.
+ *
+ *  Es lo que más distingue una página de libro de texto de un artículo: no
+ *  basta con contar lo que pasó, hay que poner delante un texto de la época y
+ *  pedirle al lector que lo lea.
+ *
+ *  LICENCIA (SPEC §14.8): el original tiene que ser de dominio público, que es
+ *  el caso de todo texto anterior al siglo XX. Cuidado con las TRADUCCIONES,
+ *  que sí pueden tener derechos vivos: cuando el original no está en español,
+ *  la versión es propia y `note` lo dice.
+ *
+ *  Los extractos son breves a propósito. Un documento comentado no es una
+ *  antología: es un texto corto que se pueda leer entero y discutir. */
+export interface TopicDocument {
+  /** Índice del apartado tras el que va, igual que las figuras. */
+  section: number
+  title: string
+  /** El extracto, en párrafos separados por una línea en blanco. */
+  text: string
+  /** Autor, obra y fecha. Se pinta como pie del documento. */
+  source: string
+  /** Nota sobre la traducción o sobre el estado del texto. */
+  note?: string
+  /** La pregunta al lector. Es lo que convierte el extracto en ejercicio. */
+  question: string
 }
 
 /** Datos básicos de un país del atlas, tomados de Wikidata.

@@ -614,6 +614,41 @@ h1, h2, h3, h4 { margin: 0; font-family: var(--serif); font-weight: 400; letter-
 /* Figuras dentro de un apartado. El pie lleva SIEMPRE la atribución: es
    requisito de varias de las licencias admitidas y es el mismo rigor que ya
    tiene el resto del contenido (SPEC §14.2). */
+/* Documento comentado: extracto de fuente primaria con su pregunta. Es lo que
+   más distingue una página de libro de texto de un artículo. Va al final del
+   apartado y a todo el ancho, porque se lee entero. */
+.lesson-document {
+  margin: 4px 0 0; padding: 22px 24px;
+  border: 1px solid var(--line); border-left: 3px solid var(--ember-light);
+  border-radius: var(--r-md); background: var(--panel);
+}
+.lesson-document-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.lesson-document-tag {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--ember-light);
+}
+.lesson-document-head strong { font-family: var(--serif); font-size: 19px; line-height: 1.2; color: var(--text-strong); }
+.lesson-document blockquote { margin: 0; padding: 0 0 0 2px; }
+.lesson-document blockquote p {
+  margin: 0 0 10px; font-family: var(--serif); font-size: 16px; line-height: 1.62; color: var(--text);
+}
+.lesson-document blockquote p:last-child { margin-bottom: 0; }
+.lesson-document-source {
+  margin: 14px 0 0; font-size: 12.5px; line-height: 1.5; color: var(--text-55);
+}
+.lesson-document-source small { font-family: var(--mono); font-size: 10px; color: var(--text-45); }
+.lesson-document-question {
+  display: flex; gap: 10px; align-items: flex-start;
+  margin: 16px 0 0; padding-top: 14px; border-top: 1px solid var(--line-soft);
+  font-size: 14.5px; line-height: 1.6; color: var(--text-70);
+}
+.lesson-document-question span {
+  flex: none; width: 20px; height: 20px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: rgb(255 130 86 / 18%); color: var(--ember-light);
+  font-family: var(--mono); font-size: 11px;
+}
+
 /* Datos de Wikidata de un país. Se pintan tenga o no lección escrita: sin
    ellos, 120 de los 142 países del globo no mostraban nada al pincharlos. */
 .country-facts, .panel-facts {

@@ -20,6 +20,7 @@ import { imageProblem } from '../src/lib/images.ts'
 import { TOPIC_IMAGES } from '../src/data/topic-images.ts'
 import { levelsOf } from '../src/lib/levels.ts'
 import { sectionsWithLevels } from '../src/data/levels/index.ts'
+import { TOPIC_DOCUMENTS } from '../src/data/documents.ts'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const topicsDir = join(root, 'src', 'data', 'topics')
@@ -117,6 +118,7 @@ async function loadModules() {
   for (const module of modules) {
     module.topic.images = TOPIC_IMAGES[module.topic.id] ?? []
     module.topic.sections = sectionsWithLevels(module.topic.id, module.topic.sections)
+    module.topic.documents = TOPIC_DOCUMENTS[module.topic.id] ?? []
   }
   return modules
 }
@@ -145,6 +147,9 @@ function lessonBody(topic) {
   // Las imágenes viajan como un bloque más, igual que el glosario o la
   // bibliografía. No hizo falta migración para aquellos y tampoco para estas.
   if (topic.images?.length) blocks.push({ type: 'images', items: topic.images })
+  // Los documentos comentados viajan como un bloque más, igual que el glosario
+  // o las imágenes: no hizo falta migración para aquellos y tampoco para estos.
+  if (topic.documents?.length) blocks.push({ type: 'documents', items: topic.documents })
   return blocks
 }
 

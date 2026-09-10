@@ -66,6 +66,12 @@ function paragraphs(body: string) {
 /** Portada del tema. Sustituye al glifo tipográfico cuando existe (SPEC §14.2). */
 const cover = computed(() => topic.value?.images.find((image) => image.role === 'portada') ?? null)
 
+/** Documento comentado de un apartado, si lo tiene. Va al final del apartado y
+ *  no flotando entre los párrafos: se lee entero, no se ojea. */
+function documentOf(index: number) {
+  return (topic.value?.documents ?? []).find((doc) => doc.section === index) ?? null
+}
+
 /** Figuras de un apartado. `section` es el índice del apartado tras el que van. */
 function figuresOf(index: number) {
   return (topic.value?.images ?? []).filter((image) => image.role === 'figura' && image.section === index)
@@ -199,6 +205,20 @@ function scrollToSection(index: number) {
               </aside>
             </template>
           </div>
+          <figure v-if="documentOf(entry.index)" class="lesson-document">
+            <figcaption class="lesson-document-head">
+              <span class="lesson-document-tag">Documento</span>
+              <strong>{{ documentOf(entry.index)!.title }}</strong>
+            </figcaption>
+            <blockquote>
+              <p v-for="(line, lineIndex) in paragraphs(documentOf(entry.index)!.text)" :key="lineIndex">{{ line }}</p>
+            </blockquote>
+            <p class="lesson-document-source">
+              {{ documentOf(entry.index)!.source }}
+              <template v-if="documentOf(entry.index)!.note"><br /><small>{{ documentOf(entry.index)!.note }}</small></template>
+            </p>
+            <p class="lesson-document-question"><span>?</span>{{ documentOf(entry.index)!.question }}</p>
+          </figure>
           <aside v-if="entry.section.callout" class="history-callout"><span>✦</span><p>{{ entry.section.callout }}</p></aside>
           <button class="section-complete" type="button" :class="{ complete: completedSections.includes(entry.index) }" @click="toggleSection(entry.index)">{{ completedSections.includes(entry.index) ? '✓ Apartado completado' : 'Marcar como leído' }}</button>
         </section>
