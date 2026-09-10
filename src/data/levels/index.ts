@@ -25,6 +25,12 @@ import { feudalismo } from './feudalismo.ts'
 import { andalus } from './andalus.ts'
 import { plenaEdadMedia } from './plena-edad-media.ts'
 import { crisisSigloXiv } from './crisis-siglo-xiv.ts'
+import { renacimiento } from './renacimiento.ts'
+import { descubrimientos } from './descubrimientos.ts'
+import { reforma } from './reforma.ts'
+import { absolutismo } from './absolutismo.ts'
+import { revolucionCientifica } from './revolucion-cientifica.ts'
+import { ilustracion } from './ilustracion.ts'
 
 export const TOPIC_LEVELS: Record<string, TopicLevels> = {
   prehistoria,
@@ -40,6 +46,12 @@ export const TOPIC_LEVELS: Record<string, TopicLevels> = {
   andalus,
   'plena-edad-media': plenaEdadMedia,
   'crisis-siglo-xiv': crisisSigloXiv,
+  renacimiento,
+  descubrimientos,
+  reforma,
+  absolutismo,
+  'revolucion-cientifica': revolucionCientifica,
+  ilustracion,
 }
 
 /** Los apartados de un tema con sus textos de ESO y Bachillerato enganchados.
