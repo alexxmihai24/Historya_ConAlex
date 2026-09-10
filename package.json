@@ -12,7 +12,8 @@
     "flags": "node --experimental-strip-types scripts/copy-flags.mjs",
     "images": "node --experimental-strip-types scripts/fetch-images.mjs",
     "check:backend": "node scripts/check-backend.mjs",
-    "countries": "node --experimental-strip-types scripts/fetch-countries.mjs"
+    "countries": "node --experimental-strip-types scripts/fetch-countries.mjs",
+    "check:security": "node --experimental-strip-types scripts/check-security.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.4",

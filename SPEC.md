@@ -498,3 +498,37 @@ Se baraja **al servir**, en `useQuiz`, con `shuffled` de `src/lib/shuffle.ts`, y
 - **La pregunta no es opcional.** Un extracto sin pregunta es una cita; lo que lo convierte en documento comentado es el ejercicio. `npm test` lo exige, y exige también que el apartado al que apunta exista: un documento con un índice equivocado no se pintaría nunca y nadie se enteraría.
 - **Licencia, regla dura.** Los originales son todos de dominio público. **El riesgo real está en las traducciones**, que pueden tener derechos vivos aunque el original tenga tres mil años: cuando el original no está en español la versión es propia y el pie lo dice. Los textos ya en español —Montesinos, Cádiz, la Constitución de 1978, el Acuerdo de París— se citan como tales.
 - **Cobertura:** 34 documentos en 34 temas. `prehistoria` no tiene, y es deliberado: es por definición el periodo anterior a la escritura. La comprobación de `npm test` lo fija por escrito para que se lea como decisión y no como descuido.
+
+## 17. Checklist de seguridad antes de publicar
+
+Ejecutado el 10/09/2026 contra el proyecto real con `npm run check:security`. **19 comprobaciones en verde, ninguna con fallo, 3 pendientes de hacerse a mano.** El script está en `scripts/check-security.mjs` y no es destructivo: las escrituras que intenta son todas escrituras que deben fallar, y si alguna saliera bien, ese sería el hallazgo.
+
+Lo que hay que entender de la arquitectura antes de leer el resultado: **este proyecto no tiene backend propio**. El navegador habla directamente con Supabase, que es PostgREST más PostgreSQL. Por eso la clave publishable **es pública por diseño** y no es un secreto filtrado, y por eso la frontera de autorización no son unos endpoints sino las **políticas RLS**. Un endpoint que se olvida de comprobar permisos es imposible aquí, porque no hay endpoints que escribir: la política se aplica en la base de datos.
+
+| | Comprobación | Resultado |
+| --- | --- | --- |
+| A1 | Ninguna clave en el bundle | Sin coincidencias en los 19 archivos de `dist/` |
+| A1b | Las variables `VITE_` no llevan secretos | Solo URL y clave publishable |
+| A2 | Las llamadas a terceros no salen del navegador | Solo Supabase. Commons y Wikidata se consultan en build, desde Node |
+| A2b | La CSP impide llamar a terceros | `connect-src` limitado a Supabase; `script-src 'self'` sin `unsafe-inline` ni `unsafe-eval` |
+| A3 | Ningún secreto en el historial de git | Limpio. `.env.local` nunca versionado |
+| B1 | Sin sesión no se lee nada personal | `profiles`, `quiz_attempts`, `learning_progress`, `user_preferences`, `user_roles` cerradas |
+| B1b | El banco de respuestas no se lee | `questions` y `question_options` sin grant ni política: nadie las lee (§10.3) |
+| B3 | Denegar por defecto | 11 tablas, las 11 con RLS |
+| C1 | Cambiar el id no abre otra ficha | Consultar por id concreto no salta la política |
+| C2 | El dueño va dentro de la consulta | Las 7 políticas de tablas de usuario comparan con `auth.uid()` en el `using` |
+| C3 | Identificadores no adivinables | Todas las claves primarias son uuid |
+| D1 | Esconder el botón no es un permiso | `topics`, `questions` y `user_roles` rechazan insert y delete anónimos |
+| D1b | Nadie se hace administrador | `user_roles` no tiene ningún grant de escritura (§10.5) |
+| D2 | Las reglas, en un solo sitio | 11 políticas en `supabase/migrations/` |
+| D3 | Lo destructivo deja rastro | No hay `DELETE` concedido al navegador, así que no hay borrado que auditar |
+| E0 | Auth pide confirmación de correo | Registro abierto **con** confirmación; solo proveedor de correo |
+| E3 | Los errores no cuentan de más | Sin trazas, sin rutas, sin nombres internos |
+| E4 | Cabeceras del alojamiento | `nosniff`, `Referrer-Policy`, HSTS y `Permissions-Policy` |
+
+**Las tres que faltan exigen dos cuentas reales abiertas a la vez** —B2 con sesión ajena, E1 dos cuentas en paralelo y E2 recorrer la app con la de menor privilegio— y crearlas es decisión del dueño del proyecto, no de un script. Las políticas comparan con `auth.uid()`, que es la condición estructural, pero eso hay que verlo con dos sesiones.
+
+**Dos matices que el resultado en verde no debe ocultar:**
+
+1. **Con PostgREST el esquema es descubrible.** El error de E3 nombra la tabla consultada, y cualquiera puede listar las tablas expuestas. No es un fallo: es cómo funciona el modelo, y por eso la defensa **no es la oscuridad sino RLS**. Todo lo que no debe leerse ya está cerrado.
+2. **`style-src` admite `unsafe-inline`.** Lo exigen los estilos ligados con `:style` de Vue, como las barras de progreso. Es una relajación conocida y acotada: `script-src` sigue sin `unsafe-inline`, que es lo que importa para XSS.
