@@ -3,17 +3,13 @@ import { supabase } from '../lib/supabase.ts'
 import { findTopic } from '../data/history.ts'
 import type { Concept, Debate, Source, TopicImage, TopicDocument } from '../data/types.ts'
 import { safeImages } from '../lib/images.ts'
-import { TOPIC_SELECT, TOPIC_SELECT_SIN_LEVELS, mapEducationLevel, type RawTopicRow, type EducationLevel } from './useTopics.ts'
+import { TOPIC_SELECT, mapEducationLevel, type RawTopicRow, type EducationLevel } from './useTopics.ts'
 
 export type LessonBlock =
   | {
       type: 'section'
       title: string
-      /** Texto de Universidad: el nivel al que se escribió el temario. */
       text: string
-      /** Mismo apartado para ESO y Bachillerato. Ausentes = no se da en ese nivel. */
-      textEso?: string | null
-      textBachillerato?: string | null
       callout?: string | null
     }
   | { type: 'timeline'; items: Array<{ date: string; event: string }> }
@@ -26,8 +22,6 @@ export type LessonBlock =
 export interface StudySectionUI {
   title: string
   body: string
-  bodyEso?: string
-  bodyBachillerato?: string
   callout?: string
 }
 
@@ -71,8 +65,6 @@ function blocksToSections(body: LessonBlock[]) {
       sections.push({
         title: block.title,
         body: block.text,
-        bodyEso: block.textEso ?? undefined,
-        bodyBachillerato: block.textBachillerato ?? undefined,
         callout: block.callout ?? undefined,
       })
     else if (block.type === 'timeline') keyDates.push(...block.items)
@@ -104,8 +96,6 @@ function mapDemoLesson(slug: string): LessonView | null {
     sections: demo.sections.map((section) => ({
       title: section.title,
       body: section.body,
-      bodyEso: section.bodyEso,
-      bodyBachillerato: section.bodyBachillerato,
       callout: section.callout,
     })),
     keyDates: demo.keyDates,
@@ -129,11 +119,7 @@ export function useLesson(slug: string) {
     }
     isLoading.value = true
     try {
-      let { data: topicRow, error: topicError } = await supabase.from('topics').select(TOPIC_SELECT).eq('slug', slug).maybeSingle()
-      if (topicError) {
-        // Sin la migración 20260910 la columna `levels` no existe todavía.
-        ;({ data: topicRow, error: topicError } = await supabase.from('topics').select(TOPIC_SELECT_SIN_LEVELS).eq('slug', slug).maybeSingle())
-      }
+      const { data: topicRow, error: topicError } = await supabase.from('topics').select(TOPIC_SELECT).eq('slug', slug).maybeSingle()
       if (topicError) throw topicError
       const row = topicRow as unknown as RawTopicRow | null
       if (!row) {

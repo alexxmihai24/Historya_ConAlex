@@ -64,7 +64,7 @@ async function loadDashboard() {
 
     /* Sin la migración 20260910 no existen `points` ni `best_streak`, y pedirlas
        haría fallar el select entero. Se reintenta sin ellas para no dejar el
-       historial vacío hasta que se ejecute el SQL, igual que con `levels`. */
+       historial vacío hasta que se ejecute el SQL. */
     async function ultimosIntentos(columnas: string) {
       return supabase!
         .from('quiz_attempts')

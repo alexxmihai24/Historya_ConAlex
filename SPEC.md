@@ -1,12 +1,13 @@
 # Especificación del producto · Historya con Alex
 
-**Última actualización:** 10 de septiembre de 2026
-**Estado:** temario completo a nivel universitario: 35 temas y 555 preguntas. Rediseño «Atlas Nocturno» implantado, con la lección remaquetada como página de libro de texto. 145 imágenes con licencia comprobada, descargadas y enganchadas. Temario escrito en los tres niveles educativos. **Pendiente: ejecutar en el SQL Editor, en este orden, `20260829_topic_cover_image.sql`, `20260910_quiz_score.sql` y `20260910_topic_levels.sql`, y después los ocho archivos de `supabase/seed/`. No volver a ejecutar `20260826` ni `20260827`: ya están aplicadas. Antes de pegar nada, `npm run check:sql` (§17.1).**
+**Última actualización:** 11 de septiembre de 2026
+**Estado:** 37 temas y 590 preguntas (con `rumania` y `estados-unidos`, añadidos el 11/09). Los 142 países del atlas tienen historia breve propia. Rediseño «Atlas Nocturno» implantado, con la lección remaquetada como página de libro de texto. 145 imágenes con licencia comprobada. **Pendiente: ejecutar en el SQL Editor, en este orden, `20260829_topic_cover_image.sql`, `20260910_quiz_score.sql` y después los siete archivos de `supabase/seed/`. No volver a ejecutar `20260826` ni `20260827`: ya están aplicadas. Antes de pegar nada, `npm run check:sql` (§17.1).**
 
 > **Carencias señaladas por el cliente y su estado.**
-> 1. **Nivel educativo.** ✅ Implementado el 10/09/2026. Ver §15.
+> 1. **Nivel educativo.** ❌ Retirado el 11/09/2026 a petición del cliente: cada lección tiene un solo texto. Ver §15.
 > 2. **La lección era un muro de texto.** ✅ Resuelto. Figuras intercaladas, conceptos al margen y documento comentado (§14.6 y §14.8).
-> 3. **120 de los 142 países del atlas no tenían ficha.** ✅ Resuelto el 10/09/2026 con datos de Wikidata (CC0). Ver §14.7.
+> 3. **120 de los 142 países del atlas no tenían ficha.** ✅ Datos de Wikidata (CC0, §14.7) e historia breve de los 142 países (§18).
+> 6. **Faltaban las causas de la Segunda Guerra Mundial.** ✅ Apartado nuevo «Cómo y por qué empezó» (11/09/2026).
 > 4. **La respuesta del quiz era la «b» en el 85 % de las preguntas.** ✅ Corregido con barajado al servir. Ver §16.
 > 5. **Poco tiempo por pregunta.** ✅ 40 s en lugar de 20.
 
@@ -89,7 +90,7 @@ Ya no queda ningún tema con el texto corto de la demo inicial: `_pendientes.ts`
 - **Home con globo interactivo**: proyección ortográfica sobre Natural Earth 110m, modo noche con atmósfera y terminador, arrastre para girar, rueda para acercar, y los países con lección encendidos en brasa. Al elegir uno, el globo vuela hasta él y el panel lateral muestra su ficha breve.
 - **Ficha de país** en `/pais/:country`: hitos, línea de épocas, lecciones del país y acceso a su quiz. Sin mapa histórico ni narración de audio, por decisión del cliente.
 - **Quiz contrarreloj**: 40 segundos por pregunta, 3 vidas, racha con multiplicador hasta ×4 y bonus por tiempo restante.
-- Biblioteca filtrable por época y **por nivel educativo real** (§15), lectura de lección con selector de nivel, perfil y acceso.
+- Biblioteca filtrable por época, lectura de lección, perfil y acceso. Historia breve de los 142 países del atlas (§18).
 - Lectura de lección con apartados multipárrafo, glosario, debate historiográfico, línea temporal y bibliografía.
 - Quiz global o por tema, con corrección inmediata y explicación.
 - Composables `useTopics`, `useLesson`, `useQuiz` y `useProgress` que leen de Supabase y **caen al contenido local** si no hay backend configurado.
@@ -466,19 +467,9 @@ La lección se lee como una página de libro de texto, no como un bloque de pár
 - **Peso.** Tres imágenes pasan del megabyte. Bajar `ANCHO` en
   `scripts/fetch-images.mjs` y volver a descargarlas es la vía rápida.
 
-## 15. Niveles educativos
+## 15. Niveles educativos (retirados)
 
-Implementado el 10/09/2026. `EducationLevel` existía desde el principio, pero los 35 temas estaban escritos en `Universidad` y la biblioteca filtraba comparando con `topic.level`: elegir ESO o Bachillerato devolvía cero resultados.
-
-**El modelo es el mismo tema contado con distinta profundidad**, no tres temarios sin relación. Cada apartado puede llevar `bodyEso` y `bodyBachillerato` además de `body`, que es el texto universitario. **Un apartado sin texto para un nivel no se da en ese nivel**, y de ahí sale que un tema en ESO tenga menos apartados que el mismo tema en Universidad.
-
-- **Dónde vive:** `src/data/levels/<slug>.ts`, aparte del archivo de tema, por el mismo motivo que las imágenes: un tema son 400 líneas y cada temario se escribe y se revisa por su cuenta. `sectionsWithLevels`, en `src/data/levels/index.ts`, los engancha, y **la usan tanto `history.ts` como `scripts/generate-seed.mjs`**: con dos copias de esa mezcla bastaba olvidarse de una para que la web ofreciera un nivel que la base de datos no tenía.
-- **La disponibilidad se deriva, no se declara.** `levelsOf` en `src/lib/levels.ts` calcula en qué niveles se puede leer un tema a partir de sus apartados, y el seed usa esa misma función para escribir la columna. Un campo escrito a mano se quedaría desfasado en cuanto alguien añadiera un apartado.
-- **Qué cambia además del texto:** el debate historiográfico es material universitario y la bibliografía con fuentes primarias entra en Bachillerato. En ESO se omiten también los apartados que tratan de cómo se hace historia y no de qué pasó.
-- **Interfaz:** la lección lleva selector de nivel, que se recuerda en `localStorage` envuelto en `try/catch` —si el almacenamiento no está disponible se usa Bachillerato, que es el predeterminado—. El progreso cuenta sobre los apartados del nivel que se lee, para que quien estudia en ESO pueda llegar al 100 %, y los índices de apartado siguen siendo los del temario completo para no descolocar las figuras ni el progreso guardado al cambiar de nivel.
-- **Base de datos:** migración `20260910_topic_levels.sql`, columna `topics.levels` con check de forma. La biblioteca lista temas sin tocar `lessons`, igual que pasaba con la portada, así que necesita la columna. `useTopics` y `useLesson` reintentan el select sin ella si la migración no se ha ejecutado, para no obligar a desplegar el SQL y el código a la vez, y los valores que llegan de la base de datos se filtran contra los tres niveles conocidos antes de pintarse.
-
-**Estado:** 35 de 35 temas en los tres niveles. 194 apartados de ESO y 208 de Bachillerato escritos.
+Se implantaron el 10/09/2026 (textos de ESO y Bachillerato por apartado, selector en la lección, filtro en la biblioteca y columna `topics.levels`) y **se retiraron el 11/09/2026 a petición del cliente**: en producción solo veía Universidad porque la migración no estaba aplicada, y pidió dejarlo «normal, sin niveles». Se borraron `src/lib/levels.ts`, `src/data/levels/` y la migración `20260910_topic_levels.sql`. Cada lección muestra un único texto, con debates y bibliografía. Si en producción llegó a crearse la columna `levels`, se queda sin uso y no molesta.
 
 ## 16. Barajado de las opciones del quiz
 
@@ -535,8 +526,17 @@ Lo que hay que entender de la arquitectura antes de leer el resultado: **este pr
 
 ### 17.1 El SQL se ejecuta antes de llegar a Supabase
 
-`npm run check:sql` ejecuta todas las migraciones y los ocho archivos del seed contra un Postgres de verdad —PGlite, Postgres compilado a WebAssembly, en memoria—, sin Docker, sin la clave `service_role` y sin tocar Supabase. Comprueba que corren sobre una base limpia, que las posteriores al esquema inicial se pueden repetir, que el contenido llega completo, que el `CHECK` de niveles rechaza lo que debe, y prueba las políticas RLS y el cálculo de puntos con dos usuarios simulados.
+`npm run check:sql` ejecuta todas las migraciones y los archivos del seed contra un Postgres de verdad —PGlite, Postgres compilado a WebAssembly, en memoria—, sin Docker, sin la clave `service_role` y sin tocar Supabase. Comprueba que corren sobre una base limpia, que las posteriores al esquema inicial se pueden repetir, que el contenido llega completo, y prueba las políticas RLS y el cálculo de puntos con dos usuarios simulados.
 
 **Existe por un fallo concreto.** El 10/09/2026 se entregaron tres migraciones que nunca se habían ejecutado, y dos fallaron al pegarlas en el SQL Editor. `20260910_topic_levels.sql` tenía una subconsulta dentro de un `CHECK`, que Postgres no admite, y además dejaba pasar un array vacío porque `array_length('{}')` devuelve `NULL` y un `CHECK` solo rechaza lo que da falso. Leer el SQL no encuentra ninguno de los dos: hay que ejecutarlo.
 
 **Lo que no prueba** es que producción coincida con los archivos. Para eso está `npm run check:security`, contra el servidor real.
+
+## 18. Historia de cada país del atlas (11/09/2026)
+
+Los 142 países del globo tienen una historia breve propia —tres párrafos y de cuatro a siete fechas clave— en `src/data/country-histories/` (`europa.ts`, `asia.ts`, `africa.ts`, `america.ts`, este último con Oceanía). La clave es el nombre en español exacto de `ES_NAMES`. `countryHistory(nombre)` usa `Object.hasOwn` para no devolver propiedades heredadas como `constructor`.
+
+- **Dónde se ve:** la ficha de país (`/pais/:nombre`) la muestra entera para todos los países; el panel del globo, el primer párrafo con el botón «Leer su historia». Siempre con interpolación `{{ }}`, nunca `v-html`.
+- **Texto propio**, no copiado de Wikipedia (CC BY-SA, §13). Viaja en el paquete: la PWA funciona sin red y no toca la base de datos.
+- **Test:** `npm test` comprueba que todo país del atlas tiene historia con texto y fechas, y que no hay historias de países que el atlas no conoce.
+- **Lecciones completas de país:** `rumania` y `estados-unidos` son temas de biblioteca completos (7 apartados, debates, bibliografía y 16 preguntas cada uno). Todavía no tienen imágenes.

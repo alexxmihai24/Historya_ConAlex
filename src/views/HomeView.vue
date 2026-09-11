@@ -6,6 +6,7 @@ import { useTopics } from '../composables/useTopics.ts'
 import { atlasCountries, coveredCountries } from '../lib/regions.ts'
 import CountryFlag from '../components/CountryFlag.vue'
 import { countryFacts, factRows } from '../lib/countries.ts'
+import { countryHistory } from '../data/country-histories/index.ts'
 import '../lib/globe.js'
 
 const { topics } = useTopics()
@@ -43,7 +44,7 @@ const selectedStats = computed(() => {
   const years = list.map((topic) => topic.years).filter(Boolean)
   return [
     { k: 'Lecciones', v: String(list.length) },
-    { k: 'Nivel', v: list.some((topic) => topic.level === 'Universidad') ? 'Univ.' : list[0].level },
+    { k: 'Época', v: list[0].era },
     { k: 'Periodo', v: years.length === 1 ? years[0] : `${years.length} tramos` },
   ]
 })
@@ -65,6 +66,7 @@ const starters = computed(() =>
 /* Datos de Wikidata del país elegido. Los 142 del atlas los tienen, así que el
    panel nunca se queda vacío aunque el país no tenga lección escrita. */
 const selectedFacts = computed(() => (selected.value ? factRows(countryFacts(selected.value)) : []))
+const selectedHistory = computed(() => (selected.value ? countryHistory(selected.value) : null))
 
 function onHover(event: Event) {
   hovered.value = (event as CustomEvent<{ name: string } | null>).detail?.name ?? null
@@ -112,7 +114,7 @@ function back() {
         <h1 class="globe-title">Gira el globo.<br /><i>Elige un país.</i></h1>
         <p class="globe-lead">
           Cada país abre sus lecciones, sus hitos y su quiz.
-          {{ covered.length }} brillan ya con lección escrita; el resto está en camino.
+          Todos tienen su historia; {{ covered.length }} brillan con lección completa y quiz.
         </p>
 
         <div class="alex-card">
@@ -211,16 +213,13 @@ function back() {
         <button class="panel-back" type="button" @click="back">← Volver al globo</button>
         <div class="panel-head">
           <div>
-            <p class="eyebrow">Sin lección todavía</p>
+            <p class="eyebrow">Historia breve</p>
             <CountryFlag class="panel-flag" :country="selected" size="md" />
             <h1 class="panel-country">{{ selected }}</h1>
           </div>
           <historya-outline :country="selected" tone="light" class="panel-outline faded"></historya-outline>
         </div>
-        <p class="globe-lead">
-          Todavía no hemos escrito la historia de {{ selected }}. Estos son sus datos
-          básicos mientras tanto.
-        </p>
+        <p v-if="selectedHistory" class="globe-lead">{{ selectedHistory.text[0] }}</p>
 
         <div v-if="selectedFacts.length" class="panel-facts">
           <div v-for="fact in selectedFacts" :key="fact.k">
@@ -231,12 +230,12 @@ function back() {
         </div>
 
         <div class="panel-actions">
-          <RouterLink class="button button-quiet panel-grow" :to="`/pais/${encodeURIComponent(selected)}`">
-            Abrir ficha completa
+          <RouterLink class="button button-primary panel-grow" :to="`/pais/${encodeURIComponent(selected)}`">
+            Leer su historia
           </RouterLink>
         </div>
 
-        <p class="panel-label">Países con lección</p>
+        <p class="panel-label">Países con lección completa</p>
         <div class="era-legend">
           <button
             v-for="starter in starters"

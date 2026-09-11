@@ -14,7 +14,7 @@
     "check:backend": "node scripts/check-backend.mjs",
     "countries": "node --experimental-strip-types scripts/fetch-countries.mjs",
     "check:security": "node --experimental-strip-types scripts/check-security.mjs",
-    "check:sql": "node scripts/check-sql.mjs"
+    "check:sql": "node --experimental-strip-types scripts/check-sql.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.4",

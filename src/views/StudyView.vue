@@ -4,8 +4,7 @@ import { RouterLink, useRoute } from 'vue-router'
 import { useLesson } from '../composables/useLesson.ts'
 import { useProgress } from '../composables/useProgress.ts'
 import { imageCredit } from '../lib/images.ts'
-import type { Concept, EducationLevel, TopicImage } from '../data/types.ts'
-import { DEFAULT_LEVEL, levelsOf, sectionsForLevel, showsDebates, showsSources } from '../lib/levels.ts'
+import type { Concept, TopicImage } from '../data/types.ts'
 
 const route = useRoute()
 const { topic, isLoading } = useLesson(String(route.params.topicId))
@@ -13,48 +12,12 @@ const lessonId = computed(() => topic.value?.lessonId ?? null)
 const { completedSections, toggleSection: saveSection } = useProgress(lessonId)
 const isBookmarked = ref(false)
 
-/* Nivel de lectura. Se recuerda entre lecciones porque quien estudia para un
-   curso concreto no quiere volver a elegirlo en cada tema. Si el guardado no
-   está disponible (navegación privada, almacenamiento bloqueado) se usa el
-   predeterminado: es una comodidad, no un dato que haga falta conservar. */
-const LEVEL_KEY = 'historya:nivel'
-
-function storedLevel(): EducationLevel {
-  try {
-    const saved = window.localStorage.getItem(LEVEL_KEY)
-    return saved === 'ESO' || saved === 'Bachillerato' || saved === 'Universidad' ? saved : DEFAULT_LEVEL
-  } catch {
-    return DEFAULT_LEVEL
-  }
-}
-
-const wantedLevel = ref<EducationLevel>(storedLevel())
-
-/** Niveles a los que este tema está escrito. */
-const availableLevels = computed(() => levelsOf(topic.value?.sections ?? []))
-
-/** El nivel elegido, o el más cercano que este tema sí tenga. */
-const level = computed<EducationLevel>(() => {
-  const available = availableLevels.value
-  if (!available.length) return 'Universidad'
-  return available.includes(wantedLevel.value) ? wantedLevel.value : available[available.length - 1]
-})
-
-function chooseLevel(next: EducationLevel) {
-  wantedLevel.value = next
-  try {
-    window.localStorage.setItem(LEVEL_KEY, next)
-  } catch {
-    /* Sin almacenamiento el nivel dura lo que la visita. No es un error. */
-  }
-}
-
-/** Apartados que se leen en el nivel activo, con su índice del temario completo. */
-const visibleSections = computed(() => sectionsForLevel(topic.value?.sections ?? [], level.value))
+/** Apartados con su índice, que es al que apuntan figuras, documentos y progreso. */
+const visibleSections = computed(() =>
+  (topic.value?.sections ?? []).map((section, index) => ({ section, index, text: section.body })),
+)
 
 function toggleSection(index: number) {
-  // El total es el de los apartados del nivel que se está leyendo: con el del
-  // temario completo, quien lee en ESO no podría llegar nunca al 100 %.
   void saveSection(index, visibleSections.value.length)
 }
 
@@ -84,8 +47,6 @@ function figuresOf(index: number) {
 const marginNotes = computed(() => {
   const bySection = new Map<number, Concept[]>()
   const used = new Set<string>()
-  // Se busca en el texto del nivel activo: si no, en ESO saldrían al margen
-  // términos que solo aparecen en la versión universitaria del apartado.
   for (const { section, index, text } of visibleSections.value) {
     const haystack = `${section.title} ${text}`.toLowerCase()
     for (const concept of topic.value?.concepts ?? []) {
@@ -152,21 +113,6 @@ function scrollToSection(index: number) {
         <h1>{{ topic.title }}</h1>
         <p>{{ topic.summary }}</p>
         <div class="study-meta"><span>{{ topic.years }}</span><span>{{ topic.duration }} de lectura</span><span>{{ visibleSections.length }} apartados</span></div>
-        <div v-if="availableLevels.length > 1" class="level-switch" role="group" aria-label="Nivel de la lección">
-          <span class="level-switch-label">Nivel</span>
-          <button
-            v-for="option in availableLevels"
-            :key="option"
-            class="level-switch-option"
-            :class="{ active: option === level }"
-            type="button"
-            :aria-pressed="option === level"
-            @click="chooseLevel(option)"
-          >
-            {{ option }}
-          </button>
-        </div>
-        <p v-else class="level-switch-note">Este tema está escrito solo para {{ level }}.</p>
       </div>
       <figure v-if="cover" class="study-cover">
         <img :src="cover.src" :alt="cover.alt" :width="cover.width" :height="cover.height" decoding="async" />
@@ -228,9 +174,7 @@ function scrollToSection(index: number) {
           <dl><template v-for="concept in topic.concepts" :key="concept.term"><dt>{{ concept.term }}</dt><dd>{{ concept.definition }}</dd></template></dl>
         </section>
 
-        <!-- El debate historiográfico es material universitario; la bibliografía
-             con fuentes primarias entra en Bachillerato. Ver src/lib/levels.ts. -->
-        <section v-if="topic.debates.length && showsDebates(level)" class="debate-card">
+        <section v-if="topic.debates.length" class="debate-card">
           <p class="eyebrow">DEBATE HISTORIOGRÁFICO</p><h2>Lo que los historiadores discuten</h2>
           <article v-for="debate in topic.debates" :key="debate.question" class="debate-item">
             <h3>{{ debate.question }}</h3>
@@ -240,7 +184,7 @@ function scrollToSection(index: number) {
         </section>
 
         <section class="timeline-card"><p class="eyebrow">LÍNEA TEMPORAL</p><h2>Fechas para orientarte</h2><ol><li v-for="item in topic.keyDates" :key="item.date"><strong>{{ item.date }}</strong><span>{{ item.event }}</span></li></ol></section>
-        <section v-if="topic.sources.length && showsSources(level)" class="sources-card">
+        <section v-if="topic.sources.length" class="sources-card">
           <p class="eyebrow">FUENTES Y BIBLIOGRAFÍA</p><h2>Para seguir leyendo</h2>
           <ul><li v-for="source in topic.sources" :key="source.title"><span class="source-kind" :class="`kind-${source.kind}`">{{ source.kind === 'primaria' ? 'Fuente primaria' : 'Estudio' }}</span><p><strong>{{ source.author }}</strong>, <em>{{ source.title }}</em> ({{ source.year }}).<template v-if="source.note"> {{ source.note }}</template></p></li></ul>
         </section>

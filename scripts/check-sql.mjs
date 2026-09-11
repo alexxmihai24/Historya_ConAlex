@@ -20,6 +20,7 @@
 // real, con `npm run check:security`.
 
 import { PGlite } from '@electric-sql/pglite'
+import { topics as temasRepo, quizQuestions } from '../src/data/history.ts'
 import { readFile, readdir } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
@@ -111,27 +112,16 @@ for (const archivo of semillas) await ejecutar(`seed/${archivo} otra vez`, await
 console.log('\n4. Contenido cargado')
 const cuenta = async (sql) => (await db.query(sql)).rows[0].n
 const temas = await cuenta('select count(*)::int as n from public.topics where published')
-comprobar('35 temas publicados', temas === 35, `${temas}`)
+// Los recuentos salen del repositorio: escritos a mano se quedaban desfasados
+// en cuanto se añadía un tema.
+const conPortada = temasRepo.filter((t) => (t.images ?? []).some((i) => i.role === 'portada')).length
+comprobar(`${temasRepo.length} temas publicados`, temas === temasRepo.length, `${temas}`)
 const preguntas = await cuenta('select count(*)::int as n from public.questions where published')
-comprobar('555 preguntas publicadas', preguntas === 555, `${preguntas}`)
-const niveles = await cuenta(`select count(*)::int as n from public.topics
-  where levels = array['eso','bachillerato','universidad']::public.education_level[]`)
-comprobar('los 35 temas con los tres niveles', niveles === 35, `${niveles}`)
+comprobar(`${quizQuestions.length} preguntas publicadas`, preguntas === quizQuestions.length, `${preguntas}`)
 const portadas = await cuenta('select count(*)::int as n from public.topics where cover_image is not null')
-comprobar('35 portadas', portadas === 35, `${portadas}`)
+comprobar(`${conPortada} portadas`, portadas === conPortada, `${portadas}`)
 
-console.log('\n5. El CHECK de niveles rechaza lo que debe')
-for (const [caso, valor] of [
-  ['vacío', `'{}'`],
-  ['repetido', `array['eso','eso']::public.education_level[]`],
-  ['curioso', `array['curioso']::public.education_level[]`],
-]) {
-  await ejecutar(`levels ${caso}`, `update public.topics set levels = ${valor} where slug = 'egipto';`, {
-    debeFallar: 'topics_levels_shape',
-  })
-}
-
-console.log('\n6. RLS con dos usuarios (B2 del checklist de seguridad)')
+console.log('\n5. RLS con dos usuarios (B2 del checklist de seguridad)')
 const A = '11111111-1111-1111-1111-111111111111'
 const B = '22222222-2222-2222-2222-222222222222'
 await db.exec(`insert into auth.users (id, email) values ('${A}', 'a@prueba'), ('${B}', 'b@prueba') on conflict do nothing;`)

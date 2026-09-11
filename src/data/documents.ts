@@ -361,7 +361,7 @@ export const TOPIC_DOCUMENTS: Record<string, TopicDocument[]> = {
   ],
   'segunda-guerra': [
     {
-      section: 4,
+      section: 5,
       title: 'El acta de la conferencia de Wannsee',
       text: [
         'En lugar de la emigración, y previa autorización del Führer, ha aparecido ahora como otra posible solución la evacuación de los judíos hacia el Este.',

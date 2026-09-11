@@ -6,6 +6,7 @@ import { useTopics } from '../composables/useTopics.ts'
 import { atlasCountries, coveredCountries } from '../lib/regions.ts'
 import CountryFlag from '../components/CountryFlag.vue'
 import { countryFacts, factRows } from '../lib/countries.ts'
+import { countryHistory } from '../data/country-histories/index.ts'
 import '../lib/globe.js'
 
 const route = useRoute()
@@ -64,6 +65,7 @@ const milestones = computed(() =>
 const facts = computed(() => countryFacts(country.value))
 const factList = computed(() => factRows(facts.value))
 const isAtlasCountry = computed(() => facts.value !== null)
+const history = computed(() => countryHistory(country.value))
 
 const otherCountries = computed(() =>
   coveredCountries(topics.value.map((topic) => topic.country))
@@ -77,7 +79,7 @@ const otherCountries = computed(() =>
     <header class="country-hero">
       <div class="country-hero-top">
         <RouterLink class="country-back" to="/">← Globo</RouterLink>
-        <span class="country-tag">{{ countryTopics.length ? `${countryTopics.length} lecciones` : "Sin lección todavía" }}</span>
+        <span class="country-tag">{{ countryTopics.length ? `${countryTopics.length} lecciones` : 'Historia breve' }}</span>
       </div>
 
       <div class="country-hero-main">
@@ -86,7 +88,6 @@ const otherCountries = computed(() =>
           <CountryFlag class="country-hero-flag" :country="country" size="lg" />
           <h1>{{ country }}</h1>
           <p v-if="countryTopics.length" class="country-lead">{{ countryTopics[0].description }}</p>
-          <p v-else class="country-lead">Todavía no hemos escrito la historia de {{ country }}. Estos son sus datos básicos mientras tanto.</p>
         </div>
         <div class="country-outline-frame">
           <historya-outline :country="country" tone="light" class="country-outline"></historya-outline>
@@ -108,6 +109,22 @@ const otherCountries = computed(() =>
         </div>
       </div>
     </header>
+
+    <section v-if="history" class="country-history">
+      <div>
+        <p class="panel-label">Historia de {{ country }}</p>
+        <p v-for="(paragraph, index) in history.text" :key="index">{{ paragraph }}</p>
+      </div>
+      <div>
+        <p class="panel-label">Fechas clave</p>
+        <div class="country-timeline">
+          <div v-for="[date, event] in history.dates" :key="date">
+            <span class="country-timeline-date">{{ date }}</span>
+            <span class="country-timeline-event">{{ event }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <div v-if="countryTopics.length" class="country-body">
       <div class="country-main">
@@ -140,7 +157,6 @@ const otherCountries = computed(() =>
               <span class="panel-topic-title">{{ topic.title }}</span>
               <span class="panel-topic-meta">{{ topic.years }} · {{ topic.duration }} · {{ questionCount(topic.id) }} preguntas</span>
             </span>
-            <span class="level-tag">{{ topic.level }}</span>
             <span class="starter-arrow">→</span>
           </RouterLink>
         </div>
@@ -188,7 +204,7 @@ const otherCountries = computed(() =>
     </div>
 
     <div v-else class="country-empty">
-      <p class="panel-label">Países con lección escrita</p>
+      <p class="panel-label">Países con lección completa</p>
       <div class="era-legend">
         <RouterLink
           v-for="name in otherCountries"

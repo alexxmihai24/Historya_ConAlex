@@ -34,25 +34,22 @@ import { india } from './topics/india.ts'
 import { japon } from './topics/japon.ts'
 import { africa } from './topics/africa.ts'
 import { americaPrecolombina } from './topics/america-precolombina.ts'
+import { rumania } from './topics/rumania.ts'
+import { estadosUnidos } from './topics/estados-unidos.ts'
 import { TOPIC_IMAGES } from './topic-images.ts'
-import { sectionsWithLevels } from './levels/index.ts'
 import { TOPIC_DOCUMENTS } from './documents.ts'
 
-export type { Era, EducationLevel, StudySection, Concept, Topic, QuizQuestion, TopicModule, TopicLevels, TopicDocument } from './types.ts'
+export type { Era, EducationLevel, StudySection, Concept, Topic, QuizQuestion, TopicModule, TopicDocument } from './types.ts'
 
 /** Orden de lectura de la biblioteca. Un módulo por tema. */
-const modules: TopicModule[] = [prehistoria, mesopotamia, egipto, grecia, helenismo, romaRepublica, romaImperio, bizancio, islam, feudalismo, andalus, plenaEdadMedia, crisisSigloXiv, renacimiento, descubrimientos, reforma, absolutismo, revolucionCientifica, ilustracion, revolucionFrancesa, industrializacion, revolucionesLiberales, imperialismo, granGuerra, revolucionRusa, entreguerras, segundaGuerra, guerraFria, espanaSigloXx, mundoActual, chinaImperial, india, japon, africa, americaPrecolombina]
+const modules: TopicModule[] = [prehistoria, mesopotamia, egipto, grecia, helenismo, romaRepublica, romaImperio, bizancio, islam, feudalismo, andalus, plenaEdadMedia, crisisSigloXiv, renacimiento, descubrimientos, reforma, absolutismo, revolucionCientifica, ilustracion, revolucionFrancesa, industrializacion, revolucionesLiberales, imperialismo, granGuerra, revolucionRusa, entreguerras, segundaGuerra, guerraFria, espanaSigloXx, mundoActual, chinaImperial, india, japon, africa, americaPrecolombina, estadosUnidos, rumania]
 
-/* Las imágenes y los textos de ESO y Bachillerato se enganchan aquí y no dentro
-   de cada archivo de tema. Las imágenes porque se generan desde
-   `scripts/images.json` y su licencia se revisa por su cuenta; los niveles
-   porque cada temario se escribe y se revisa por separado. En los dos casos se
-   pueden cambiar sin tocar el texto universitario de la lección. */
+/* Las imágenes se enganchan aquí y no dentro de cada archivo de tema porque se
+   generan desde `scripts/images.json` y su licencia se revisa por su cuenta. */
 export const topics: Topic[] = modules.map((module) => ({
   ...module.topic,
   images: TOPIC_IMAGES[module.topic.id] ?? [],
   documents: TOPIC_DOCUMENTS[module.topic.id] ?? [],
-  sections: sectionsWithLevels(module.topic.id, module.topic.sections),
 }))
 
 export const quizQuestions: QuizQuestion[] = modules.flatMap((module) => module.questions)

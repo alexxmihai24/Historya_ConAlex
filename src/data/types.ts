@@ -3,28 +3,9 @@ export type EducationLevel = 'ESO' | 'Bachillerato' | 'Universidad'
 
 export interface StudySection {
   title: string
-  /** Párrafos separados por una línea en blanco. StudyView los renderiza uno a uno.
-   *  Este es el texto de Universidad: el nivel al que se escribió el temario. */
+  /** Párrafos separados por una línea en blanco. StudyView los renderiza uno a uno. */
   body: string
-  /** Mismo apartado contado para ESO. Si falta, el apartado no se da en ESO. */
-  bodyEso?: string
-  /** Mismo apartado contado para Bachillerato. Si falta, no se da en Bachillerato. */
-  bodyBachillerato?: string
   callout?: string
-}
-
-/** Los textos de un tema para los niveles que no son Universidad.
- *
- *  Viven en `src/data/levels/<slug>.ts`, aparte del archivo de tema, por el
- *  mismo motivo que las imágenes: un tema son ya 400 líneas y el temario de
- *  cada nivel se escribe y se revisa por su cuenta. `history.ts` los engancha.
- *
- *  Cada array va **en el mismo orden que `sections`**. Una cadena vacía o un
- *  hueco significa que ese apartado no se da en ese nivel, que es lo normal:
- *  un tema de ESO tiene menos apartados que el mismo tema en Universidad. */
-export interface TopicLevels {
-  eso?: string[]
-  bachillerato?: string[]
 }
 
 export interface Concept {
@@ -145,6 +126,13 @@ export interface TopicDocument {
   note?: string
   /** La pregunta al lector. Es lo que convierte el extracto en ejercicio. */
   question: string
+}
+
+/** Historia breve de un país del atlas: párrafos y fechas clave.
+ *  Texto propio, en `src/data/country-histories/<continente>.ts`. */
+export interface CountryHistory {
+  text: string[]
+  dates: Array<[string, string]>
 }
 
 /** Datos básicos de un país del atlas, tomados de Wikidata.

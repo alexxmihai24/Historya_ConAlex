@@ -16,6 +16,12 @@ export const segundaGuerra: TopicModule = {
     summary:
       'Entre 1939 y 1945 murieron entre cincuenta y setenta millones de personas, y por primera vez en la historia europea la mayoría fueron civiles. La guerra tuvo dos naturalezas superpuestas. Fue un conflicto entre Estados por el dominio de Europa y del Pacífico, decidido en última instancia por la capacidad industrial y por el frente oriental, donde se libró en torno al ochenta por ciento del combate terrestre contra Alemania. Y fue una guerra de exterminio con un programa ideológico propio, que en el este planificó el hambre de decenas de millones de eslavos y ejecutó el asesinato sistemático de casi seis millones de judíos europeos. Separar ambos planos sin desconectarlos es el problema central del tema: el Holocausto no fue un daño colateral de la guerra, pero tampoco habría podido ejecutarse sin ella.',
     keyDates: [
+      { date: '28 de junio de 1919', event: 'Tratado de Versalles: Alemania pierde territorio, colonias y ejército y acepta la culpa de la guerra.' },
+      { date: '30 de enero de 1933', event: 'Hitler, nombrado canciller. En meses convierte la república en una dictadura.' },
+      { date: 'Marzo de 1936', event: 'Remilitarización de Renania, en contra de Versalles. Nadie responde.' },
+      { date: 'Marzo de 1938', event: 'Anschluss: Alemania se anexiona Austria.' },
+      { date: '29-30 de septiembre de 1938', event: 'Conferencia de Múnich: Gran Bretaña y Francia entregan los Sudetes a Hitler.' },
+      { date: '23 de agosto de 1939', event: 'Pacto germano-soviético (Ribbentrop-Mólotov), con un reparto secreto de Polonia.' },
       { date: '1 de septiembre de 1939', event: 'Invasión alemana de Polonia. Dos días después Gran Bretaña y Francia declaran la guerra.' },
       { date: 'Mayo y junio de 1940', event: 'Campaña del oeste: derrota francesa en seis semanas, evacuación de Dunkerque y armisticio con el régimen de Vichy.' },
       { date: 'Julio a octubre de 1940', event: 'Batalla de Inglaterra. Primera derrota estratégica alemana y aplazamiento indefinido de la invasión.' },
@@ -31,6 +37,19 @@ export const segundaGuerra: TopicModule = {
       { date: '6 y 9 de agosto de 1945', event: 'Bombas atómicas sobre Hiroshima y Nagasaki. Japón capitula el 15 de agosto.' },
     ],
     sections: [
+      {
+        title: 'Cómo y por qué empezó: de Versalles a Danzig',
+        body: [
+          'La Segunda Guerra Mundial no estalló por sorpresa: fue el final de un camino de veinte años. Su punto de partida es el Tratado de Versalles de 1919. Alemania perdió el trece por ciento de su territorio, todas sus colonias y la mayor parte de su ejército; tuvo que pagar reparaciones enormes y aceptar en el artículo 231 la responsabilidad de la guerra. Casi ningún alemán, de izquierdas o de derechas, aceptó aquel tratado como justo, y la palabra «Diktat» se convirtió en un argumento político permanente. Versalles no hacía inevitable otra guerra, pero dejó a la mayor potencia del continente humillada y con motivos para revisar el mapa.',
+          'La segunda causa es la crisis de 1929. La Gran Depresión hundió la economía alemana, que dependía de los créditos estadounidenses: en 1932 había seis millones de parados. El paro y el miedo al comunismo empujaron a millones de votantes hacia el partido nazi, que pasó del 2,6 % de los votos en 1928 al 37 % en julio de 1932. En enero de 1933 Hitler fue nombrado canciller por el presidente Hindenburg y en pocos meses convirtió la república en una dictadura. Su programa, escrito en Mi lucha, era explícito: romper Versalles, reunir a todos los alemanes en un solo Estado y conquistar «espacio vital» en el este a costa de Polonia y la Unión Soviética.',
+          'Entre 1935 y 1939 Hitler desmontó Versalles paso a paso y nadie lo detuvo. En 1935 restableció el servicio militar obligatorio; en 1936 remilitarizó Renania; en marzo de 1938 se anexionó Austria, el Anschluss; en septiembre de 1938 exigió los Sudetes checoslovacos. La respuesta de Gran Bretaña y Francia fue la política de apaciguamiento: ceder en lo que parecía negociable para evitar otra carnicería como la de 1914-1918, que sus opiniones públicas no querían repetir. En la conferencia de Múnich, Chamberlain y Daladier entregaron los Sudetes a Hitler sin consultar a Checoslovaquia, y Chamberlain volvió a Londres anunciando «paz para nuestro tiempo».',
+          'No fue solo cosa de Alemania. Italia, con Mussolini, había invadido Etiopía en 1935, y Japón ocupaba Manchuria desde 1931 y atacó China en 1937. La Sociedad de Naciones, creada para impedir guerras, se mostró incapaz de frenar a ninguno de los tres: no tenía ejército, Estados Unidos no formaba parte de ella y sus sanciones eran simbólicas. En España, entre 1936 y 1939, Alemania e Italia apoyaron a Franco con aviones y tropas, y la Legión Cóndor ensayó en Guernica el bombardeo de ciudades. Los tres países se agruparon en el Eje Roma-Berlín-Tokio.',
+          'En marzo de 1939 Hitler ocupó lo que quedaba de Checoslovaquia, un territorio que ya no era alemán. Eso acabó con el apaciguamiento: Gran Bretaña y Francia garantizaron entonces las fronteras de Polonia, el siguiente objetivo, porque Hitler reclamaba la ciudad libre de Danzig y el corredor polaco. La pieza que faltaba llegó el 23 de agosto de 1939 con el pacto germano-soviético, firmado por los ministros Ribbentrop y Mólotov. Los dos enemigos ideológicos se comprometían a no atacarse y, en un protocolo secreto, se repartían Polonia y el este de Europa. Con la Unión Soviética neutral, Hitler ya no temía una guerra en dos frentes.',
+          'El 1 de septiembre de 1939 Alemania invadió Polonia con el pretexto de un falso ataque polaco montado por las SS en la emisora de Gleiwitz. El 3 de septiembre Gran Bretaña y Francia declararon la guerra. El 17, el Ejército Rojo entró en Polonia por el este. Las causas, por tanto, se pueden resumir en cuatro: un tratado de paz que Alemania no aceptó, una crisis económica que llevó al poder a un régimen que quería la guerra, unas democracias que cedieron demasiado tiempo por miedo a repetir 1914, y un pacto entre Hitler y Stalin que le dejó las manos libres.',
+        ].join('\n\n'),
+        callout:
+          'Los historiadores coinciden en que la responsabilidad principal es de Hitler: a diferencia de 1914, nadie «resbaló» hacia la guerra. El debate está en si las democracias pudieron frenarlo antes, por ejemplo en Renania en 1936, cuando el ejército alemán aún era débil.',
+      },
       {
         title: 'De Polonia a Barbarroja',
         body: [
@@ -396,6 +415,42 @@ export const segundaGuerra: TopicModule = {
       ],
       answer: 1,
       explanation: 'De ahí derivan la Convención sobre el Genocidio de 1948 y el derecho penal internacional posterior.',
+    },
+    {
+      id: 'segunda-guerra-17', era: 'Edad Contemporánea', topicId: 'segunda-guerra', topic: 'Segunda Guerra Mundial',
+      question: '¿Qué fue la política de apaciguamiento?',
+      options: [
+        'La alianza militar de Francia y la URSS contra Alemania en 1935',
+        'La estrategia británica y francesa de ceder ante las exigencias de Hitler para evitar otra guerra',
+        'El desarme voluntario de Alemania tras Versalles',
+        'La neutralidad de Estados Unidos en la guerra de España',
+      ],
+      answer: 1,
+      explanation: 'Su momento culminante fue Múnich, en 1938, cuando Chamberlain y Daladier entregaron los Sudetes a Hitler. Terminó cuando Alemania ocupó el resto de Checoslovaquia en marzo de 1939.',
+    },
+    {
+      id: 'segunda-guerra-18', era: 'Edad Contemporánea', topicId: 'segunda-guerra', topic: 'Segunda Guerra Mundial',
+      question: '¿Por qué fue decisivo el pacto germano-soviético de agosto de 1939?',
+      options: [
+        'Porque Stalin prometió enviar tropas contra Francia',
+        'Porque obligó a Italia a entrar en la guerra',
+        'Porque, al neutralizar a la URSS y repartirse Polonia en secreto, Hitler ya no temía una guerra en dos frentes',
+        'Porque puso fin a la guerra civil española',
+      ],
+      answer: 2,
+      explanation: 'Firmado por Ribbentrop y Mólotov el 23 de agosto, precedió en nueve días a la invasión de Polonia. El 17 de septiembre el Ejército Rojo ocupó la parte oriental del país.',
+    },
+    {
+      id: 'segunda-guerra-19', era: 'Edad Contemporánea', topicId: 'segunda-guerra', topic: 'Segunda Guerra Mundial',
+      question: '¿Qué papel tuvo la crisis de 1929 en el camino hacia la guerra?',
+      options: [
+        'Ninguno: Alemania salió de la crisis antes que nadie',
+        'Hundió la economía alemana, disparó el paro y dio a los nazis los votos que los llevaron al poder',
+        'Obligó a Gran Bretaña a rearmarse de inmediato',
+        'Provocó la caída de Mussolini',
+      ],
+      answer: 1,
+      explanation: 'Con seis millones de parados en 1932, el partido nazi pasó del 2,6 % de los votos en 1928 al 37 % en julio de 1932. Hitler fue nombrado canciller en enero de 1933.',
     },
   ],
 }

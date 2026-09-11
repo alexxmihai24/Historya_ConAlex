@@ -667,23 +667,6 @@ h1, h2, h3, h4 { margin: 0; font-family: var(--serif); font-weight: 400; letter-
 }
 .country-empty { display: flex; flex-direction: column; gap: 14px; align-items: flex-start; margin-top: 30px; }
 
-/* Selector de nivel de la lección. El mismo tema contado para ESO,
-   Bachillerato o Universidad; ver src/lib/levels.ts. */
-.level-switch { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
-.level-switch-label {
-  font-weight: 700; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: rgb(255 255 255 / 62%);
-}
-.level-switch-option {
-  padding: 8px 14px; border-radius: var(--r-pill);
-  border: 1px solid rgb(255 255 255 / 35%); color: rgb(255 255 255 / 82%);
-  font-weight: 700; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
-  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-}
-.level-switch-option:hover { border-color: #fff; color: #fff; }
-.level-switch-option.active { background: rgb(255 255 255 / 92%); border-color: #fff; color: #1a1208; }
-.level-switch-note { margin-top: 14px; font-size: 12.5px; color: rgb(255 255 255 / 62%); }
-
-.level-tag-group { display: flex; flex-wrap: wrap; gap: 6px; }
 
 /* El cuerpo del apartado. Flujo de bloque, no flex, porque las figuras y las
    notas de margen flotan a un lado y el texto las rodea, como en un libro de
@@ -912,6 +895,11 @@ h1, h2, h3, h4 { margin: 0; font-family: var(--serif); font-weight: 400; letter-
 .country-stats .stat-key { color: rgb(255 255 255 / 80%); letter-spacing: 0.18em; }
 
 .country-body { display: grid; gap: 30px; grid-template-columns: minmax(0, 1fr) 400px; align-items: start; margin-top: 30px; }
+/* Historia breve del país: texto propio para los 142 del atlas. */
+.country-history { display: grid; gap: 30px; grid-template-columns: minmax(0, 1fr) 400px; align-items: start; margin-top: 30px; }
+.country-history .panel-label { margin-top: 0; }
+.country-history > div:first-child > p:not(.panel-label) { margin-top: 14px; font-size: 16px; line-height: 1.7; color: var(--text-70); max-width: 68ch; }
+@media (max-width: 900px) { .country-history { grid-template-columns: minmax(0, 1fr); } }
 .country-main, .country-side { display: flex; flex-direction: column; min-width: 0; }
 .country-main .panel-label:first-child { margin-top: 0; }
 

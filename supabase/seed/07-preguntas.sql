@@ -1,4 +1,4 @@
--- Historya con Alex · contenido publicable — parte 07 de 8 (preguntas)
+-- Historya con Alex · contenido publicable — parte 07 de 7 (preguntas)
 --
 -- ARCHIVO GENERADO. No editar a mano: los cambios se pierden.
 -- Fuente: src/data/topics/ y src/data/topic-images.ts. Regenerar con `npm run seed`.
@@ -7,7 +7,7 @@
 -- supabase/migrations/. Está partido porque el editor rechaza las consultas
 -- grandes con «Query is too large to be run via the SQL Editor».
 -- Cada archivo es una transacción propia e idempotente: repetirlo no duplica.
--- Contenido completo: 35 temas y 555 preguntas.
+-- Contenido completo: 37 temas y 590 preguntas.
 
 begin;
 
@@ -17,10 +17,6 @@ do $$ begin
     raise exception 'Falta la migración 20260827_content_metadata_and_answer_check.sql. Ejecuta las migraciones de supabase/migrations/ en orden antes que este seed.';
   end if;
   if not exists (select 1 from information_schema.columns
-    where table_schema = 'public' and table_name = 'topics' and column_name = 'levels') then
-    raise exception 'Falta la migración 20260910_topic_levels.sql. Ejecuta las migraciones de supabase/migrations/ en orden antes que este seed.';
-  end if;
-  if not exists (select 1 from information_schema.columns
     where table_schema = 'public' and table_name = 'topics' and column_name = 'cover_image') then
     raise exception 'Falta la migración 20260829_topic_cover_image.sql. Ejecuta las migraciones de supabase/migrations/ en orden antes que este seed.';
   end if;
@@ -28,4589 +24,6 @@ do $$ begin
     raise exception 'La tabla topics está vacía. Ejecuta antes la parte 01-catalogo.sql.';
   end if;
 end $$;
-
--- questions no tiene clave natural única, así que se borran y se reinsertan
--- por tema. question_options cae en cascada por su clave foránea.
---
--- OJO: este borrado va al principio de las preguntas. Si los archivos se
--- ejecutan desordenados, las preguntas insertadas antes de esta línea se
--- pierden. Ejecútalos en orden numérico.
-delete from public.questions where topic_id in (select id from public.topics where slug in ('absolutismo', 'africa', 'america-precolombina', 'andalus', 'bizancio', 'china-imperial', 'crisis-siglo-xiv', 'descubrimientos', 'egipto', 'entreguerras', 'espana-siglo-xx', 'feudalismo', 'gran-guerra', 'grecia', 'guerra-fria', 'helenismo', 'ilustracion', 'imperialismo', 'india', 'industrializacion', 'islam', 'japon', 'mesopotamia', 'mundo-actual', 'plena-edad-media', 'prehistoria', 'reforma', 'renacimiento', 'revolucion-cientifica', 'revolucion-francesa', 'revolucion-rusa', 'revoluciones-liberales', 'roma-imperio', 'roma-republica', 'segunda-guerra'));
-
--- Pregunta: absolutismo-1
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué designa la categoría de «monarquía compuesta» de John Elliott?', 'Era la forma normal del poder moderno, no una anomalía. Carlos V reinaba con títulos distintos y obligaciones distintas en cada uno de sus territorios.', 3, true
-  from public.topics where slug = 'absolutismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Una monarquía gobernada conjuntamente por varios miembros de la misma dinastía', false, 0),
-  ('Un agregado de reinos y territorios bajo un mismo soberano, cada uno con sus leyes, cortes y privilegios propios', true, 1),
-  ('Una monarquía electiva sometida al control de una dieta nobiliaria', false, 2),
-  ('La unión de la corona con la jerarquía eclesiástica en un solo cuerpo político', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: absolutismo-2
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, 'En el vocabulario jurídico del siglo XVII, ¿qué significaba que un rey fuese «absoluto»?', '*Legibus solutus*. El propio Bodin negaba al soberano el derecho de confiscar bienes sin causa o alterar la ley de sucesión.', 3, true
-  from public.topics where slug = 'absolutismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que su voluntad no tenía ningún límite y podía disponer libremente de vidas y bienes', false, 0),
-  ('Que estaba liberado de la ley positiva anterior, pero sujeto a la ley divina, natural y fundamental del reino', true, 1),
-  ('Que reunía en su persona el poder civil y el sacerdocio', false, 2),
-  ('Que gobernaba sin ministros ni consejos', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: absolutismo-3
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué proyecto de Olivares desencadenó las rebeliones de 1640?', 'Chocó con la lógica pactista de Cataluña y Portugal. Portugal se independizó; Cataluña volvió en 1652 con sus constituciones formalmente intactas.', 3, true
-  from public.topics where slug = 'absolutismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La expulsión de los moriscos', false, 0),
-  ('La Unión de Armas, que exigía a cada reino hombres y dinero en proporción a su población', true, 1),
-  ('La imposición del castellano como lengua administrativa única', false, 2),
-  ('La supresión de las Cortes de Castilla', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: absolutismo-4
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Por qué la venalidad de oficios limitaba el poder del rey que la practicaba?', 'La corona cobraba por adelantado y perdía capacidad de mandar sobre sus propios administradores. Los intendentes revocables nacieron para sortear ese bloqueo.', 3, true
-  from public.topics where slug = 'absolutismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Porque los cargos vendidos quedaban exentos de impuestos', false, 0),
-  ('Porque el comprador se convertía en propietario inamovible del cargo y lo transmitía a sus herederos', true, 1),
-  ('Porque los oficios se vendían solo a extranjeros', false, 2),
-  ('Porque el precio de los cargos estaba fijado por los parlamentos', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: absolutismo-5
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿En qué desplazó Geoffrey Parker la tesis de la revolución militar de Michael Roberts?', 'La *trace italienne* multiplicó los efectivos necesarios para sitiar y guarnecer. El ejército de Flandes pasó de unos diez mil hombres a más de ochenta mil.', 3, true
-  from public.topics where slug = 'absolutismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Situó el motor del cambio en la fortificación abaluartada y en los asedios prolongados', true, 0),
-  ('Negó que hubiera existido ningún cambio militar significativo', false, 1),
-  ('Atribuyó la transformación exclusivamente a la artillería de campaña francesa', false, 2),
-  ('Retrasó todo el proceso al siglo XVIII', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: absolutismo-6
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué decisión tomó Luis XIV en 1661 a la muerte de Mazarino?', 'Separó el honor, que dejó a los grandes, del poder efectivo, que puso en manos de administradores dependientes de su voluntad. Versalles llegó en 1682.', 3, true
-  from public.topics where slug = 'absolutismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Convocó los Estados Generales para legitimar su gobierno', false, 0),
-  ('Gobernó personalmente, sin nombrar primer ministro, apoyándose en secretarios de familias de servicio', true, 1),
-  ('Delegó el gobierno en el Parlamento de París', false, 2),
-  ('Trasladó de inmediato la corte a Versalles', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: absolutismo-7
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, 'Según Norbert Elias, ¿qué función cumplía la etiqueta de Versalles?', 'La lectura tiene límites: no toda la nobleza vivía en la corte, muchas casas conservaron poder provincial y Versalles era también un mercado de pensiones.', 3, true
-  from public.topics where slug = 'absolutismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Ahorrar gastos de representación a la corona', false, 0),
-  ('Convertir a la nobleza en un grupo dependiente que competía por signos de favor distribuidos solo por el rey', true, 1),
-  ('Sustituir la administración civil por la doméstica', false, 2),
-  ('Impedir el acceso de la burguesía a los cargos públicos', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: absolutismo-8
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cuál fue la consecuencia económica más citada de la revocación del Edicto de Nantes en 1685?', 'Llevaron sus oficios y su propaganda antifrancesa a Holanda, Inglaterra, Brandeburgo y Suiza. Una demostración de fuerza que salió cara.', 3, true
-  from public.topics where slug = 'absolutismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La quiebra inmediata del Banco Real', false, 0),
-  ('La emigración de entre 200.000 y 300.000 hugonotes, muchos artesanos y comerciantes cualificados, a países rivales', true, 1),
-  ('El fin del comercio francés con el Levante', false, 2),
-  ('La devaluación de la libra tornesa', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: absolutismo-9
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué sostuvo William Beik a partir del estudio del Languedoc?', 'La «colaboración social» explica bien la estabilidad del sistema. Se le objeta que explica peor los momentos de ruptura.', 3, true
-  from public.topics where slug = 'absolutismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que la monarquía destruyó el poder de las élites provinciales', false, 0),
-  ('Que la corona y los notables locales colaboraron: dinero y obediencia a cambio de cargos, exenciones y respaldo armado', true, 1),
-  ('Que las provincias del sur permanecieron al margen de la fiscalidad real', false, 2),
-  ('Que el absolutismo francés fue una copia del modelo español', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: absolutismo-10
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cuál es la paradoja fiscal que señala John Brewer al comparar Inglaterra y Francia?', 'El consentimiento parlamentario y el Banco de Inglaterra de 1694 hicieron creíble la deuda. El consentimiento resultó ser una tecnología fiscal superior a la orden.', 3, true
-  from public.topics where slug = 'absolutismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Francia recaudaba más per cápita pese a su desorden administrativo', false, 0),
-  ('La Inglaterra parlamentaria recaudaba más per cápita y se endeudaba más barato que la Francia absoluta', true, 1),
-  ('Ninguno de los dos Estados logró recaudar lo suficiente para sostener sus guerras', false, 2),
-  ('Inglaterra financiaba sus guerras exclusivamente con el comercio colonial', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: absolutismo-11
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué hicieron los Decretos de Nueva Planta?', 'Convirtieron una monarquía compuesta en una unión accesoria. Es la excepción española a la regla de negociación con las periferias.', 3, true
-  from public.topics where slug = 'absolutismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Restablecieron los fueros vascos y navarros', false, 0),
-  ('Suprimieron las instituciones propias de la Corona de Aragón e impusieron el modelo castellano por derecho de conquista', true, 1),
-  ('Crearon un parlamento común para toda la Monarquía', false, 2),
-  ('Repartieron las colonias americanas entre los reinos peninsulares', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: absolutismo-12
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué era el liberum veto de la república polaco-lituana?', 'Bloqueó la fiscalidad y el ejército permanente. Entre 1772 y 1795 los vecinos se repartieron el país.', 3, true
-  from public.topics where slug = 'absolutismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('El derecho del rey a vetar los acuerdos de la dieta', false, 0),
-  ('La facultad de un solo diputado de anular la dieta entera y sus acuerdos', true, 1),
-  ('La exención fiscal universal de la nobleza', false, 2),
-  ('El derecho de las ciudades a rechazar el reclutamiento', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: absolutismo-13
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué paradoja subraya Perry Anderson sobre el absolutismo de Europa oriental?', 'Pedro I ligó el estatus nobiliario al servicio del Estado mediante la tabla de rangos mientras la servidumbre campesina se agravaba.', 3, true
-  from public.topics where slug = 'absolutismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que fue más débil que el occidental pese a disponer de más territorio', false, 0),
-  ('Que la construcción del Estado moderno coincidió allí con el endurecimiento de la servidumbre, no con su desaparición', true, 1),
-  ('Que se apoyó en las ciudades y no en la nobleza', false, 2),
-  ('Que renunció a mantener ejércitos permanentes', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: absolutismo-14
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué distinción manejaban, según Henshall, los propios contemporáneos?', 'La oposición entre absolutismo continental y constitucionalismo inglés sería, en su lectura, una construcción retrospectiva del siglo XIX.', 3, true
-  from public.topics where slug = 'absolutismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Entre monarquía absoluta y monarquía constitucional', false, 0),
-  ('Entre monarquía absoluta, legítima y respetuosa con los cuerpos intermedios, y despotismo o tiranía', true, 1),
-  ('Entre monarquía hereditaria y monarquía electiva', false, 2),
-  ('Entre monarquía nacional y monarquía compuesta', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: absolutismo-15
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué novedad fiscal introdujeron la capitación de 1695 y el diezmo real de 1710 en Francia?', 'La guerra continua desde 1672 obligó a tocar el privilegio fiscal. Es el primer aviso del problema que estallará en 1789.', 3, true
-  from public.topics where slug = 'absolutismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Suprimieron los impuestos indirectos sobre la sal', false, 0),
-  ('Alcanzaban por primera vez a los grupos privilegiados, no solo al tercer estado', true, 1),
-  ('Transferían la recaudación a los intendentes en exclusiva', false, 2),
-  ('Sustituían el pago en dinero por el pago en especie', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: absolutismo-16
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Por qué la fundación teológica del poder por Bossuet resultó menos duradera que la fundación pactista de Hobbes?', 'Hobbes justificaba un poder absoluto con argumentos laicos. Locke aceptó la premisa del pacto y extrajo la conclusión contraria en 1689.', 3, true
-  from public.topics where slug = 'absolutismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Porque Bossuet escribió en latín y no fue leído', false, 0),
-  ('Porque lo que se funda en un pacto puede discutirse en sus términos, y esa vía quedó abierta a Locke y a la crítica ilustrada', true, 1),
-  ('Porque Hobbes defendía la monarquía limitada', false, 2),
-  ('Porque la Iglesia condenó la obra de Bossuet', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: africa-1
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué demostró la excavación de Jenne-Jeno en el delta interior del Níger?', 'La arqueología africana ha refutado por sí sola la tesis de que los Estados y las ciudades llegaron siempre de fuera.', 3, true
-  from public.topics where slug = 'africa'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que la urbanización llegó al Sahel con el comercio islámico', false, 0),
-  ('Que existían ciudades de miles de habitantes desde el siglo III, sin relación con estímulos externos', true, 1),
-  ('Que el yacimiento fue construido por comerciantes fenicios', false, 2),
-  ('Que la región estuvo despoblada hasta el siglo XI', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: africa-2
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué método propuso Jan Vansina para trabajar con tradición oral?', 'Los jeli o griots eran especialistas profesionales con formación y responsabilidad hereditaria, no narradores espontáneos.', 3, true
-  from public.topics where slug = 'africa'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Descartarla salvo cuando coincida con fuentes escritas', false, 0),
-  ('Aplicar una crítica análoga a la textual: género, cadena de transmisión, función social y deformaciones sistemáticas', true, 1),
-  ('Registrarla sin intervención y publicarla literalmente', false, 2),
-  ('Sustituirla por reconstrucciones lingüísticas', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: africa-3
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué singularidad tuvo Aksum en el siglo IV?', 'Mani lo situó entre los cuatro grandes imperios del mundo, junto a Roma, Persia y China, y sus estelas están entre las mayores piedras talladas jamás erigidas.', 3, true
-  from public.topics where slug = 'africa'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Fue el primer Estado africano en adoptar el islam', false, 0),
-  ('Su rey Ezana se convirtió al cristianismo, antes que la mayoría de Europa, y el reino acuñó moneda propia', true, 1),
-  ('Fue conquistado por el imperio romano', false, 2),
-  ('Careció de escritura propia hasta el siglo XII', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: africa-4
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué son las iglesias de Lalibela?', 'Se tallaron bajo la dinastía Zagüe, tras la caída de Jerusalén en manos musulmanas, con ventanas, columnas y sistemas de drenaje.', 3, true
-  from public.topics where slug = 'africa'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Basílicas construidas por misioneros portugueses en el siglo XVI', false, 0),
-  ('Once templos excavados hacia abajo en la roca viva en los siglos XII y XIII, concebidos como una nueva Jerusalén', true, 1),
-  ('Monasterios rupestres de origen copto egipcio', false, 2),
-  ('Mezquitas reconvertidas tras la conquista cristiana', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: africa-5
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué función cumplía el Kebra Nagast en Etiopía?', 'Es una construcción ideológica comparable a cualquier mito dinástico europeo, y funcionó durante setecientos años, hasta 1974.', 3, true
-  from public.topics where slug = 'africa'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Era un código legal aplicado por los tribunales', false, 0),
-  ('Legitimaba a la dinastía salomónica haciéndola descender de Salomón y la reina de Saba', true, 1),
-  ('Recogía la liturgia de la Iglesia etíope', false, 2),
-  ('Narraba la conquista musulmana del siglo XVI', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: africa-6
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué productos articulaban el comercio transahariano?', 'Los Estados del Sahel se enriquecieron gravando ese intercambio, transformado por el uso del camello.', 3, true
-  from public.topics where slug = 'africa'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Cereales del norte y ganado del sur', false, 0),
-  ('Sal del desierto y oro de las cuencas fluviales del sur, además de cobre, tejidos, libros y personas esclavizadas', true, 1),
-  ('Especias índicas y porcelana china', false, 2),
-  ('Marfil y madera de la selva ecuatorial', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: africa-7
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué medida monetaria describe al-Bakri en el reino de Ghana?', 'Es política monetaria deliberada en el siglo XI, en un Estado que la historiografía europea describió durante siglos como tribal.', 3, true
-  from public.topics where slug = 'africa'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La acuñación de moneda de oro con el nombre del rey', false, 0),
-  ('El monopolio real sobre las pepitas, que garantizaba el valor del polvo de oro que circulaba como moneda', true, 1),
-  ('La prohibición del uso del oro en el comercio interior', false, 2),
-  ('La emisión de papel moneda respaldado por sal', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: africa-8
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué valor tiene la tradición de Kurukan Fuga?', 'Su valor como documento histórico literal es discutible; su valor como fuente sobre cómo se concebía el poder no lo es.', 3, true
-  from public.topics where slug = 'africa'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Es un documento escrito contemporáneo de la fundación de Malí', false, 0),
-  ('Es una fuente sobre la cultura política del imperio, con reparto de funciones entre linajes y obligaciones del gobernante', true, 1),
-  ('Es una crónica portuguesa del siglo XVI', false, 2),
-  ('Es un tratado de derecho islámico maliki', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: africa-9
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Por qué es valiosa la descripción de Malí que dejó Ibn Battuta?', 'Sus reproches revelan una sociedad que había integrado el islam sin renunciar a sus propias formas.', 3, true
-  from public.topics where slug = 'africa'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Porque idealiza el imperio y confirma la tradición oral', false, 0),
-  ('Porque no idealiza: elogia la seguridad y la justicia y se escandaliza de prácticas que le parecían impropias de musulmanes', true, 1),
-  ('Porque es la única fuente escrita africana del período', false, 2),
-  ('Porque describe con detalle las minas de oro del sur', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: africa-10
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué fue Tombuctú en los siglos XV y XVI?', 'León el Africano escribió que allí los libros dejaban más beneficio que ninguna otra mercancía. Cientos de miles de manuscritos se conservan hoy en Malí.', 3, true
-  from public.topics where slug = 'africa'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Una fortaleza militar sin población civil', false, 0),
-  ('Un centro intelectual del mundo islámico con enseñanza superior y una industria del libro muy rentable', true, 1),
-  ('Un puerto de la costa atlántica dedicado a la trata', false, 2),
-  ('La capital administrativa del imperio de Malí', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: africa-11
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cómo cayó el imperio Songhay en 1591?', 'Unos cuatro mil hombres con arcabuces y cañones vencieron a una fuerza mucho mayor sin armas de fuego. La conquista no produjo un imperio estable.', 3, true
-  from public.topics where slug = 'africa'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Por una revuelta interna de los askias', false, 0),
-  ('Por la derrota en Tondibi ante un ejército saadí que cruzó el desierto con armas de fuego', true, 1),
-  ('Por la conquista portuguesa desde la costa atlántica', false, 2),
-  ('Por una sequía prolongada que despobló el Níger', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: africa-12
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué han demostrado la arqueología y la lingüística sobre las ciudades swahilis?', 'Los hallazgos de porcelana Song y Ming muestran el alcance de esa red, y una flota china llegó a Malindi en el siglo XV.', 3, true
-  from public.topics where slug = 'africa'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que fueron colonias árabes y persas implantadas sobre población africana', false, 0),
-  ('Que son una civilización africana que adoptó el islam, con continuidad material desde asentamientos bantúes anteriores', true, 1),
-  ('Que se fundaron tras la llegada de los portugueses', false, 2),
-  ('Que no tuvieron relación con el comercio del índico', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: africa-13
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué era Gran Zimbabue?', 'Su riqueza venía del ganado, del oro y del comercio con la costa, como prueban los hallazgos de vidrio persa y porcelana china en el yacimiento.', 3, true
-  from public.topics where slug = 'africa'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Una fortaleza portuguesa del siglo XVI', false, 0),
-  ('Una ciudad de hasta veinte mil habitantes con recintos de granito sin argamasa, construida entre los siglos XIII y XV', true, 1),
-  ('Un santuario religioso sin población estable', false, 2),
-  ('Un puerto comercial en la desembocadura del Zambeze', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: africa-14
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué ocurrió con la interpretación del origen de Gran Zimbabue?', 'Peter Garlake lo confirmó después y fue presionado por el régimen de Rodesia. El país independiente tomó en 1980 el nombre del yacimiento.', 3, true
-  from public.topics where slug = 'africa'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Se resolvió pacíficamente en el siglo XIX a favor del origen africano', false, 0),
-  ('Caton-Thompson demostró en 1929 que era obra africana medieval y la administración colonial siguió negándolo durante medio siglo', true, 1),
-  ('La datación por radiocarbono resultó imposible por falta de materia orgánica', false, 2),
-  ('Se atribuyó a los portugueses hasta la independencia del país', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: africa-15
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué aporta la correspondencia de Afonso I del Kongo?', 'El Kongo mantuvo desde 1483 una relación diplomática con Portugal, con embajadas y correspondencia real conservada.', 3, true
-  from public.topics where slug = 'africa'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La primera descripción europea del interior africano', false, 0),
-  ('Una voz africana contemporánea que denuncia por escrito el efecto destructivo del comercio de esclavos sobre su propio reino', true, 1),
-  ('Un tratado comercial que prohibía la trata', false, 2),
-  ('La crónica oficial de la conversión del reino al cristianismo', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: africa-16
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cómo se relacionan las posiciones de Rodney y de Thornton sobre la trata?', 'Nunn ha añadido una medición econométrica que correlaciona la intensidad de la trata por región con niveles actuales de renta y confianza social.', 3, true
-  from public.topics where slug = 'africa'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Se excluyen: si hubo agencia africana no hubo daño estructural', false, 0),
-  ('Son compatibles si se distingue entre quién decidía y quién sufría, y constatar la participación de élites no atenúa la responsabilidad de quien demandaba', true, 1),
-  ('Ambas niegan efectos de largo plazo sobre las economías africanas', false, 2),
-  ('Thornton sostiene que la trata no existió a gran escala', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: america-precolombina-1
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Por qué se considera América un caso decisivo para la historia comparada?', 'Que llegara a resultados comparables partiendo de cero prueba que esas invenciones no son un accidente cultural europeo.', 3, true
-  from public.topics where slug = 'america-precolombina'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Porque su poblamiento fue el más reciente del planeta', false, 0),
-  ('Porque desarrolló agricultura, ciudades, Estado y escritura de forma independiente, sin contacto con Eurasia', true, 1),
-  ('Porque conservó economías de caza y recolección hasta 1492', false, 2),
-  ('Porque recibió influencias asiáticas continuas por vía marítima', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: america-precolombina-2
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué importancia tuvo el yacimiento de Monte Verde, en Chile?', 'Su datación en torno al 14500 a. C. obligó a abandonar el modelo que hacía de Clovis el punto de partida.', 3, true
-  from public.topics where slug = 'america-precolombina'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Confirmó que la cultura Clovis fue la primera del continente', false, 0),
-  ('Documentó una ocupación anterior a Clovis y abrió la hipótesis de una ruta costera del Pacífico', true, 1),
-  ('Demostró el origen africano del poblamiento americano', false, 2),
-  ('Fechó la domesticación del maíz en el sur del continente', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: america-precolombina-3
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Por qué es nutricional y agronómicamente notable la milpa?', 'A ella se añadió la nixtamalización, sin la cual una dieta basada en maíz produce pelagra.', 3, true
-  from public.topics where slug = 'america-precolombina'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Porque permite tres cosechas anuales de maíz', false, 0),
-  ('Porque combina maíz, frijol y calabaza: el frijol fija nitrógeno, la calabaza cubre el suelo y el conjunto es nutricionalmente completo', true, 1),
-  ('Porque no requiere riego en ninguna región', false, 2),
-  ('Porque sustituye a la ganadería como fuente de proteína animal', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: america-precolombina-4
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué consecuencia no evidente tuvo la ausencia de grandes animales domésticos en América?', 'También dejó sin aplicación práctica a la rueda, conocida en juguetes mesoamericanos, en un terreno además muy accidentado.', 3, true
-  from public.topics where slug = 'america-precolombina'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Impidió el desarrollo de la agricultura intensiva', false, 0),
-  ('Dejó a las poblaciones sin inmunidad frente a las enfermedades zoonóticas que Eurasia llevaba milenios padeciendo', true, 1),
-  ('Obligó a abandonar la vida urbana', false, 2),
-  ('Retrasó la domesticación del maíz varios milenios', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: america-precolombina-5
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué rasgos comparten las sociedades del área cultural mesoamericana?', 'Esa unidad no implica un imperio: implica siglos de intercambio, guerra y préstamo entre pueblos distintos.', 3, true
-  from public.topics where slug = 'america-precolombina'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Una lengua común y un gobierno unificado', false, 0),
-  ('El calendario doble de 260 y 365 días, el juego de pelota ritual, la pirámide escalonada y el cómputo con base veinte', true, 1),
-  ('La ausencia de escritura y de astronomía', false, 2),
-  ('La economía basada exclusivamente en la caza', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: america-precolombina-6
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué particularidad presenta Teotihuacán respecto de otras capitales antiguas?', 'Superó los cien mil habitantes, con traza en cuadrícula y conjuntos residenciales donde vivían artesanos de otras regiones.', 3, true
-  from public.topics where slug = 'america-precolombina'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que carecía de arquitectura monumental', false, 0),
-  ('Que no se ha identificado un retrato de gobernante individual, lo que ha llevado a proponer formas de gobierno colectivo', true, 1),
-  ('Que estaba habitada solo por sacerdotes', false, 2),
-  ('Que fue fundada por los mexicas en el siglo XIV', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: america-precolombina-7
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué cambió el desciframiento de la escritura maya?', 'Es el único sistema completo del continente, logosilábico, y su desciframiento avanzó desde los años cincuenta con Knórozov, Proskuriakoff, Schele y Stuart.', 3, true
-  from public.topics where slug = 'america-precolombina'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Confirmó la imagen de una sociedad pacífica gobernada por astrónomos', false, 0),
-  ('Reveló dinastías con nombres y fechas, guerras entre ciudades, alianzas y capturas de reyes rivales', true, 1),
-  ('Demostró que los textos eran solo calendáricos', false, 2),
-  ('Probó que la escritura era de origen olmeca', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: america-precolombina-8
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué objeción se hace hoy al término colapso maya?', 'La explicación predominante combina sequía como detonante con guerra endémica y presión demográfica sobre suelos frágiles.', 3, true
-  from public.topics where slug = 'america-precolombina'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que las ciudades del sur nunca fueron abandonadas', false, 0),
-  ('Que la población y la cultura no desaparecieron: se reorganizaron hacia el norte y siguen existiendo. Lo que colapsó fue una forma política', true, 1),
-  ('Que la sequía no está documentada en ningún registro', false, 2),
-  ('Que el abandono ocurrió tras la llegada de los españoles', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: america-precolombina-9
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cómo dominaban los mexicas los territorios sometidos?', 'El peso del tributo y del sacrificio generó un resentimiento entre los pueblos sometidos que resultó decisivo en 1519.', 3, true
-  from public.topics where slug = 'america-precolombina'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Mediante administración directa con funcionarios nombrados desde Tenochtitlan', false, 0),
-  ('Mediante tributo: los pueblos conservaban a sus señores y entregaban bienes y trabajo', true, 1),
-  ('Mediante colonización con población procedente del valle de México', false, 2),
-  ('Mediante alianzas matrimoniales exclusivamente', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: america-precolombina-10
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué caracterizaba a Tenochtitlan en 1519?', 'Era mayor que cualquier ciudad europea del momento salvo quizá Constantinopla, y las chinampas eran plataformas de cultivo de altísima productividad.', 3, true
-  from public.topics where slug = 'america-precolombina'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Un asentamiento disperso de unos diez mil habitantes', false, 0),
-  ('Entre ciento cincuenta y doscientos mil habitantes, chinampas, acueducto de agua potable, un gran mercado y escuelas obligatorias', true, 1),
-  ('Una ciudad amurallada sin agricultura propia', false, 2),
-  ('Una capital sin comercio, sostenida solo por el tributo', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: america-precolombina-11
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cómo debe tratarse la cuestión del sacrificio humano mexica?', 'Su lógica era cosmológica y estaba ligada a una guerra ritualizada. Las cifras de las crónicas son propagandísticas y la arqueología del Templo Mayor las ha acotado.', 3, true
-  from public.topics where slug = 'america-precolombina'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Negando su existencia por tratarse de propaganda española', false, 0),
-  ('Reconociéndolo como práctica central y a la vez acotando las cifras con arqueología, sabiendo que fue el argumento que legitimó la conquista', true, 1),
-  ('Considerándolo la causa única del hundimiento del imperio', false, 2),
-  ('Atribuyéndolo exclusivamente a los pueblos sometidos', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: america-precolombina-12
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿En qué consiste el control vertical descrito por John Murra?', 'Es la respuesta andina a un territorio donde en pocas decenas de kilómetros se pasa del desierto costero a los cuatro mil metros.', 3, true
-  from public.topics where slug = 'america-precolombina'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('En la jerarquía administrativa del Estado inca', false, 0),
-  ('En mantener colonias permanentes en varios pisos ecológicos para obtener productos de distintas altitudes sin recurrir a mercados', true, 1),
-  ('En la construcción de terrazas de cultivo en las laderas', false, 2),
-  ('En el sistema de caminos que unía la costa con la sierra', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: america-precolombina-13
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué han demostrado las excavaciones de Caral y Norte Chico?', 'Son contemporáneas de las pirámides de Egipto y su economía combinaba agricultura de algodón y pesca.', 3, true
-  from public.topics where slug = 'america-precolombina'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que la civilización andina comenzó con los incas', false, 0),
-  ('Que hubo arquitectura monumental y planificación urbana desde el tercer milenio antes de nuestra era, sin cerámica', true, 1),
-  ('Que la costa peruana estuvo deshabitada hasta el año 1000', false, 2),
-  ('Que Chavín fue el primer centro ceremonial del continente', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: america-precolombina-14
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Con qué instrumentos administró el Tahuantinsuyu a millones de personas?', 'Sin escritura alfabética, sin moneda, sin mercados desarrollados y sin rueda, con una red de unos cuarenta mil kilómetros de caminos.', 3, true
-  from public.topics where slug = 'america-precolombina'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Escritura alfabética, moneda y mercados regionales', false, 0),
-  ('Quipus de notación decimal, organización decimal de la población y trabajo por turnos mediante la mita', true, 1),
-  ('Un sistema de tributo en oro y plata', false, 2),
-  ('Una burocracia reclutada por examen', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: america-precolombina-15
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, 'Según Matthew Restall, ¿qué factor fue decisivo en la caída de Tenochtitlan?', 'La idea de que los mexicas tomaron a Cortés por un dios es una construcción posterior, y los arcabuces de la época eran lentos y escasos.', 3, true
-  from public.topics where slug = 'america-precolombina'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La superioridad absoluta del armamento de fuego español', false, 0),
-  ('Las alianzas indígenas: decenas de miles de tlaxcaltecas y otros pueblos combatieron por sus propios motivos', true, 1),
-  ('La creencia mexica de que Cortés era un dios', false, 2),
-  ('La superioridad naval española en el lago', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: america-precolombina-16
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cómo se explica hoy el desplome demográfico posterior a 1492?', 'El consenso maneja un rango de cuarenta a sesenta millones en 1492 y caídas de hasta el noventa por ciento en el siglo posterior al contacto.', 3, true
-  from public.topics where slug = 'america-precolombina'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Como resultado exclusivo de las epidemias, sin relación con la conquista', false, 0),
-  ('Los patógenos explican la escala, pero su letalidad se multiplicó por la guerra, el trabajo forzoso y la ruptura de los sistemas agrarios', true, 1),
-  ('Como consecuencia de migraciones voluntarias hacia el interior', false, 2),
-  ('Como un descenso menor, dentro de la variación demográfica normal', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: andalus-1
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué explica mejor la rapidez del hundimiento del reino visigodo en 711?', 'Varios sectores no tenían motivos para defender el régimen. El mecanismo principal de la conquista fue el pacto de capitulación, no la batalla.', 3, true
-  from public.topics where slug = 'andalus'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La superioridad tecnológica de los ejércitos musulmanes', false, 0),
-  ('La fragilidad del Estado visigodo: monarquía electiva, guerras sucesorias, aristocracia dividida y minorías perseguidas', true, 1),
-  ('Una epidemia previa que despobló la península', false, 2),
-  ('La ausencia total de ejército visigodo', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: andalus-2
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué establecía el Tratado de Teodomiro (713)?', 'Es el ejemplo mejor documentado del modelo de capitulación que se repitió por toda la península.', 3, true
-  from public.topics where slug = 'andalus'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La conversión obligatoria de los visigodos al islam', false, 0),
-  ('Que un noble visigodo conservaba sus territorios y su población su religión y propiedades, a cambio de un tributo anual', true, 1),
-  ('La expulsión de los cristianos del sureste peninsular', false, 2),
-  ('La alianza militar entre visigodos y bizantinos', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: andalus-3
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué evidencia contradice la tesis de que no hubo invasión en 711?', 'La tesis de Olagüe y González Ferrín está rechazada por la práctica totalidad de arabistas y medievalistas.', 3, true
-  from public.topics where slug = 'andalus'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La ausencia de fuentes escritas', false, 0),
-  ('La arqueología, las monedas bilingües acuñadas ya en 716 y las crónicas latinas y árabes contemporáneas', true, 1),
-  ('Los estatutos de limpieza de sangre', false, 2),
-  ('Las capitulaciones de Granada de 1491', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: andalus-4
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué grupo constituía la mayoría de la población musulmana de al-Ándalus?', 'Los árabes fueron siempre una minoría dominante, además dividida en facciones tribales. La conversión de la población local fue progresiva.', 3, true
-  from public.topics where slug = 'andalus'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Los árabes', false, 0),
-  ('Los muladíes, hispanos convertidos al islam', true, 1),
-  ('Los bereberes', false, 2),
-  ('Los mozárabes', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: andalus-5
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Por qué fue significativo que Abd al-Rahman III se proclamara califa en 929?', 'El título de califa no era solo político: implicaba la jefatura de la comunidad de creyentes, hasta entonces reivindicada desde Oriente.', 3, true
-  from public.topics where slug = 'andalus'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Porque unificó la península entera', false, 0),
-  ('Porque reclamaba la autoridad religiosa suprema frente a Bagdad y frente a los fatimíes de El Cairo', true, 1),
-  ('Porque abolió el impuesto a los cristianos', false, 2),
-  ('Porque trasladó la capital a Sevilla', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: andalus-6
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué eran las parias y qué consecuencia tuvieron?', 'La lógica dominante no era la cruzada, sino la extracción de recursos: un taifa vivo y tributario valía más que uno conquistado.', 3, true
-  from public.topics where slug = 'andalus'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Impuestos pagados por los mozárabes al emir; financiaron las mezquitas', false, 0),
-  ('Tributos en oro de las taifas a los reinos cristianos; financiaron iglesias, el Camino de Santiago y los ejércitos que después las conquistarían', true, 1),
-  ('Tasas comerciales del puerto de Almería', false, 2),
-  ('Rentas señoriales de los mudéjares aragoneses', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: andalus-7
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Por qué la trayectoria del Cid resulta reveladora?', 'El personaje convertido en símbolo de la Reconquista pasó buena parte de su carrera al servicio de un taifa. Las alianzas cruzadas eran la norma, no la excepción.', 3, true
-  from public.topics where slug = 'andalus'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Porque nunca combatió contra musulmanes', false, 0),
-  ('Porque, desterrado por Alfonso VI, sirvió al rey musulmán de Zaragoza y combatió contra cristianos', true, 1),
-  ('Porque fue el primer rey de Valencia', false, 2),
-  ('Porque rechazó siempre las alianzas con taifas', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: andalus-8
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué efecto tuvo la intervención almorávide y almohade?', 'Tanto Averroes como Maimónides sufrieron persecución o exilio bajo los almohades: el esplendor cultural andalusí no fue continuo ni uniformemente tolerante.', 3, true
-  from public.topics where slug = 'andalus'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Restauró la tolerancia hacia mozárabes y judíos', false, 0),
-  ('Impuso un rigorismo religioso que endureció la situación de las minorías y elevó la temperatura ideológica del conflicto', true, 1),
-  ('Unificó definitivamente al-Ándalus con el Magreb sin resistencia', false, 2),
-  ('Provocó el fin inmediato del dominio musulmán', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: andalus-9
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué consecuencia social tuvo el modelo de repoblación por donadíos en Andalucía y Extremadura?', 'En el Duero, la presura generó campesinado libre; al sur del Tajo, concejos con grandes términos; en Andalucía, grandes donaciones a nobleza y órdenes militares.', 3, true
-  from public.topics where slug = 'andalus'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Una sociedad de pequeños propietarios libres', false, 0),
-  ('La creación del latifundio, que marcaría la estructura agraria del sur hasta el siglo XX', true, 1),
-  ('La desaparición de la nobleza', false, 2),
-  ('El predominio de los concejos urbanos', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: andalus-10
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué diferenciaba políticamente a la Corona de Aragón de Castilla?', 'Castilla desarrolló una monarquía más centralizada con Cortes menos capaces de limitarla. La diferencia pesó hasta los decretos de Nueva Planta de 1707-1716.', 3, true
-  from public.topics where slug = 'andalus'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Aragón no tenía Cortes', false, 0),
-  ('Aragón funcionaba como confederación con instituciones separadas y pactismo: el rey gobierna con el consentimiento del reino', true, 1),
-  ('Castilla era una república', false, 2),
-  ('Aragón no reconocía al rey como autoridad', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: andalus-11
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, 'Según Nirenberg, ¿qué papel cumplía la violencia contra las minorías?', 'Por eso se prefiere hoy hablar de «coexistencia» o «conveniencia» antes que de convivencia: convivir porque conviene, no por tolerancia en sentido moderno.', 3, true
-  from public.topics where slug = 'andalus'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Era una ruptura excepcional del orden social', false, 0),
-  ('Formaba parte del funcionamiento ordinario del sistema y reafirmaba la jerarquía sin destruir la coexistencia', true, 1),
-  ('No existió hasta 1492', false, 2),
-  ('Se dirigía solo contra los mudéjares', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: andalus-12
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué problema nuevo generaron los pogromos de 1391?', 'Esa sospecha justificó la creación de la Inquisición castellana en 1478 y la difusión de los estatutos de limpieza de sangre.', 3, true
-  from public.topics where slug = 'andalus'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La despoblación de las ciudades', false, 0),
-  ('La aparición de un gran grupo de conversos cuya sinceridad religiosa se puso bajo sospecha permanente', true, 1),
-  ('La expulsión inmediata de los judíos', false, 2),
-  ('La conversión de los mudéjares', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: andalus-13
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué desplazamiento suponen los estatutos de limpieza de sangre?', 'Es un precedente histórico relevante de la discriminación por ascendencia, distinta de la persecución estrictamente religiosa.', 3, true
-  from public.topics where slug = 'andalus'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('De la exclusión por linaje a la exclusión por fe', false, 0),
-  ('De la exclusión por fe a la exclusión por linaje: un converso sincero de tercera generación seguía siendo sospechoso', true, 1),
-  ('De la exclusión religiosa a la exclusión económica', false, 2),
-  ('De la exclusión legal a la tolerancia', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: andalus-14
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cuál es la principal objeción historiográfica al término «Reconquista»?', 'Además llama «re-conquista» a la ocupación de territorios que los conquistadores nunca habían poseído. El término se consolida en el siglo XIX y se endurece bajo el franquismo.', 3, true
-  from public.topics where slug = 'andalus'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que la expansión cristiana nunca ocurrió', false, 0),
-  ('Que presupone una continuidad nacional inexistente y unifica ocho siglos heterogéneos en un proyecto único que nadie planificó', true, 1),
-  ('Que fue inventado en el siglo XIII', false, 2),
-  ('Que no aparece en ninguna crónica medieval', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: andalus-15
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿En qué hay consenso pese al desacuerdo sobre la palabra «Reconquista»?', 'Las fases efectivas se concentran en el siglo XI tras la fitna, el XIII tras Las Navas y 1482-1492 para Granada.', 3, true
-  from public.topics where slug = 'andalus'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('En que hubo una guerra santa ininterrumpida de ochocientos años', false, 0),
-  ('En rechazar ese relato: hubo largos periodos de estabilidad, alianzas cruzadas y tributos, con fases de conquista concentradas en momentos concretos', true, 1),
-  ('En que no hubo conquistas cristianas', false, 2),
-  ('En que el conflicto fue exclusivamente económico', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: andalus-16
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué ocurrió con lo pactado en las capitulaciones de Granada de 1491?', 'El mismo año 1492 el decreto de expulsión obligó a los judíos a convertirse o marchar; la diáspora sefardí conservó el judeoespañol durante siglos.', 3, true
-  from public.topics where slug = 'andalus'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Se cumplió íntegramente hasta 1609', false, 0),
-  ('Garantizaban a los musulmanes granadinos su religión, pero se incumplieron en 1502', true, 1),
-  ('Nunca incluyeron garantías religiosas', false, 2),
-  ('Fueron anuladas por el papa en 1492', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: bizancio-1
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cómo se llamaban a sí mismos los llamados bizantinos?', 'El término «bizantino» lo acuñó Hieronymus Wolf en 1557. Su Estado era, sin interrupción, el Imperio romano, y los turcos llamaban Rum a Anatolia por ese motivo.', 3, true
-  from public.topics where slug = 'bizancio'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Helenos', false, 0),
-  ('Rhomaioi, es decir, romanos', true, 1),
-  ('Bizantinos', false, 2),
-  ('Ortodoxos', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: bizancio-2
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué función política tuvo negar a Constantinopla el nombre de «romana»?', 'A partir de la Ilustración se sumó el desprecio de Montesquieu y Gibbon, de donde procede el uso peyorativo del adjetivo «bizantino».', 3, true
-  from public.topics where slug = 'bizancio'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Facilitar el comercio con Venecia', false, 0),
-  ('Reservar la continuidad romana para Occidente, donde el Sacro Imperio reclamaba el título', true, 1),
-  ('Distinguir el griego del latín', false, 2),
-  ('Justificar la conquista otomana', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: bizancio-3
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cuál fue la obra más duradera del reinado de Justiniano?', 'El Digesto salvó fragmentos de juristas clásicos perdidos. Su redescubrimiento en Bolonia en el siglo XI fundó la ciencia jurídica europea.', 3, true
-  from public.topics where slug = 'bizancio'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La reconquista de Italia', false, 0),
-  ('El Corpus Iuris Civilis, que ordenó mil años de jurisprudencia romana', true, 1),
-  ('La construcción del muro de Anastasio', false, 2),
-  ('La conversión de los eslavos', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: bizancio-4
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué proporción de sus ingresos perdió Bizancio con las conquistas árabes del siglo VII?', 'Perdió Siria, Palestina, Egipto y el norte de África, sus provincias más ricas. La supervivencia exigió reconstruir por completo el Estado.', 3, true
-  from public.topics where slug = 'bizancio'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Una quinta parte', false, 0),
-  ('Aproximadamente tres cuartas partes', true, 1),
-  ('Nada apreciable', false, 2),
-  ('La mitad exacta', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: bizancio-5
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿En qué consistía el sistema de themas?', 'Redujo drásticamente el coste del ejército al eliminar la dependencia del salario en metálico, y ancló la defensa en la población local.', 3, true
-  from public.topics where slug = 'bizancio'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Un impuesto sobre el comercio marítimo', false, 0),
-  ('Circunscripciones bajo mando militar donde los soldados recibían tierras a cambio de servicio hereditario', true, 1),
-  ('Una jerarquía de monasterios imperiales', false, 2),
-  ('Un sistema de alianzas con los eslavos', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: bizancio-6
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Por qué fueron decisivos los asedios árabes de Constantinopla de 674-678 y 717-718?', 'Las murallas teodosianas, la cadena del Cuerno de Oro y el fuego griego permitieron resistir. Es uno de los acontecimientos más consecuentes de la historia europea temprana.', 3, true
-  from public.topics where slug = 'bizancio'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Porque acabaron con el Imperio bizantino', false, 0),
-  ('Porque detuvieron la expansión islámica hacia Europa oriental durante siglos', true, 1),
-  ('Porque provocaron el cisma con Roma', false, 2),
-  ('Porque destruyeron Santa Sofía', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: bizancio-7
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cuál era el argumento cristológico de los iconódulos?', 'Juan Damasceno añadió la distinción entre latría, adoración debida solo a Dios, y proskynesis, veneración dirigida al prototipo a través de la imagen.', 3, true
-  from public.topics where slug = 'bizancio'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que las imágenes eran útiles para enseñar a los analfabetos', false, 0),
-  ('Que si Dios se hizo carne, esa carne es representable, y negarlo equivale a negar la Encarnación', true, 1),
-  ('Que los iconos tenían poder milagroso propio', false, 2),
-  ('Que la Biblia ordenaba fabricar imágenes', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: bizancio-8
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué problema de fuentes plantea el estudio de la iconoclasia?', 'El sesgo es sistemático: los vencedores conservaron su versión y eliminaron la contraria, lo que obliga a una cautela permanente.', 3, true
-  from public.topics where slug = 'bizancio'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que no se conserva ningún texto de la época', false, 0),
-  ('Que los textos iconoclastas fueron destruidos y solo se conocen a través de las refutaciones de sus adversarios', true, 1),
-  ('Que están escritos en latín', false, 2),
-  ('Que fueron redactados en el siglo XIX', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: bizancio-9
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿En qué se diferenció el modelo misionero bizantino del latino?', 'Cirilo y Metodio crearon el glagolítico, del que derivó el cirílico. Eso dio a los pueblos eslavos una cultura escrita propia.', 3, true
-  from public.topics where slug = 'bizancio'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('En que no traducía las Escrituras', false, 0),
-  ('En que aceptó la liturgia en lengua vernácula y creó un alfabeto para el eslavo', true, 1),
-  ('En que evangelizaba por la fuerza', false, 2),
-  ('En que exigía el celibato a los conversos', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: bizancio-10
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cuál era la diferencia de fondo entre Roma y Constantinopla sobre la autoridad eclesiástica?', 'A eso se sumaban el Filioque, el celibato del clero latino y el pan ácimo. Los anatemas de 1054 fueron un episodio menor magnificado después.', 3, true
-  from public.topics where slug = 'bizancio'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Ninguna: solo discutían sobre el calendario', false, 0),
-  ('Roma reivindicaba primacía jurisdiccional universal; Constantinopla defendía la pentarquía con primacía romana solo de honor', true, 1),
-  ('Constantinopla no reconocía al papa como obispo', false, 2),
-  ('Roma rechazaba los concilios', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: bizancio-11
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué hizo irreversible la ruptura entre las Iglesias de Oriente y Occidente?', 'La destrucción de iglesias y la profanación de reliquias crearon un rencor que los intentos de unión de Lyon (1274) y Florencia (1439) nunca superaron.', 3, true
-  from public.topics where slug = 'bizancio'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Los anatemas mutuos de 1054', false, 0),
-  ('El saqueo de Constantinopla por la Cuarta Cruzada en 1204', true, 1),
-  ('El concilio de Nicea', false, 2),
-  ('La conversión de la Rus de Kiev', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: bizancio-12
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué consecuencia tuvo la derrota de Manzikert en 1071?', 'La recuperación comnena del siglo XII se apoyó en concesiones comerciales a Venecia y Génova que drenaron a largo plazo los ingresos aduaneros del Estado.', 3, true
-  from public.topics where slug = 'bizancio'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La pérdida de Egipto', false, 0),
-  ('La apertura de Anatolia, principal reserva de reclutas e impuestos, a la ocupación turca', true, 1),
-  ('La caída inmediata de Constantinopla', false, 2),
-  ('El fin de la dinastía Comnena', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: bizancio-13
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué significa la frase atribuida a un alto funcionario bizantino sobre el turbante y la tiara?', 'Resume la resistencia popular feroz a las uniones eclesiásticas, percibidas como sometimiento al papado más que como reconciliación.', 3, true
-  from public.topics where slug = 'bizancio'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que preferían aliarse con Venecia', false, 0),
-  ('Que preferían la dominación otomana, que permitía conservar la fe, a la unión con Roma', true, 1),
-  ('Que rechazaban toda religión', false, 2),
-  ('Que apoyaban la conversión al islam', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: bizancio-14
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué permitió a los otomanos derribar en 1453 unas murallas que habían resistido mil años?', 'Unos 7.000 defensores se enfrentaron a decenas de miles de sitiadores con cañones capaces de batir las murallas teodosianas. Constantino XI murió combatiendo.', 3, true
-  from public.topics where slug = 'bizancio'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Una traición desde el interior', false, 0),
-  ('La artillería de asedio de gran calibre', true, 1),
-  ('Un terremoto previo', false, 2),
-  ('La retirada de la flota veneciana', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: bizancio-15
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué efecto tuvo la caída de Constantinopla sobre el Renacimiento?', 'También estimuló la búsqueda de rutas marítimas hacia Asia y permitió a Moscú reclamar la herencia ortodoxa como «tercera Roma».', 3, true
-  from public.topics where slug = 'bizancio'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Ninguno: fueron procesos independientes', false, 0),
-  ('La emigración de eruditos griegos a Italia con sus manuscritos alimentó el humanismo', true, 1),
-  ('Provocó el cierre de las universidades italianas', false, 2),
-  ('Impuso el uso del griego en toda Europa', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: china-imperial-1
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué doctrina permitió a Qin unificar China en 221 a. C.?', 'El imperio Qin duró quince años y su maquinaria administrativa, dos milenios. Los Han le añadieron la legitimación confuciana.', 3, true
-  from public.topics where slug = 'china-imperial'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('El confucianismo de Estado', false, 0),
-  ('El legismo: leyes uniformes, castigos severos y recompensa por mérito medible', true, 1),
-  ('El budismo llegado de Asia central', false, 2),
-  ('El neoconfucianismo de Zhu Xi', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: china-imperial-2
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué doble función cumple el mandato del Cielo?', 'Es una teoría del poder que incorpora su propia cláusula de revolución: permite que un campesino victorioso funde una dinastía legítima.', 3, true
-  from public.topics where slug = 'china-imperial'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Legitima al emperador y prohíbe expresamente la rebelión', false, 0),
-  ('Legitima a la dinastía mientras gobierne con justicia y autoriza a derribarla cuando la pierde', true, 1),
-  ('Establece la sucesión hereditaria por primogenitura', false, 2),
-  ('Concede la autoridad a los funcionarios y no al emperador', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: china-imperial-3
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué transformación religiosa se produjo entre los siglos III y VI?', 'La síntesis cultural china posterior es resultado de esa mezcla, no su punto de partida.', 3, true
-  from public.topics where slug = 'china-imperial'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La adopción del cristianismo nestoriano como religión de Estado', false, 0),
-  ('La llegada del budismo desde Asia central, su traducción a un vocabulario chino y la organización del taoísmo como iglesia', true, 1),
-  ('La prohibición de todas las religiones extranjeras', false, 2),
-  ('La imposición del confucianismo como culto obligatorio', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: china-imperial-4
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué problema resolvió el Gran Canal construido bajo los Sui?', 'Costó una movilización de trabajo forzoso enorme, contribuyó a derribar a la dinastía que lo construyó y sostuvo a todas las siguientes.', 3, true
-  from public.topics where slug = 'china-imperial'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La defensa de la frontera norte frente a los pueblos esteparios', false, 0),
-  ('La logística de llevar el arroz del Yangtsé a las capitales y los ejércitos del norte', true, 1),
-  ('El riego de las llanuras del sur', false, 2),
-  ('La comunicación con las rutas de la seda', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: china-imperial-5
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué tipo de élite produjo el sistema de exámenes?', 'No existía nada equivalente en ningún otro imperio de la época, aunque el acceso real estaba condicionado por la riqueza familiar.', 3, true
-  from public.topics where slug = 'china-imperial'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Una meritocracia plenamente igualitaria abierta a todas las clases', false, 0),
-  ('Una élite de gobierno definida por la cultura letrada y no por la sangre, aunque preparar a un candidato exigía ocio y maestros costosos', true, 1),
-  ('Una aristocracia hereditaria con acceso reservado', false, 2),
-  ('Un cuerpo de funcionarios de origen exclusivamente militar', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: china-imperial-6
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué innovaciones se generalizaron en China bajo la dinastía Song?', 'Todas son anteriores al año 1300. La pregunta histórica no es por qué China no innovó, sino por qué esa innovación tuvo otro desenlace.', 3, true
-  from public.topics where slug = 'china-imperial'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La rueda hidráulica y el arado de vertedera', false, 0),
-  ('Papel moneda, brújula náutica, pólvora militar e imprenta de tipos móviles', true, 1),
-  ('La máquina de vapor y el telar mecánico', false, 2),
-  ('El vidrio óptico y el telescopio', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: china-imperial-7
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué sostiene la trampa del alto nivel de equilibrio de Mark Elvin?', 'Otras explicaciones señalan la pérdida del norte en 1127 y la reorientación de los recursos hacia la defensa.', 3, true
-  from public.topics where slug = 'china-imperial'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que la población china era demasiado escasa para sostener la industrialización', false, 0),
-  ('Que una agricultura muy productiva y mano de obra barata eliminaron el incentivo para sustituir trabajo por máquinas', true, 1),
-  ('Que el Estado prohibió las innovaciones técnicas', false, 2),
-  ('Que faltaban materias primas en el territorio chino', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: china-imperial-8
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cuál era el propósito de las expediciones de Zheng He?', 'Sus flotas eran mucho mayores que cualquier cosa que Europa botara hasta el siglo XIX, pero no eran viajes de conquista ni de exploración comercial.', 3, true
-  from public.topics where slug = 'china-imperial'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Conquistar territorios en África oriental', false, 0),
-  ('Desplegar prestigio para integrar Estados en el sistema tributario chino', true, 1),
-  ('Buscar una ruta comercial hacia Europa', false, 2),
-  ('Establecer colonias de poblamiento en el índico', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: china-imperial-9
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué explicación predomina hoy sobre el abandono de las expediciones navales?', 'Las prohibiciones marítimas posteriores no cerraron el comercio: lo empujaron a manos privadas y a menudo ilegales.', 3, true
-  from public.topics where slug = 'china-imperial'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Un rechazo cultural chino a todo contacto exterior', false, 0),
-  ('Su coste sin ingresos, la lucha entre eunucos y burocracia por el tesoro y el retorno de la amenaza mongola en el norte', true, 1),
-  ('La derrota de la flota china en el océano Índico', false, 2),
-  ('La prohibición impuesta por comerciantes portugueses', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: china-imperial-10
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué papel tuvo la plata americana en la China Ming del siglo XVI?', 'Llegaba por Manila desde 1571 y por el comercio portugués. La China Ming estaba plenamente integrada en la primera economía global.', 3, true
-  from public.topics where slug = 'china-imperial'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Ninguno: el imperio estaba cerrado al comercio exterior', false, 0),
-  ('Entró en cantidades enormes porque China la valoraba más que ningún otro mercado, y el Estado pasó a cobrar impuestos en plata', true, 1),
-  ('Se prohibió su circulación por decreto imperial', false, 2),
-  ('Se usó exclusivamente para acuñar moneda de prestigio', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: china-imperial-11
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cómo gobernaron los Qing un imperio multiétnico?', 'Traían una experiencia de gobierno sobre poblaciones mixtas y una organización militar y social propia, los estandartes.', 3, true
-  from public.topics where slug = 'china-imperial'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Imponiendo la lengua y las costumbres manchúes a toda la población', false, 0),
-  ('Presentándose como emperadores confucianos ante los han, kanes ante los mongoles y protectores del budismo tibetano', true, 1),
-  ('Delegando el gobierno en administradores europeos', false, 2),
-  ('Dividiendo el imperio en Estados independientes tributarios', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: china-imperial-12
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué ha aportado la New Qing History?', 'Ho Ping-ti defendió la centralidad de la sinización, y la polémica conserva resonancia política actual.', 3, true
-  from public.topics where slug = 'china-imperial'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La demostración de que los Qing se sinizaron por completo', false, 0),
-  ('El uso de fuentes en manchú para mostrar una identidad conservada y un carácter multiétnico deliberado del imperio', true, 1),
-  ('La datación exacta de la conquista de Pekín', false, 2),
-  ('La revisión a la baja de las cifras de población del siglo XVIII', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: china-imperial-13
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué estableció el Tratado de Nankín de 1842?', 'Fue el primero de una serie de acuerdos que la historiografía china llama tratados desiguales.', 3, true
-  from public.topics where slug = 'china-imperial'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La apertura de puertos, la cesión de Hong Kong, aranceles fijados desde fuera y la extraterritorialidad', true, 0),
-  ('La prohibición definitiva del comercio del opio', false, 1),
-  ('La entrada de China en el sistema de las potencias europeas en pie de igualdad', false, 2),
-  ('La devolución de Taiwán al imperio', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: china-imperial-14
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué magnitud tuvo la rebelión Taiping?', 'La dirigió un letrado fracasado que se proclamó hermano menor de Jesucristo y llegó a controlar el valle del Yangtsé.', 3, true
-  from public.topics where slug = 'china-imperial'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Una revuelta local sofocada en meses', false, 0),
-  ('Una guerra civil de catorce años con entre veinte y treinta millones de muertos, la más letal del siglo XIX', true, 1),
-  ('Un golpe palaciego sin consecuencias sociales', false, 2),
-  ('Una guerra fronteriza contra los mongoles', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: china-imperial-15
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Por qué fue significativa la abolición de los exámenes en 1905?', 'El imperio cayó siete años después, en la revolución de 1911 y la abdicación de 1912.', 3, true
-  from public.topics where slug = 'china-imperial'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Porque permitió el acceso de las mujeres a la administración', false, 0),
-  ('Porque rompió el vínculo entre el estudio de los clásicos y el poder, y la élite letrada dejó de tener motivos para sostener la dinastía', true, 1),
-  ('Porque implantó un sistema electoral', false, 2),
-  ('Porque obligó a formar a los funcionarios en Japón', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: china-imperial-16
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué sostiene Kenneth Pomeranz sobre la Gran Divergencia?', 'El debate ha desplazado definitivamente la explicación por superioridad europea de largo plazo, y con ella la vieja tesis del despotismo oriental.', 3, true
-  from public.topics where slug = 'china-imperial'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que Europa fue superior a Asia desde el siglo XV', false, 0),
-  ('Que hasta mediados del XVIII las regiones más avanzadas eran comparables y la diferencia la marcaron el carbón accesible y los recursos coloniales', true, 1),
-  ('Que China nunca alcanzó niveles de vida europeos', false, 2),
-  ('Que la divergencia se debió a la superioridad militar europea', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: crisis-siglo-xiv-1
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿En qué situación estaba Europa cuando llegó la peste en 1347?', 'La hambruna de 1315-1317 y la epizootia bovina de 1319-1320 habían dejado a la población debilitada antes de la epidemia.', 3, true
-  from public.topics where slug = 'crisis-siglo-xiv'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('En pleno auge demográfico y con excedentes acumulados', false, 0),
-  ('Con el crecimiento agotado desde hacía medio siglo: tierras marginales, explotaciones fragmentadas y precios del grano al alza', true, 1),
-  ('Recién recuperada de una guerra general europea', false, 2),
-  ('Con la población en mínimos históricos', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: crisis-siglo-xiv-2
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cuál es la objeción central de Brenner al modelo demográfico?', 'Para Brenner lo decisivo fue la relación de fuerzas entre señores y campesinos y la estructura del poder político en cada región.', 3, true
-  from public.topics where slug = 'crisis-siglo-xiv'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que la población no creció realmente antes de 1300', false, 0),
-  ('Que la peste no tuvo efectos económicos apreciables', false, 1),
-  ('Que describe la presión pero no explica los desenlaces: la misma demografía produjo resultados opuestos a uno y otro lado del Elba', true, 2),
-  ('Que los registros señoriales no son fiables', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: crisis-siglo-xiv-3
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué mortalidad estima hoy la investigación para la primera oleada de peste?', 'La cifra tradicional de un tercio se ha revisado al alza con registros señoriales, censos fiscales y series de sustituciones de beneficios eclesiásticos.', 3, true
-  from public.topics where slug = 'crisis-siglo-xiv'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Alrededor del diez por ciento', false, 0),
-  ('Un tercio exacto de la población europea', false, 1),
-  ('Entre el cuarenta y el sesenta por ciento, con grandes variaciones regionales', true, 2),
-  ('Más del ochenta por ciento en toda Europa', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: crisis-siglo-xiv-4
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cómo se cerró la polémica sobre la identidad de la enfermedad?', 'Es uno de los casos más limpios de un debate histórico resuelto por evidencia biológica. Lo que sigue abierto es el mecanismo de transmisión.', 3, true
-  from public.topics where slug = 'crisis-siglo-xiv'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Con el hallazgo de nuevos cronistas italianos', false, 0),
-  ('Con la secuenciación de ADN antiguo en 2011, que identificó *Yersinia pestis* en esqueletos de Londres', true, 1),
-  ('Con el análisis estadístico de los testamentos florentinos', false, 2),
-  ('No se ha cerrado: sigue sin conocerse el agente', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: crisis-siglo-xiv-5
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué parte de la objeción de Cohn conserva vigencia?', 'El agente está identificado; su ecología de transmisión, no del todo.', 3, true
-  from public.topics where slug = 'crisis-siglo-xiv'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que el agente no era una bacteria', false, 0),
-  ('Que la mortalidad fue mucho menor de lo calculado', false, 1),
-  ('Que la velocidad de propagación encaja mal con el ciclo rata-pulga: hoy se apunta a ectoparásitos humanos y a la forma neumónica', true, 2),
-  ('Que la epidemia no llegó al norte de Europa', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: crisis-siglo-xiv-6
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué efecto económico inmediato tuvo la mortalidad masiva?', 'Mejoró incluso la dieta: más carne y cerveza y menos pan de cereal secundario para quienes sobrevivieron.', 3, true
-  from public.topics where slug = 'crisis-siglo-xiv'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('El trabajo se volvió escaso y caro, y la tierra abundante y barata: subieron los salarios reales y cayeron las rentas', true, 0),
-  ('Subieron a la vez rentas y salarios', false, 1),
-  ('Se hundió el precio del trabajo por exceso de oferta', false, 2),
-  ('No hubo efectos apreciables hasta el siglo XVI', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: crisis-siglo-xiv-7
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué pretendía el Estatuto de los Trabajadores inglés de 1351?', 'Fue la respuesta señorial a lo que el mercado de trabajo les quitaba. Se aplicó con desigual éxito y generó conflicto permanente.', 3, true
-  from public.topics where slug = 'crisis-siglo-xiv'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Repartir las tierras abandonadas entre los campesinos', false, 0),
-  ('Congelar los salarios en niveles anteriores a la peste y penar el abandono del señorío por mejor paga', true, 1),
-  ('Abolir la servidumbre para atraer mano de obra', false, 2),
-  ('Financiar la guerra de los Cien Años con un impuesto nuevo', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: crisis-siglo-xiv-8
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Quiénes fueron los Ciompi?', 'Su revuelta muestra que el conflicto no fue solo rural: también enfrentó a los oficios menores con el patriciado urbano.', 3, true
-  from public.topics where slug = 'crisis-siglo-xiv'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Los mercenarios de las compañías blancas en Italia', false, 0),
-  ('Los flagelantes que recorrieron el Imperio en 1349', false, 1),
-  ('Obreros del textil florentino sin gremio propio, que ocuparon el gobierno de la ciudad seis semanas en 1378', true, 2),
-  ('Los campesinos catalanes sujetos a malos usos señoriales', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: crisis-siglo-xiv-9
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, 'Pese a ser aplastadas casi todas las revueltas, ¿por qué desapareció la servidumbre en Europa occidental?', 'El resultado a largo plazo favoreció a los campesinos occidentales por presión de mercado, no por concesión política.', 3, true
-  from public.topics where slug = 'crisis-siglo-xiv'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Porque los reyes la abolieron por decreto general', false, 0),
-  ('Porque retener por la fuerza a una mano de obra escasa resultaba caro e inaplicable cuando el señor vecino ofrecía mejores condiciones', true, 1),
-  ('Porque la Iglesia la declaró pecado en Constanza', false, 2),
-  ('Porque los campesinos compraron su libertad con oro americano', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: crisis-siglo-xiv-10
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué fue la «segunda servidumbre»?', 'Sobre la misma catástrofe demográfica, la nobleza de Prusia, Polonia, Bohemia y Hungría reforzó su control. Duró hasta el siglo XIX.', 3, true
-  from public.topics where slug = 'crisis-siglo-xiv'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('El retorno de la esclavitud doméstica a las ciudades italianas', false, 0),
-  ('El endurecimiento de la servidumbre en Francia durante la guerra de los Cien Años', false, 1),
-  ('La reimplantación de la servidumbre al este del Elba, ligada a la exportación cerealista por el Báltico', true, 2),
-  ('Un impuesto personal aplicado a los siervos liberados', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: crisis-siglo-xiv-11
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué consecuencia institucional tuvo financiar la guerra de los Cien Años?', 'En Inglaterra se consolidó la regla de que no hay impuesto sin aprobación parlamentaria; en Francia la *taille* acabó siendo permanente sin consentimiento periódico.', 3, true
-  from public.topics where slug = 'crisis-siglo-xiv'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La desaparición de los parlamentos, sustituidos por consejos reales', false, 0),
-  ('Impuestos regulares que hubo que negociar, lo que dio peso al Parlamento inglés y a los Estados Generales franceses', true, 1),
-  ('La supresión de la nobleza como estamento fiscal', false, 2),
-  ('La creación de un banco central en ambos reinos', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: crisis-siglo-xiv-12
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué cambio militar erosionó la preeminencia social del caballero?', 'La hueste convocada por obligación vasallática deja paso al ejército contratado, y con ella pierde base el fundamento social de la nobleza militar.', 3, true
-  from public.topics where slug = 'crisis-siglo-xiv'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La prohibición eclesiástica de los torneos', false, 0),
-  ('La sustitución de la caballería por la marina de guerra', false, 1),
-  ('El arco largo, las picas, la artillería de pólvora y sobre todo las compañías permanentes pagadas por la corona', true, 2),
-  ('El encarecimiento del hierro tras la peste', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: crisis-siglo-xiv-13
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué doctrina permitió cerrar el Cisma de Occidente en Constanza?', 'El papado desactivó después la doctrina, pero el episodio dejó formulada una idea de soberanía representativa que reaparecería en la política laica.', 3, true
-  from public.topics where slug = 'crisis-siglo-xiv'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('El conciliarismo: el concilio general representa a la Iglesia y su autoridad supera a la del papa', true, 0),
-  ('La infalibilidad pontificia', false, 1),
-  ('El regalismo de las monarquías nacionales', false, 2),
-  ('La teoría de las dos espadas de Bonifacio VIII', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: crisis-siglo-xiv-14
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Por qué es relevante el movimiento husita?', 'La ejecución de Hus en 1415, pese al salvoconducto imperial, desencadenó quince años de guerras en que ejércitos campesinos derrotaron a cruzadas imperiales.', 3, true
-  from public.topics where slug = 'crisis-siglo-xiv'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Porque restauró la unidad de la Iglesia', false, 0),
-  ('Porque fue el primer movimiento de reforma religiosa que se sostuvo militarmente y arrancó concesiones, un siglo antes de Lutero', true, 1),
-  ('Porque implantó el luteranismo en Bohemia', false, 2),
-  ('Porque acabó con la guerra de los Cien Años', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: crisis-siglo-xiv-15
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué demuestra el caso de Estrasburgo en febrero de 1349?', 'Clemente VI publicó bulas desmintiendo la acusación de envenenar los pozos. Muchos supervivientes emigraron al este de Europa y redibujaron el mapa del judaísmo europeo.', 3, true
-  from public.topics where slug = 'crisis-siglo-xiv'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que la Iglesia alentó los pogromos desde Aviñón', false, 0),
-  ('Que la comunidad judía fue quemada antes de que la peste llegara a la ciudad: la violencia se anticipó al contagio', true, 1),
-  ('Que los pogromos solo se produjeron donde la mortalidad fue mayor', false, 2),
-  ('Que las acusaciones de envenenamiento se probaron judicialmente', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: crisis-siglo-xiv-16
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Por qué se usa hoy con reservas la palabra «crisis» para este periodo?', 'El mismo siglo produjo la pintura al óleo, la carabela, el reloj mecánico público y, hacia 1450, la imprenta. No es una cultura agotada: es una cultura bajo presión.', 3, true
-  from public.topics where slug = 'crisis-siglo-xiv'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Porque la mortalidad fue mucho menor de lo que se creía', false, 0),
-  ('Porque no hubo guerras significativas', false, 1),
-  ('Porque describe el trauma pero no la salida: los supervivientes del noroeste europeo alcanzaron salarios reales, dieta y libertad jurídica sin precedentes', true, 2),
-  ('Porque el término es un anacronismo del siglo XX sin uso académico', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: descubrimientos-1
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Por qué no se sostiene que la expansión portuguesa se debiera al corte turco de la ruta de las especias?', 'Los motivos fueron la continuidad de la guerra en el norte de África, el acceso directo al oro sudanés y el azúcar de las islas atlánticas.', 3, true
-  from public.topics where slug = 'descubrimientos'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Porque los turcos nunca controlaron el Mediterráneo oriental', false, 0),
-  ('Porque las especias siguieron llegando a Venecia por Alejandría durante todo el siglo XV y XVI', true, 1),
-  ('Porque Portugal no comerciaba con especias', false, 2),
-  ('Porque la ruta terrestre era más barata que la marítima', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: descubrimientos-2
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué papel tuvieron Madeira, Azores y Santo Tomé en la historia atlántica?', 'El modelo estaba probado décadas antes de que Colón zarpara. La plantación americana no se improvisó.', 3, true
-  from public.topics where slug = 'descubrimientos'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Fueron simples escalas de aguada en la ruta a la India', false, 0),
-  ('Sirvieron de bases militares contra los otomanos', false, 1),
-  ('Funcionaron como laboratorio del complejo de plantación: monocultivo de azúcar, mano de obra esclava africana y capital genovés y flamenco', true, 2),
-  ('Fueron colonias de poblamiento libre sin producción de exportación', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: descubrimientos-3
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué era la *volta do mar* y por qué fue decisiva?', 'No fue un instrumento sino un patrón de navegación. Con él, navegar dejó de ser costear.', 3, true
-  from public.topics where slug = 'descubrimientos'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Un tipo de vela triangular que permitía ceñir el viento', false, 0),
-  ('Comprender que para regresar hay que alejarse de la costa y describir un arco por el océano abierto aprovechando los vientos del oeste', true, 1),
-  ('Un impuesto sobre el comercio de retorno', false, 2),
-  ('La técnica de cálculo de la longitud mediante relojes', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: descubrimientos-4
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué objetó realmente la junta de Salamanca al proyecto de Colón?', 'La esfericidad de la Tierra no se discutía desde la Antigüedad. El mito del Colón visionario procede de una biografía novelada de 1828.', 3, true
-  from public.topics where slug = 'descubrimientos'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que la Tierra era plana y se caería por el borde', false, 0),
-  ('Que sus cálculos de distancia eran erróneos: situaba Japón a unos 3.700 km de Canarias cuando la distancia real ronda los 20.000', true, 1),
-  ('Que el papa había concedido esas aguas a Portugal', false, 2),
-  ('Que no existían barcos capaces de cruzar un océano', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: descubrimientos-5
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cómo llegó a llamarse «América» el nuevo continente?', 'Colón murió en 1506 sosteniendo que había llegado a Asia. Fueron los relatos de Vespucio los que difundieron la idea de un continente desconocido.', 3, true
-  from public.topics where slug = 'descubrimientos'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Colón lo bautizó así en su tercer viaje', false, 0),
-  ('Es un topónimo indígena adoptado por los cronistas', false, 1),
-  ('Lo impuso el Tratado de Tordesillas', false, 2),
-  ('El cartógrafo Waldseemüller lo imprimió en su mapa de 1507 a partir de los relatos atribuidos a Vespucio', true, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: descubrimientos-6
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿En qué consistía el modelo imperial portugués en Asia?', 'Un imperio de peajes sostenido por artillería naval, con muy poca población detrás.', 3, true
-  from public.topics where slug = 'descubrimientos'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Conquista territorial y poblamiento masivo', false, 0),
-  ('Una red de factorías fortificadas en puntos de paso y un sistema de licencias, el *cartaz*, que cobraba peaje a la navegación local', true, 1),
-  ('Alianzas matrimoniales con las dinastías locales', false, 2),
-  ('Concesión de encomiendas a los colonos', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: descubrimientos-7
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cuál fue el factor humano decisivo en la caída de Tenochtitlan?', 'Desde la perspectiva local no fue una invasión extranjera contra un imperio, sino una guerra interna en la que un actor nuevo se alió con los descontentos.', 3, true
-  from public.topics where slug = 'descubrimientos'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La superioridad numérica del ejército español', false, 0),
-  ('La rendición voluntaria de Moctezuma', false, 1),
-  ('Las decenas de miles de guerreros tlaxcaltecas y de otros pueblos sometidos al tributo mexica que combatieron del lado de Cortés', true, 2),
-  ('El bloqueo naval del golfo de México', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: descubrimientos-8
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué situación encontró Pizarro al llegar a Cajamarca en 1532?', 'La enfermedad llegó antes que los conquistadores y desarticuló la sucesión. Se conquistó un Estado recién salido de una guerra dinástica.', 3, true
-  from public.topics where slug = 'descubrimientos'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Un imperio en su apogeo y plenamente unificado', false, 0),
-  ('Un imperio que salía de una guerra civil entre Huáscar y Atahualpa, desencadenada tras una epidemia que se había adelantado a los españoles', true, 1),
-  ('Un territorio despoblado por la sequía', false, 2),
-  ('Una alianza inca-mexica ya formada contra los europeos', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: descubrimientos-9
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Por qué es un artificio fechar el final de la conquista en 1521 y 1533?', 'Los chichimecas sostuvieron cuarenta años de guerra y amplias zonas de Amazonía y Chaco quedaron fuera de todo control colonial efectivo.', 3, true
-  from public.topics where slug = 'descubrimientos'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Porque las fechas correctas son 1519 y 1532', false, 0),
-  ('Porque la conquista fue un proceso de siglos e incompleto: el Petén maya resistió hasta 1697 y los mapuches nunca fueron sometidos al sur del Biobío', true, 1),
-  ('Porque los imperios mexica e inca se restauraron después', false, 2),
-  ('Porque la corona no reconoció esas conquistas hasta el siglo XVIII', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: descubrimientos-10
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué problema plantea explicar el colapso demográfico americano solo por las epidemias?', 'Minas, plantaciones, traslados forzosos y destrucción de cosechas multiplicaron la letalidad. Enfermedad y explotación no son causas alternativas.', 3, true
-  from public.topics where slug = 'descubrimientos'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que las epidemias están mal documentadas', false, 0),
-  ('Que convierte una catástrofe histórica en un accidente biológico sin responsables, cuando la mortalidad fue mayor donde el régimen de trabajo era más duro', true, 1),
-  ('Que las enfermedades europeas no eran contagiosas en América', false, 2),
-  ('Que la población indígena tenía inmunidad previa a la viruela', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: descubrimientos-11
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, 'Según la base de datos de referencia, ¿cuál fue la magnitud del comercio atlántico de esclavos?', 'Cerca de cinco millones fueron a Brasil, algo más de millón y medio a la América española y unos cuatrocientos mil a Norteamérica.', 3, true
-  from public.topics where slug = 'descubrimientos'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Unos dos millones de personas embarcadas', false, 0),
-  ('Unos doce millones y medio embarcadas y unos diez millones y medio desembarcadas vivas', true, 1),
-  ('Unos cincuenta millones embarcadas', false, 2),
-  ('No existen cifras reconstruibles', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: descubrimientos-12
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué era la mita reorganizada por el virrey Toledo en 1573?', 'Junto con la amalgamación con mercurio de Huancavelica, hizo de Potosí una de las mayores ciudades del mundo a comienzos del siglo XVII.', 3, true
-  from public.topics where slug = 'descubrimientos'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Un impuesto sobre la plata extraída', false, 0),
-  ('Un turno de trabajo obligatorio que forzaba a las comunidades andinas a enviar parte de sus hombres a las minas', true, 1),
-  ('La licencia para comerciar con Filipinas', false, 2),
-  ('El reparto de tierras entre los encomenderos', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: descubrimientos-13
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Por qué acabó gran parte de la plata americana en China?', 'El galeón de Manila la llevaba desde Acapulco entre 1565 y 1815. Es el primer circuito comercial planetario, y funcionó por arbitraje de precios.', 3, true
-  from public.topics where slug = 'descubrimientos'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Porque España pagaba con ella la seda de Europa', false, 0),
-  ('Porque China había monetizado su fiscalidad en plata y pagaba por ella mucho más que el mercado europeo', true, 1),
-  ('Porque el papa lo estableció en el Tratado de Zaragoza', false, 2),
-  ('Porque Portugal controlaba la ruta del Cabo y la desviaba', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: descubrimientos-14
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué sostuvo Francisco de Vitoria en 1539?', 'Su formulación se considera un antecedente del derecho internacional. Se discutió en Valladolid en 1550-1551 entre Sepúlveda y Las Casas.', 3, true
-  from public.topics where slug = 'descubrimientos'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que la donación papal legitimaba plenamente la conquista', false, 0),
-  ('Que los indígenas carecían de capacidad jurídica', false, 1),
-  ('Que ni la donación papal ni el derecho de conquista eran títulos válidos, y propuso un derecho de gentes común a todos los pueblos', true, 2),
-  ('Que la evangelización justificaba cualquier medio', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: descubrimientos-15
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Por qué fallan tanto la leyenda negra como su reverso apologético?', 'La leyenda negra atribuye a España una crueldad singular ignorando a las demás potencias; la apologética usa a Vitoria y Las Casas para tapar la práctica.', 3, true
-  from public.topics where slug = 'descubrimientos'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Porque ambas exageran el número de víctimas', false, 0),
-  ('Porque la discusión jurídica existió y las atrocidades también, y las leyes protectoras se incumplieron donde estorbaban a la extracción', true, 1),
-  ('Porque ninguna se basa en fuentes escritas', false, 2),
-  ('Porque las dos fueron construidas en el siglo XX', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: descubrimientos-16
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cuál fue el mayor efecto demográfico del intercambio colombino sobre el Viejo Mundo?', 'El efecto llegó tarde: dos siglos después del contacto. Maíz y boniato permitieron cultivar laderas antes improductivas en China.', 3, true
-  from public.topics where slug = 'descubrimientos'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La llegada del caballo, que transformó la agricultura europea', false, 0),
-  ('La introducción del café y del té en la dieta popular', false, 1),
-  ('Patata, maíz y mandioca, que sostuvieron el crecimiento de Europa, China y África central desde el siglo XVIII', true, 2),
-  ('La desaparición de las hambrunas en el siglo XVI', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: egipto-1
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué rasgo del régimen del Nilo resultó más decisivo para la formación del Estado egipcio?', 'La regularidad del ciclo permitía anticipar cosechas, fijar impuestos antes de recogerlos y planificar la corvea. El Tigris y el Éufrates, más irregulares, no ofrecían esa base.', 3, true
-  from public.topics where slug = 'egipto'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Su caudal absoluto', false, 0),
-  ('Su predictibilidad estacional', true, 1),
-  ('Su navegabilidad hasta el mar', false, 2),
-  ('Su riqueza pesquera', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: egipto-2
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué sostiene la crítica de Karl Butzer a la tesis del «despotismo hidráulico» de Wittfogel?', 'Butzer invierte la causalidad: no fue el riego el que creó el Estado, sino un Estado ya formado el que amplió después los sistemas hidráulicos.', 3, true
-  from public.topics where slug = 'egipto'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que Egipto careció por completo de irrigación', false, 0),
-  ('Que la irrigación fue de cuenca y local, y las grandes obras posteriores a la formación del Estado', true, 1),
-  ('Que el riego lo gestionaban exclusivamente los templos', false, 2),
-  ('Que la crecida hacía innecesaria cualquier obra hidráulica', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: egipto-3
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué documentan los papiros de Uadi al-Yarf?', 'El diario del inspector Merer, hallado en 2013, registra los viajes de su equipo desde las canteras de Tura. Es la documentación administrativa más antigua conservada en Egipto.', 3, true
-  from public.topics where slug = 'egipto'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('El ritual de coronación de Keops', false, 0),
-  ('El diario logístico del transporte de caliza a Guiza', true, 1),
-  ('El tratado con los hititas', false, 2),
-  ('El censo de sacerdotes de Amón', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: egipto-4
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, 'La hereditariedad de los cargos de nomarca y la monumentalización de sus tumbas provinciales indican, sobre todo…', 'Cuando las élites provinciales se perpetúan y se entierran con lujo en sus nomos, están capturando recursos que antes fluían al centro. Es un indicador clásico de descentralización.', 3, true
-  from public.topics where slug = 'egipto'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Un aumento del poder faraónico', false, 0),
-  ('Un retroceso del poder central', true, 1),
-  ('La llegada de dinastías extranjeras', false, 2),
-  ('Una reforma religiosa', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: egipto-5
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué explica la concentración de la corvea en los meses de inundación?', 'La estacionalidad agraria liberaba trabajo justo cuando el transporte fluvial de bloques era además más fácil. El sistema aprovechaba ambos factores.', 3, true
-  from public.topics where slug = 'egipto'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que el calor impedía trabajar el resto del año', false, 0),
-  ('Que el campo estaba anegado y la mano de obra agraria quedaba disponible', true, 1),
-  ('Que los templos prohibían trabajar en la siembra', false, 2),
-  ('Que las canteras solo eran accesibles con el río bajo', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: egipto-6
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué muestra la evidencia arqueológica del poblado de constructores de Guiza?', 'Las excavaciones de Lehner y Hawass documentan infraestructura de abastecimiento, jerarquías técnicas y atención médica en los restos óseos: equipos organizados, no esclavitud masiva.', 3, true
-  from public.topics where slug = 'egipto'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Barracones de esclavos extranjeros', false, 0),
-  ('Panaderías, cervecerías y consumo cárnico propios de trabajadores mantenidos por el Estado', true, 1),
-  ('Que la pirámide se construyó con mano de obra militar cautiva', false, 2),
-  ('Que el poblado se abandonó antes de terminar la obra', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: egipto-7
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Por qué Deir el-Medina es un yacimiento excepcional?', 'La comunidad de artesanos del Valle de los Reyes dejó miles de textos ordinarios. En el año 29 de Ramsés III el retraso de las raciones provocó la primera huelga documentada.', 3, true
-  from public.topics where slug = 'egipto'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Porque conserva el único templo solar completo', false, 0),
-  ('Porque sus ostraca documentan la vida cotidiana: raciones, pleitos, enfermedades y una huelga', true, 1),
-  ('Porque contiene la tumba intacta de un faraón', false, 2),
-  ('Porque allí se halló la piedra de Rosetta', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: egipto-8
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué proceso reflejan los Textos de las Pirámides, los Textos de los Sarcófagos y el Libro de los Muertos?', 'Es la llamada «democratización del más allá»: lo que en el Imperio Antiguo era prerrogativa real acaba circulando en copias comerciales con espacio para el nombre del comprador.', 3, true
-  from public.topics where slug = 'egipto'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La sustitución del politeísmo por el monoteísmo', false, 0),
-  ('La progresiva extensión del acceso al más allá desde el rey a la élite y a quien pudiera pagarlo', true, 1),
-  ('El abandono de la momificación', false, 2),
-  ('La centralización del culto en Karnak', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: egipto-9
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cómo describe hoy la egiptología mayoritaria la reforma de Akenatón?', 'Assmann y Hornung subrayan que el acceso a Atón pasaba por el propio rey, objeto de culto, y que no existen eslabones documentales que enlacen Amarna con el monoteísmo israelita.', 3, true
-  from public.topics where slug = 'egipto'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Como el primer monoteísmo, origen directo del judaísmo', false, 0),
-  ('Como un exclusivismo cultual impuesto desde la corona, sin continuidad documental posterior', true, 1),
-  ('Como una restauración del culto tradicional a Amón', false, 2),
-  ('Como una invención de la historiografía del siglo XIX', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: egipto-10
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, 'El papiro Edwin Smith destaca porque…', 'Su estructura es clínica y llega a admitir casos intratables. La magia convivía con ese registro sin que sus autores percibieran contradicción.', 3, true
-  from public.topics where slug = 'egipto'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Contiene solo ensalmos mágicos', false, 0),
-  ('Ordena cuarenta y ocho casos de traumatismos con examen, diagnóstico y pronóstico', true, 1),
-  ('Recoge el calendario de las crecidas', false, 2),
-  ('Describe el proceso completo de momificación', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: egipto-11
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué desfase producía el calendario civil egipcio de 365 días?', 'Al no intercalar el día bisiesto, el año civil se desplazaba respecto al año solar. Los propios egipcios eran conscientes del desfase.', 3, true
-  from public.topics where slug = 'egipto'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Ninguno: era exacto', false, 0),
-  ('Un desplazamiento acumulativo por prescindir del cuarto de día sobrante', true, 1),
-  ('Un adelanto de un mes por siglo por contar 13 meses', false, 2),
-  ('Un retraso causado por los cinco días epagómenos', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: egipto-12
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué aportó Champollion en su Lettre à M. Dacier (1822)?', 'Frente a la tradición simbolista heredada de Horapolo, Champollion demostró el carácter mixto —fonético y semántico— de la escritura.', 3, true
-  from public.topics where slug = 'egipto'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que los jeroglíficos eran símbolos puramente conceptuales', false, 0),
-  ('Que el sistema registraba a la vez sonidos y significados', true, 1),
-  ('Que el egipcio derivaba del griego', false, 2),
-  ('Que la piedra de Rosetta era una falsificación', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: egipto-13
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué revelan las cartas de Amarna sobre el sistema internacional del Bronce Final?', 'La correspondencia con Babilonia, Mitani, Hatti y los príncipes cananeos muestra protocolos estables entre «grandes reyes» y una red de vasallaje en Siria-Palestina.', 3, true
-  from public.topics where slug = 'egipto'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que Egipto no mantenía relaciones exteriores', false, 0),
-  ('Que existía una diplomacia regulada en acadio, con matrimonios dinásticos e intercambio de regalos', true, 1),
-  ('Que los hititas eran vasallos de Egipto', false, 2),
-  ('Que el comercio se hacía solo por vía marítima', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: egipto-14
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cuál fue el resultado real de la batalla de Qadesh?', 'La propaganda monumental de Ramsés II presenta una victoria personal, pero el desenlace fue un equilibrio que hacia 1259 a. C. se formalizó en un tratado conservado en ambas versiones.', 3, true
-  from public.topics where slug = 'egipto'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Victoria egipcia decisiva, como afirman los relieves de Ramsés II', false, 0),
-  ('Un empate estratégico que desembocó en un tratado con Hattusili III', true, 1),
-  ('La conquista hitita del delta', false, 2),
-  ('La pérdida egipcia de Nubia', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: egipto-15
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué consecuencia interna tuvo para Egipto el colapso del Bronce Final?', 'Egipto resistió las incursiones de los Pueblos del Mar, pero salió debilitado: inflación del grano documentada y un clero tebano que acabó gobernando de hecho el sur.', 3, true
-  from public.topics where slug = 'egipto'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La desaparición inmediata del Estado egipcio', false, 0),
-  ('La pérdida de las posesiones asiáticas y la creciente autonomía del sacerdocio de Amón', true, 1),
-  ('La adopción del alfabeto fenicio como escritura oficial', false, 2),
-  ('El traslado definitivo de la capital a Alejandría', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: egipto-16
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué estatuto tuvo Egipto tras la anexión de 30 a. C.?', 'Por su valor estratégico como granero, Augusto la reservó a su control personal mediante un prefecto de rango ecuestre, y vetó el acceso de senadores sin permiso imperial.', 3, true
-  from public.topics where slug = 'egipto'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Provincia senatorial ordinaria', false, 0),
-  ('Provincia de estatuto singular administrada directamente por el emperador', true, 1),
-  ('Reino cliente con dinastía propia', false, 2),
-  ('Territorio libre de impuestos', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: entreguerras-1
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué establecía el artículo 231 del Tratado de Versalles?', 'Era el fundamento jurídico de las reparaciones, pero se leyó en Alemania como una condena moral y alimentó la propaganda contra el tratado.', 3, true
-  from public.topics where slug = 'entreguerras'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('El desarme total de la marina alemana', false, 0),
-  ('La atribución a Alemania y sus aliados de la responsabilidad de las pérdidas de la guerra', true, 1),
-  ('La creación de la Sociedad de Naciones', false, 2),
-  ('La cifra exacta de las reparaciones que Alemania debía pagar', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: entreguerras-2
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cuál fue la debilidad estructural más grave del orden de Versalles?', 'El tratado resultó demasiado severo para reconciliar y demasiado blando para incapacitar, y ninguna potencia quedó dispuesta a hacerlo cumplir.', 3, true
-  from public.topics where slug = 'entreguerras'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que las reparaciones fueron impagables desde el primer día', false, 0),
-  ('Que nació sin garante: Estados Unidos no lo ratificó y Gran Bretaña dejó de sostenerlo', true, 1),
-  ('Que dividió Alemania en cuatro zonas de ocupación', false, 2),
-  ('Que excluyó a Francia de las negociaciones', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: entreguerras-3
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿En qué consistía el circuito financiero que sostuvo la estabilización de 1924 a 1929?', 'Todo dependía del crédito norteamericano, que empezó a retirarse en 1928 hacia la especulación bursátil interna, antes incluso del crac.', 3, true
-  from public.topics where slug = 'entreguerras'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Alemania financiaba la reconstrucción soviética a cambio de materias primas', false, 0),
-  ('Estados Unidos prestaba a Alemania, Alemania pagaba reparaciones y los aliados devolvían sus deudas a Estados Unidos', true, 1),
-  ('La Sociedad de Naciones emitía deuda común europea', false, 2),
-  ('Gran Bretaña garantizaba la moneda alemana con sus reservas coloniales', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: entreguerras-4
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, 'Según Eichengreen, ¿qué relación hay entre el patrón oro y la duración de la Depresión?', 'Gran Bretaña salió en 1931, Estados Unidos en 1933 y Francia solo en 1936, y las curvas de recuperación siguen ese orden.', 3, true
-  from public.topics where slug = 'entreguerras'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Los países que abandonaron antes el patrón oro se recuperaron antes', true, 0),
-  ('El patrón oro protegió a las economías que lo mantuvieron', false, 1),
-  ('No hubo relación observable entre ambos factores', false, 2),
-  ('Solo afectó a las economías agrarias de Europa oriental', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: entreguerras-5
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué efecto político tuvo la Gran Depresión sobre el voto nazi?', 'La Depresión no creó el fascismo, que existía desde 1919, pero convirtió a los partidos antisistema en fuerzas de masas.', 3, true
-  from public.topics where slug = 'entreguerras'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Ninguno: el NSDAP ya era el primer partido alemán en 1928', false, 0),
-  ('Lo hizo pasar del dos coma seis por ciento en 1928 al treinta y siete por ciento en julio de 1932', true, 1),
-  ('Lo redujo a la mitad al desplazar el voto obrero al KPD', false, 2),
-  ('Lo estabilizó en torno al veinte por ciento durante toda la crisis', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: entreguerras-6
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué fue el escuadrismo en la Italia de 1920 y 1921?', 'Actuaba con tolerancia policial y financiación de los agrarios del valle del Po, y fue la base de fuerza sobre la que creció el movimiento.', 3, true
-  from public.topics where slug = 'entreguerras'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La milicia oficial del Estado fascista ya constituido', false, 0),
-  ('La violencia organizada de bandas de excombatientes contra sindicatos y ayuntamientos socialistas', true, 1),
-  ('El sistema de encuadramiento de obreros en corporaciones', false, 2),
-  ('La organización juvenil del Partido Nacional Fascista', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: entreguerras-7
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cómo llegó Mussolini a la jefatura del gobierno en octubre de 1922?', 'La marcha sobre Roma fue más teatro que asalto. El acceso al poder fue legal y con apoyo de la derecha liberal, que creía poder domesticarlo.', 3, true
-  from public.topics where slug = 'entreguerras'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Tras un asalto armado que tomó los ministerios de Roma', false, 0),
-  ('Por nombramiento del rey, que se negó a firmar el estado de sitio contra los camisas negras', true, 1),
-  ('Tras ganar unas elecciones generales con mayoría absoluta', false, 2),
-  ('Mediante un referéndum convocado por el Parlamento', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: entreguerras-8
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué consiguió Mussolini con los Pactos de Letrán de 1929?', 'El acuerdo con el Vaticano dio al fascismo un aval social que ningún decreto podía proporcionarle.', 3, true
-  from public.topics where slug = 'entreguerras'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La incorporación de Etiopía al imperio italiano', false, 0),
-  ('La paz con la Iglesia y una legitimidad interna decisiva para el régimen', true, 1),
-  ('La disolución del Parlamento y la implantación del partido único', false, 2),
-  ('El reconocimiento internacional de la conquista de Albania', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: entreguerras-9
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué permitía el artículo 48 de la Constitución de Weimar?', 'Desde 1930 sustituyó de hecho al Parlamento: Brüning y sus sucesores gobernaron con decretos firmados por Hindenburg.', 3, true
-  from public.topics where slug = 'entreguerras'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Disolver el Parlamento por votación de dos tercios', false, 0),
-  ('Gobernar por decreto presidencial de emergencia', true, 1),
-  ('Prohibir partidos declarados anticonstitucionales', false, 2),
-  ('Convocar referendos vinculantes de iniciativa popular', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: entreguerras-10
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, 'Según Kershaw, ¿qué explica el nombramiento de Hitler como canciller en enero de 1933?', 'El NSDAP había perdido dos millones de votos en noviembre de 1932 y estaba endeudado. La clave fue una decisión política, no un ascenso irresistible.', 3, true
-  from public.topics where slug = 'entreguerras'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Una victoria electoral por mayoría absoluta del NSDAP', false, 0),
-  ('El cálculo erróneo de un grupo reducido de conservadores que creían poder controlarlo', true, 1),
-  ('Un golpe militar apoyado por la Reichswehr', false, 2),
-  ('La renuncia de Hindenburg a la presidencia', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: entreguerras-11
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué fue la Ley de Plenos Poderes de marzo de 1933?', 'Se aprobó con los votos del Zentrum y con la oposición comunista ya detenida. La legalidad se destruyó por procedimientos legales.', 3, true
-  from public.topics where slug = 'entreguerras'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('El decreto que suspendió los derechos fundamentales tras el incendio del Reichstag', false, 0),
-  ('La norma que transfirió al gobierno la potestad legislativa y liquidó legalmente la República de Weimar', true, 1),
-  ('La ley que expulsó a los judíos de la función pública', false, 2),
-  ('El texto que unificó los cargos de presidente y canciller', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: entreguerras-12
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué designa el término Gleichschaltung?', 'Se ejecutó entre 1933 y 1934 e incluyó la disolución de partidos y sindicatos y la depuración de la función pública.', 3, true
-  from public.topics where slug = 'entreguerras'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('El plan de rearme acelerado de la industria alemana', false, 0),
-  ('El alineamiento forzoso de partidos, sindicatos, administración y asociaciones con el Estado nazi', true, 1),
-  ('La política de anexión de territorios de población alemana', false, 2),
-  ('El sistema de propaganda dirigido por Goebbels', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: entreguerras-13
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué efecto tuvo la política de no intervención en la Guerra Civil española?', 'Aplicada de forma asimétrica, funcionó como una intervención de hecho a favor de un bando. La URSS abasteció a la República a cambio de las reservas de oro.', 3, true
-  from public.topics where slug = 'entreguerras'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Frenó la llegada de armas a los dos bandos por igual', false, 0),
-  ('Perjudicó al gobierno legítimo mientras Alemania e Italia abastecían abiertamente a los sublevados', true, 1),
-  ('Obligó a la retirada de las Brigadas Internacionales en 1936', false, 2),
-  ('Impidió la intervención soviética a favor de la República', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: entreguerras-14
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué razones explican la política británica de apaciguamiento?', 'Reducirla a cobardía impide entenderla. Fue una política razonada que se rompió cuando la ocupación de Praga demostró que no se trataba solo de alemanes.', 3, true
-  from public.topics where slug = 'entreguerras'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La convicción de que Alemania no tenía capacidad militar alguna', false, 0),
-  ('Un imperio que defender, el rearme retrasado, la memoria de la Gran Guerra y la creencia de que parte de las reclamaciones alemanas era legítima', true, 1),
-  ('Un tratado de alianza firmado con Alemania en 1935', false, 2),
-  ('La presión de la Sociedad de Naciones para no aplicar sanciones', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: entreguerras-15
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué contenía el protocolo secreto del pacto germano-soviético de agosto de 1939?', 'Su existencia se negó oficialmente hasta 1989. Una semana después de la firma empezó la invasión de Polonia.', 3, true
-  from public.topics where slug = 'entreguerras'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Una alianza militar ofensiva contra Francia', false, 0),
-  ('El reparto de Polonia, los países bálticos y Besarabia entre ambas potencias', true, 1),
-  ('La entrega de tecnología aeronáutica alemana a la URSS', false, 2),
-  ('El compromiso soviético de entrar en el Eje', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: entreguerras-16
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué propone Robert Paxton frente a las definiciones doctrinales del fascismo?', 'La propuesta desplaza la pregunta de qué decía el fascismo a la de qué hizo y cómo llegó, que es donde los casos italiano y alemán se parecen de verdad.', 3, true
-  from public.topics where slug = 'entreguerras'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Negar que exista un fascismo genérico comparable entre países', false, 0),
-  ('Estudiar las etapas del proceso: creación del movimiento, arraigo, llegada al poder con aliados conservadores y radicalización', true, 1),
-  ('Definirlo exclusivamente por su política económica corporativa', false, 2),
-  ('Considerarlo una variante del bonapartismo del siglo XIX', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: espana-siglo-xx-1
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cómo funcionaba el turno pacífico de la Restauración?', 'El sistema requería que las elecciones no decidieran nada. Cuando el voto empezó a importar en las ciudades, el mecanismo dejó de servir.', 3, true
-  from public.topics where slug = 'espana-siglo-xx'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Los partidos alternaban tras ganar elecciones libres', false, 0),
-  ('La Corona nombraba gobierno y este convocaba y ganaba las elecciones mediante el caciquismo', true, 1),
-  ('El Parlamento elegía al presidente por votación secreta', false, 2),
-  ('Los gobiernos se sorteaban entre las provincias', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: espana-siglo-xx-2
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué efecto tuvo la derrota de 1898?', 'Fue un desastre militar menor y una catástrofe simbólica. Joaquín Costa formuló el diagnóstico de oligarquía y caciquismo.', 3, true
-  from public.topics where slug = 'espana-siglo-xx'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Provocó la caída inmediata de la monarquía', false, 0),
-  ('Liquidó el imperio y produjo el regeneracionismo, una corriente crítica que exigía reformar el Estado', true, 1),
-  ('Obligó a España a entrar en la Primera Guerra Mundial', false, 2),
-  ('Supuso la pérdida de Marruecos', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: espana-siglo-xx-3
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué mostró la crisis de 1917?', 'Juntas militares, asamblea de parlamentarios y huelga general coincidieron con agendas distintas, y el sistema sobrevivió sin resolver nada.', 3, true
-  from public.topics where slug = 'espana-siglo-xx'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que el ejército, el catalanismo y el movimiento obrero podían protestar a la vez sin confiar unos en otros', true, 0),
-  ('Que el sistema de la Restauración se había democratizado', false, 1),
-  ('Que España entraría en la guerra europea', false, 2),
-  ('Que la monarquía había perdido el apoyo del ejército', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: espana-siglo-xx-4
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué relación hubo entre el desastre de Annual y el golpe de 1923?', 'La dictadura se presentó como paréntesis regenerador, duró siete años y al caer arrastró a la monarquía que la había amparado.', 3, true
-  from public.topics where slug = 'espana-siglo-xx'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Ninguna: el golpe respondió a la crisis económica', false, 0),
-  ('El expediente sobre Annual apuntaba a responsabilidades del ejército y de la Corona, y el golpe cerró la investigación', true, 1),
-  ('El golpe se dio para reanudar la guerra de Marruecos', false, 2),
-  ('Primo de Rivera fue el principal responsable militar de Annual', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: espana-siglo-xx-5
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué reformas emprendió el bienio republicano de 1931 a 1933?', 'Se intentó en dos años una agenda que en otros países había ocupado medio siglo, y chocó simultáneamente con la Iglesia, el ejército y los propietarios.', 3, true
-  from public.topics where slug = 'espana-siglo-xx'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Nacionalización de la banca y colectivización agraria', false, 0),
-  ('Reforma agraria, separación de Iglesia y Estado, Estatuto catalán, reforma militar y sufragio femenino', true, 1),
-  ('Reforma fiscal y entrada en la Sociedad de Naciones', false, 2),
-  ('Reforma electoral y abolición del ejército', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: espana-siglo-xx-6
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué ocurrió en octubre de 1934?', 'Fue el momento en que ambos bandos empezaron a considerar legítimo lo que negaban al contrario.', 3, true
-  from public.topics where slug = 'espana-siglo-xx'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Se proclamó el Frente Popular', false, 0),
-  ('Una insurrección de izquierda contra la entrada de la CEDA en el gobierno, con revolución obrera en Asturias y proclamación del Estado catalán', true, 1),
-  ('Se aprobó la Constitución republicana', false, 2),
-  ('Se produjo la sublevación militar contra la República', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: espana-siglo-xx-7
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Por qué la sublevación de julio de 1936 produjo una guerra civil?', 'El Estado se descompuso en dos zonas con dos economías, dos ejércitos y dos formas de violencia.', 3, true
-  from public.topics where slug = 'espana-siglo-xx'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Porque triunfó en todo el país y la resistencia fue exterior', false, 0),
-  ('Porque fracasó en las grandes ciudades y en la mayor parte de la industria, sin que ninguno de los dos bandos pudiera imponerse', true, 1),
-  ('Porque intervinieron desde el primer día Francia y Gran Bretaña', false, 2),
-  ('Porque el gobierno declaró la guerra a Marruecos', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: espana-siglo-xx-8
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿En qué se diferenció la violencia en las dos retaguardias?', 'Se calculan unas cincuenta mil víctimas en la zona republicana y alrededor de cien mil en la sublevada hasta 1939, más otras cincuenta mil en la posguerra.', 3, true
-  from public.topics where slug = 'espana-siglo-xx'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('En que solo hubo represión en la zona sublevada', false, 0),
-  ('En que la republicana fue sobre todo descentralizada y de los primeros meses, y la sublevada fue sistemática, ordenada desde arriba y continuó tras la guerra', true, 1),
-  ('En que la republicana afectó únicamente a militares', false, 2),
-  ('En que la sublevada se detuvo al terminar el conflicto', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: espana-siglo-xx-9
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué se dirimió en los hechos de mayo de 1937 en Barcelona?', 'Enfrentó a fuerzas del gobierno con militantes del POUM y la CNT. Orwell lo contó desde dentro en Homenaje a Cataluña.', 3, true
-  from public.topics where slug = 'espana-siglo-xx'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La entrada de Cataluña en la guerra', false, 0),
-  ('El conflicto entre revolución social y construcción de un Estado y un ejército regular, resuelto a favor de la centralización', true, 1),
-  ('La firma de una paz separada con los sublevados', false, 2),
-  ('El reparto del oro del Banco de España', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: espana-siglo-xx-10
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué caracterizó la primera etapa económica del franquismo?', 'Los llamados años del hambre se prolongaron hasta bien entrados los cincuenta, cuando la Guerra Fría rompió el aislamiento del régimen.', 3, true
-  from public.topics where slug = 'espana-siglo-xx'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Una rápida integración en el comercio internacional', false, 0),
-  ('La autarquía: intervención, racionamiento hasta 1952, mercado negro y consumo inferior al de 1935', true, 1),
-  ('La entrada masiva de inversión extranjera', false, 2),
-  ('La colectivización de la agricultura', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: espana-siglo-xx-11
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué supuso el Plan de Estabilización de 1959?', 'Fue obra de tecnócratas vinculados al Opus Dei y cambió la sociedad sin cambiar el régimen, que es la contradicción del período.', 3, true
-  from public.topics where slug = 'espana-siglo-xx'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('El regreso a la autarquía tras la crisis internacional', false, 0),
-  ('La liberalización parcial de la economía y el arranque del desarrollismo con turismo, remesas e inversión extranjera', true, 1),
-  ('La nacionalización de la banca española', false, 2),
-  ('El ingreso de España en la Comunidad Económica Europea', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: espana-siglo-xx-12
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué propuso Juan Linz en 1964 sobre la naturaleza del franquismo?', 'Otros historiadores subrayan la fase fascistizada de los años cuarenta. La discusión se ha desplazado de la etiqueta al estudio de las fases.', 3, true
-  from public.topics where slug = 'espana-siglo-xx'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que era un régimen totalitario equiparable al nazismo', false, 0),
-  ('Que era un régimen autoritario, con pluralismo limitado, mentalidades en vez de ideología y desmovilización política', true, 1),
-  ('Que era una monarquía constitucional en suspenso', false, 2),
-  ('Que era una dictadura militar sin base social', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: espana-siglo-xx-13
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué fue la Ley para la Reforma Política de 1976?', 'La reforma se hizo desde la legalidad anterior, lo que evitó la ruptura y condicionó a la vez el alcance del cambio.', 3, true
-  from public.topics where slug = 'espana-siglo-xx'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La ley que legalizó los partidos políticos y los sindicatos', false, 0),
-  ('La norma aprobada por las propias Cortes franquistas que abrió el paso a elecciones libres', true, 1),
-  ('El texto que estableció el Estado de las autonomías', false, 2),
-  ('La ley que amnistió a los presos políticos', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: espana-siglo-xx-14
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué alcance tuvo la Ley de Amnistía de 1977?', 'Fue reclamada por la oposición, y su segunda cara es el núcleo del debate sobre el llamado pacto del olvido.', 3, true
-  from public.topics where slug = 'espana-siglo-xx'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Solo liberó a los presos políticos del franquismo', false, 0),
-  ('Liberó a los presos políticos y cubrió también los delitos cometidos desde el poder, cerrando la vía penal sobre la represión', true, 1),
-  ('Anuló las sentencias de los tribunales militares franquistas', false, 2),
-  ('Estableció un tribunal especial para juzgar los crímenes de la dictadura', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: espana-siglo-xx-15
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué argumento sostienen quienes defienden el proceso de la Transición?', 'Sus críticos responden que quedaron intactas la administración y la judicatura y que durante décadas no hubo investigación oficial de la represión.', 3, true
-  from public.topics where slug = 'espana-siglo-xx'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que no hubo continuidad alguna con el aparato franquista', false, 0),
-  ('Que la comparación relevante no es con un ideal sino con las alternativas disponibles en 1976, con el ejército intacto y sin apoyo exterior', true, 1),
-  ('Que la represión franquista fue exagerada por la historiografía', false, 2),
-  ('Que el 23-F demostró la lealtad del ejército a la democracia', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: espana-siglo-xx-16
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué acontecimientos cerraron el ciclo de la Transición?', 'El golpe fallido funcionó como vacuna, y la integración europea consolidó el nuevo régimen dentro del marco continental.', 3, true
-  from public.topics where slug = 'espana-siglo-xx'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La muerte de Franco y la coronación del rey', false, 0),
-  ('El fracaso del golpe del 23-F en 1981, la llegada del PSOE al gobierno en 1982 y el ingreso en la Comunidad Económica Europea en 1986', true, 1),
-  ('La aprobación de la Constitución y los Pactos de la Moncloa', false, 2),
-  ('La legalización del PCE y las primeras elecciones municipales', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: feudalismo-1
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué proceso describe mejor el origen del orden feudal?', 'Nadie lo inventó: se formó por acumulación de soluciones locales al mismo problema, la ausencia de una autoridad capaz de garantizar defensa y justicia.', 3, true
-  from public.topics where slug = 'feudalismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Un sistema diseñado y proclamado por Carlomagno', false, 0),
-  ('La privatización de funciones públicas —justicia, moneda, peajes— tras el colapso del poder carolingio', true, 1),
-  ('Una imposición de la Iglesia sobre los reyes', false, 2),
-  ('La adopción del derecho romano por los señores', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: feudalismo-2
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué era el ban?', 'El castillo delimitaba el ámbito donde ese poder se ejercía. Duby llamó «encastillamiento» a la multiplicación de fortificaciones privadas de los siglos X y XI.', 3, true
-  from public.topics where slug = 'feudalismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Un impuesto sobre el comercio', false, 0),
-  ('El poder de mandar, juzgar y castigar, que en teoría emanaba del rey y en la práctica ejercía cada señor', true, 1),
-  ('La ceremonia del homenaje', false, 2),
-  ('El juramento de los cruzados', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: feudalismo-3
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué debía el vasallo a su señor?', 'Las contribuciones tasadas incluían el rescate del señor cautivo, el armamento de su hijo mayor y el matrimonio de su hija mayor. El señor debía protección y justicia.', 3, true
-  from public.topics where slug = 'feudalismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Solo el pago de una renta anual en dinero', false, 0),
-  ('Auxilium y consilium: ayuda militar y consejo, más contribuciones económicas en casos tasados', true, 1),
-  ('Trabajo agrícola en la reserva señorial', false, 2),
-  ('Obediencia religiosa', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: feudalismo-4
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Por qué se creó la figura del homenaje ligio?', 'El problema nunca se resolvió del todo: que el rey de Inglaterra fuera vasallo del de Francia por sus tierras continentales está en el origen de la Guerra de los Cien Años.', 3, true
-  from public.topics where slug = 'feudalismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Para permitir que las mujeres prestaran homenaje', false, 0),
-  ('Para establecer una fidelidad prioritaria cuando un noble era vasallo de varios señores enfrentados', true, 1),
-  ('Para eximir del servicio militar', false, 2),
-  ('Para vincular directamente al campesinado con el rey', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: feudalismo-5
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Por qué es problemática la imagen de la «pirámide feudal»?', 'Durante largos periodos el rey fue un señor más entre otros, a menudo menos poderoso que sus supuestos vasallos.', 3, true
-  from public.topics where slug = 'feudalismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Porque el rey no existía en la Edad Media', false, 0),
-  ('Porque procede de los manuales del siglo XIX: los vínculos reales eran múltiples, contradictorios y frecuentemente incumplidos', true, 1),
-  ('Porque los campesinos ocupaban la cúspide', false, 2),
-  ('Porque solo se aplicaba en Inglaterra', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: feudalismo-6
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué eran las banalidades?', 'Muestran bien qué era el poder señorial: no solo cobrar renta por la tierra, sino monopolizar servicios imprescindibles y cobrar por su uso forzoso.', 3, true
-  from public.topics where slug = 'feudalismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Impuestos pagados por los nobles al rey', false, 0),
-  ('Monopolios señoriales de molino, horno y lagar, de uso obligatorio y de pago', true, 1),
-  ('Fiestas religiosas del calendario agrícola', false, 2),
-  ('Tierras comunales de la aldea', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: feudalismo-7
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué distinguía a un siervo de un campesino libre?', 'La esclavitud antigua desapareció progresivamente, sustituida por estas formas de dependencia. El campesino libre seguía sujeto a la jurisdicción señorial.', 3, true
-  from public.topics where slug = 'feudalismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('El siervo no podía trabajar la tierra', false, 0),
-  ('El siervo estaba adscrito a la tierra, con restricciones al matrimonio y derechos sobre su sucesión', true, 1),
-  ('El campesino libre no pagaba renta alguna', false, 2),
-  ('El siervo era propiedad personal vendible, como el esclavo antiguo', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: feudalismo-8
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué evidencia contradice la imagen de un campesinado pasivo?', 'Las comunidades rurales tenían asambleas, gestionaban pastos, bosques y aguas, y negociaban con el señor como cuerpo colectivo.', 3, true
-  from public.topics where slug = 'feudalismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La ausencia de documentación rural', false, 0),
-  ('Pleitos ante la corte señorial, negociación de cartas de franquicia, fugas y revueltas abiertas', true, 1),
-  ('La inexistencia de comunidades rurales', false, 2),
-  ('La prohibición de los bienes comunales', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: feudalismo-9
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué innovaciones técnicas impulsaron el crecimiento agrario desde el siglo XI?', 'La collera rígida multiplicaba la fuerza de tiro del caballo sin ahogarlo. El aumento de rendimientos permitió crecimiento demográfico, roturaciones y ciudades nuevas.', 3, true
-  from public.topics where slug = 'feudalismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('El arado romano y la rotación bienal', false, 0),
-  ('Arado pesado de vertedera, collera rígida, rotación trienal y molinos hidráulicos', true, 1),
-  ('El regadío por inundación y la noria', false, 2),
-  ('La siembra a voleo y el barbecho permanente', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: feudalismo-10
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, 'Según Duby, ¿qué función cumplía el esquema de los tres órdenes?', 'Se repitió durante ochocientos años y todavía estructuraba el discurso del Antiguo Régimen en 1789. Su eficacia fue política, no descriptiva.', 3, true
-  from public.topics where slug = 'feudalismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Describir con precisión la sociedad de su tiempo', false, 0),
-  ('Justificar ideológicamente que unos trabajen para que otros combatan y recen, precisamente cuando el orden se cuestiona', true, 1),
-  ('Organizar la administración carolingia', false, 2),
-  ('Regular las relaciones vasalláticas', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: feudalismo-11
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué consecuencia de largo alcance tuvo la Querella de las Investiduras?', 'El Concordato de Worms (1122) distinguió investidura espiritual y temporal. Varios historiadores del derecho lo consideran un origen remoto de la separación Iglesia-Estado.', 3, true
-  from public.topics where slug = 'feudalismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La desaparición del papado', false, 0),
-  ('Separar explícitamente la esfera religiosa de la política, creando condiciones para pensar el poder secular como autónomo', true, 1),
-  ('La conversión de los reyes en obispos', false, 2),
-  ('La abolición del vasallaje', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: feudalismo-12
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cuál es el origen de la palabra «feudalismo»?', 'Nació como categoría polémica antes que como concepto analítico. En 1789 la Asamblea francesa abolió «el régimen feudal», agrupando bajo esa etiqueta realidades muy distintas.', 3, true
-  from public.topics where slug = 'feudalismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Es un término medieval usado por los propios señores', false, 0),
-  ('Se acuñó en el siglo XVII y se generalizó en el XVIII con sentido peyorativo, para designar privilegios que había que abolir', true, 1),
-  ('Procede del derecho romano justinianeo', false, 2),
-  ('Lo inventó Marc Bloch en 1939', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: feudalismo-13
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué sostiene Susan Reynolds en Fiefs and Vassals?', 'La documentación muestra usos dispares de «feudo», homenajes sin concesión de tierra y relaciones mucho más locales y variadas que el modelo de los manuales.', 3, true
-  from public.topics where slug = 'feudalismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que el feudalismo fue más rígido de lo que se creía', false, 0),
-  ('Que las categorías de feudo y vasallaje fueron sistematizadas por juristas del siglo XII y proyectadas hacia atrás', true, 1),
-  ('Que el vasallaje nunca existió en ninguna forma', false, 2),
-  ('Que el feudalismo se originó en Bizancio', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: feudalismo-14
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué objeta Barthélemy a la tesis de la «mutación del año mil»?', 'Se pasa de actas públicas a cartularios monásticos. Hoy se acepta una transformación real pero más lenta y con cronologías muy distintas según regiones.', 3, true
-  from public.topics where slug = 'feudalismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que el cambio fue aún más brusco de lo descrito', false, 0),
-  ('Que la impresión de ruptura procede del cambio en el tipo de documentos conservados, no en la realidad social', true, 1),
-  ('Que no hubo ningún cambio en el poder local', false, 2),
-  ('Que la mutación ocurrió en el siglo XIII', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: feudalismo-15
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué papel tuvo la recuperación del derecho romano en el fin del orden feudal?', 'Los juristas formados en Bolonia y en las universidades se convirtieron en el instrumento del Estado en construcción frente a los poderes señoriales.', 3, true
-  from public.topics where slug = 'feudalismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Reforzó la fragmentación jurisdiccional', false, 0),
-  ('Dio a los monarcas conceptos —soberanía, ley general, autoridad pública— para combatir la fragmentación', true, 1),
-  ('Prohibió la propiedad de la tierra', false, 2),
-  ('Eliminó las universidades', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: gran-guerra-1
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué fue el cheque en blanco de julio de 1914?', 'Dado el 5 de julio, permitió a Viena redactar un ultimátum pensado para ser rechazado. Es la pieza central de la tesis de Fischer.', 3, true
-  from public.topics where slug = 'gran-guerra'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('El crédito con que Gran Bretaña financió a sus aliados continentales', false, 0),
-  ('El apoyo incondicional alemán a Austria-Hungría frente a Serbia, sin condicionar su respuesta', true, 1),
-  ('La autorización rusa a Serbia para rechazar el ultimátum', false, 2),
-  ('El compromiso francés de no intervenir en un conflicto balcánico', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: gran-guerra-2
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué sostiene Christopher Clark en Sonámbulos?', 'Se le objeta que la simetría diluye la diferencia entre quien fuerza la crisis y quien reacciona.', 3, true
-  from public.topics where slug = 'gran-guerra'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que Alemania planificó la guerra desde el consejo de 1912', false, 0),
-  ('Que la guerra fue un accidente sin responsables identificables', false, 1),
-  ('Que la responsabilidad fue compartida por dirigentes vigilantes y a la vez ciegos ante las consecuencias', true, 2),
-  ('Que Serbia fue la única potencia que buscó deliberadamente el conflicto', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: gran-guerra-3
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Por qué el frente occidental se inmovilizó a finales de 1914?', 'El defensor traía reservas en tren y el atacante caminaba. Sin un vehículo capaz de moverse bajo fuego, el asalto frontal era insostenible.', 3, true
-  from public.topics where slug = 'gran-guerra'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Porque los ejércitos agotaron sus reservas de munición ese mismo año', false, 0),
-  ('Porque la potencia de fuego favorecía abrumadoramente a la defensa mientras el atacante avanzaba a pie', true, 1),
-  ('Porque los mandos decidieron esperar a la llegada de los carros de combate', false, 2),
-  ('Porque el terreno belga impedía cualquier maniobra de flanqueo', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: gran-guerra-4
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué arma causó la mayoría de las bajas del conflicto?', 'En torno al setenta por ciento. La escasez de proyectiles llegó a derribar un gobierno británico en 1915 y obligó a crear un ministerio de municiones.', 3, true
-  from public.topics where slug = 'gran-guerra'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La ametralladora', false, 0),
-  ('El gas de combate', false, 1),
-  ('El fusil de repetición', false, 2),
-  ('La artillería', true, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: gran-guerra-5
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cómo planteó Falkenhayn la batalla de Verdún?', 'Duró diez meses, costó unos trescientos mil muertos entre los dos bandos y no desplazó el frente de forma significativa.', 3, true
-  from public.topics where slug = 'gran-guerra'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Como una ruptura del frente para retomar la guerra de movimiento', false, 0),
-  ('Como una operación de desgaste sobre un punto que Francia no podría abandonar por prestigio', true, 1),
-  ('Como una maniobra de distracción para atacar en el este', false, 2),
-  ('Como un ensayo general de las tácticas de infiltración', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: gran-guerra-6
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué matiza la historiografía militar reciente sobre los leones dirigidos por burros?', 'La curva de aprendizaje británica entre 1916 y 1918 es un campo de estudio establecido: sin radio de campaña ni transporte todoterreno, el margen táctico era estrecho.', 3, true
-  from public.topics where slug = 'gran-guerra'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que las bajas fueron muy inferiores a las contabilizadas en su momento', false, 0),
-  ('Que los generales no tuvieron ninguna responsabilidad en las pérdidas', false, 1),
-  ('Que los ejércitos aprendieron con rapidez dentro de las restricciones técnicas de la época, aunque ese aprendizaje se pagara con vidas', true, 2),
-  ('Que la ofensiva frontal era en realidad la táctica más económica disponible', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: gran-guerra-7
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué caracterizó a los motines franceses de 1917?', 'Fue una huelga, no una deserción. Pétain respondió cambiando las tácticas y las condiciones de vida además de castigar.', 3, true
-  from public.topics where slug = 'gran-guerra'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La deserción masiva y el abandono de las trincheras', false, 0),
-  ('La fraternización con las tropas alemanas del sector', false, 1),
-  ('La negativa a atacar sin abandonar la defensa de la línea', true, 2),
-  ('La exigencia de una paz separada con las potencias centrales', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: gran-guerra-8
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué documentó Tony Ashworth con el sistema de vivir y dejar vivir?', 'Entre la obediencia y la rebelión hubo un espacio amplio de violencia regulada tácitamente por las propias tropas.', 3, true
-  from public.topics where slug = 'gran-guerra'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La organización del racionamiento en las ciudades británicas', false, 0),
-  ('Las treguas informales entre unidades enfrentadas, con bombardeos rituales y patrullas que se evitaban', true, 1),
-  ('El reparto de tierras a los veteranos desmovilizados', false, 2),
-  ('La negociación entre sindicatos y gobiernos sobre la producción de municiones', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: gran-guerra-9
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué efecto tuvo el bloqueo naval británico sobre las potencias centrales?', 'Cortó alimentos y fertilizantes. Su mantenimiento durante los meses de negociación pesó en la percepción alemana del tratado.', 3, true
-  from public.topics where slug = 'gran-guerra'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Ninguno relevante, porque Alemania era autosuficiente en alimentos', false, 0),
-  ('Solo afectó al suministro de materias primas militares', false, 1),
-  ('Provocó desnutrición generalizada y el invierno del nabo de 1916-1917, y se mantuvo hasta la firma de la paz', true, 2),
-  ('Fue levantado inmediatamente tras el armisticio de noviembre de 1918', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: gran-guerra-10
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Por qué reanudó Alemania la guerra submarina sin restricciones en 1917?', 'El cálculo falló por poco. El convoy, adoptado ese mismo año, redujo las pérdidas de forma drástica.', 3, true
-  from public.topics where slug = 'gran-guerra'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Porque calculó que podía rendir a Gran Bretaña antes de que Estados Unidos interviniera de forma efectiva', true, 0),
-  ('Porque Jutlandia le había dado el control de la superficie del mar del Norte', false, 1),
-  ('Porque Estados Unidos ya había declarado la guerra en 1916', false, 2),
-  ('Porque el sistema de convoyes había demostrado ser ineficaz', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: gran-guerra-11
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué fue el telegrama Zimmermann?', 'Junto con los hundimientos y la exposición financiera a la victoria aliada, empujó a Estados Unidos a la guerra en abril de 1917.', 3, true
-  from public.topics where slug = 'gran-guerra'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La orden alemana de iniciar la ofensiva de marzo de 1918', false, 0),
-  ('La propuesta alemana a México de una alianza a cambio de territorio estadounidense, interceptada por los británicos', true, 1),
-  ('La comunicación del armisticio a las tropas alemanas', false, 2),
-  ('La oferta de paz separada de Austria-Hungría a los aliados', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: gran-guerra-12
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Por qué se cita Brest-Litovsk en el debate sobre la dureza de Versalles?', 'Arrebató a Rusia un tercio de su población y la mayor parte de su industria. Indica qué habrían impuesto las potencias centrales de haber ganado.', 3, true
-  from public.topics where slug = 'gran-guerra'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Porque fue el modelo textual que copiaron los negociadores de París', false, 0),
-  ('Porque anuló todas las reparaciones exigidas a Rusia', false, 1),
-  ('Porque las condiciones impuestas por Alemania a Rusia fueron mucho más severas, lo que relativiza la excepcionalidad de Versalles', true, 2),
-  ('Porque nunca llegó a firmarse y quedó como una amenaza', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: gran-guerra-13
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué establece el artículo 231 del Tratado de Versalles?', 'La cifra se dejó para 1921. El artículo se redactó como fundamento legal y se leyó en Alemania como condena moral.', 3, true
-  from public.topics where slug = 'gran-guerra'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La cifra exacta de las reparaciones alemanas', false, 0),
-  ('La responsabilidad de Alemania por las pérdidas aliadas, como base jurídica de la indemnización', true, 1),
-  ('La ocupación indefinida de Renania por tropas francesas', false, 2),
-  ('La expulsión de Alemania de la Sociedad de Naciones', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: gran-guerra-14
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué corrigen Mantoux y Sally Marks en la lectura de Keynes sobre las reparaciones?', 'De ahí la fórmula que resume el consenso: demasiado duro para conciliar, demasiado blando para incapacitar.', 3, true
-  from public.topics where slug = 'gran-guerra'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que las cifras nominales eran aún mayores de lo que Keynes calculó', false, 0),
-  ('Que Alemania pagó una fracción de lo nominal y conservó intacta su base industrial', true, 1),
-  ('Que las reparaciones se cobraron íntegramente antes de 1923', false, 2),
-  ('Que Keynes no participó en la conferencia de paz', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: gran-guerra-15
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿En qué consiste el mito de la puñalada por la espalda?', 'El armisticio llegó con el frente en territorio ocupado y sin tropas aliadas en Alemania, circunstancia que hizo verosímil un relato falso y decisivo.', 3, true
-  from public.topics where slug = 'gran-guerra'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('En la acusación aliada de que Alemania firmó el armisticio de mala fe', false, 0),
-  ('En la creencia de que el ejército alemán invicto fue traicionado por la retaguardia', true, 1),
-  ('En la versión austríaca del reparto de responsabilidades de 1914', false, 2),
-  ('En la denuncia de los soldados franceses contra su alto mando', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: gran-guerra-16
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué propone George Mosse con el concepto de brutalización?', 'Se discute porque países igualmente golpeados como Gran Bretaña o Francia no derivaron hacia la violencia política, pero sigue siendo el mejor vínculo entre 1918 y lo que vino después.', 3, true
-  from public.topics where slug = 'gran-guerra'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que la propaganda de guerra endureció el trato a los prisioneros', false, 0),
-  ('Que la violencia y los hábitos del frente se trasladaron a la política civil de posguerra', true, 1),
-  ('Que los ejércitos abandonaron las convenciones sobre trato a civiles desde 1914', false, 2),
-  ('Que la memoria del conflicto impidió cualquier rearme en los años veinte', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: grecia-1
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué es exactamente una polis?', 'Aristóteles insiste en que la polis es un cuerpo político, no un lugar. Por eso las fuentes dicen «los atenienses» y no «Atenas» al referirse a decisiones.', 3, true
-  from public.topics where slug = 'grecia'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Una ciudad amurallada de gran tamaño', false, 0),
-  ('Una comunidad de ciudadanos con territorio, cultos e instituciones propias', true, 1),
-  ('Una provincia del Imperio persa', false, 2),
-  ('Una alianza militar entre aldeas', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: grecia-2
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cuál fue la aportación griega al alfabeto fenicio?', 'Un sistema de unas veinticuatro letras se aprende en semanas. Eso permitió exponer las leyes por escrito y que cualquiera pudiera verificarlas.', 3, true
-  from public.topics where slug = 'grecia'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Reducirlo a doce signos', false, 0),
-  ('Asignar signos a las vocales, lo que abarató enormemente la alfabetización', true, 1),
-  ('Escribirlo sobre arcilla', false, 2),
-  ('Añadir determinativos semánticos', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: grecia-3
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿En qué se diferenciaban las colonias griegas del colonialismo moderno?', 'La colonia mantenía vínculos religiosos y sentimentales con su metrópolis, pero no dependencia política. Su causa principal fue la escasez de tierra cultivable.', 3, true
-  from public.topics where slug = 'grecia'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('En que no comerciaban con la metrópolis', false, 0),
-  ('En que cada colonia era desde su fundación una polis independiente, no una posesión', true, 1),
-  ('En que estaban gobernadas por Persia', false, 2),
-  ('En que solo se fundaron en Asia Menor', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: grecia-4
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué estableció la seisachtheia de Solón?', 'Fue una reforma censitaria, no democrática: organizó la participación según la renta agraria. Pero rompió el monopolio político del linaje.', 3, true
-  from public.topics where slug = 'grecia'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('El sorteo de los cargos públicos', false, 0),
-  ('La cancelación de deudas y la prohibición de esclavizar a ciudadanos atenienses por deudas', true, 1),
-  ('La expulsión de los metecos', false, 2),
-  ('La creación de la Liga de Delos', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: grecia-5
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cuál fue el objetivo de la reorganización en diez tribus de Clístenes?', 'Cada tribu combinaba demos de costa, ciudad e interior. La unidad política pasó a ser el demo de residencia y los ciudadanos se identificaban por su demótico.', 3, true
-  from public.topics where slug = 'grecia'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Facilitar el reclutamiento naval', false, 0),
-  ('Romper las lealtades de parentesco y regionales mezclando demos de zonas distintas', true, 1),
-  ('Reducir el número de ciudadanos', false, 2),
-  ('Repartir la tierra de forma igualitaria', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: grecia-6
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Por qué los griegos consideraban el sorteo más democrático que la elección?', 'La elección se veía como procedimiento aristocrático. Solo los cargos técnicos, como la estrategia militar, se cubrían por votación; y desde ahí gobernó Pericles.', 3, true
-  from public.topics where slug = 'grecia'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Porque era más barato de organizar', false, 0),
-  ('Porque garantizaba igualdad efectiva de acceso, mientras la elección favorece a los notables', true, 1),
-  ('Porque lo exigían los oráculos', false, 2),
-  ('Porque impedía la reelección', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: grecia-7
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué proporción aproximada de la población del Ática tenía derechos políticos?', 'Entre 30.000 y 60.000 ciudadanos varones sobre 250.000-300.000 habitantes. Quedaban excluidos mujeres, metecos y esclavos.', 3, true
-  from public.topics where slug = 'grecia'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Alrededor del 50 %', false, 0),
-  ('Entre el 10 % y el 20 %', true, 1),
-  ('Más del 70 %', false, 2),
-  ('Menos del 1 %', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: grecia-8
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué efecto tuvo la misthophoría introducida por Pericles?', 'Sin retribución solo los acomodados podían dedicar días a la política. Aristóteles señala esta medida como la que hizo real la participación popular.', 3, true
-  from public.topics where slug = 'grecia'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Limitó los cargos a los propietarios', false, 0),
-  ('Hizo viable que los ciudadanos pobres ejercieran cargos y actuaran como jurados', true, 1),
-  ('Sustituyó el sorteo por la elección', false, 2),
-  ('Financió la construcción del Partenón', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: grecia-9
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué era el ostracismo?', 'Funcionaba como válvula contra la concentración de poder personal. Se votaba con fragmentos de cerámica, los ostraka.', 3, true
-  from public.topics where slug = 'grecia'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Una pena de muerte por traición', false, 0),
-  ('Un destierro preventivo de diez años, sin delito y sin pérdida de bienes', true, 1),
-  ('La confiscación de la propiedad de los metecos', false, 2),
-  ('La expulsión de una polis de la Liga de Delos', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: grecia-10
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué era la kryptéia espartana?', 'Los hilotas superaban ampliamente en número a los espartiatas. El sistema exigía represión permanente; los éforos les declaraban formalmente la guerra cada año.', 3, true
-  from public.topics where slug = 'grecia'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Una escuela de retórica', false, 0),
-  ('El envío de jóvenes espartiatas a eliminar selectivamente a hilotas destacados', true, 1),
-  ('La asamblea de los éforos', false, 2),
-  ('Un festival religioso anual', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: grecia-11
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué causa profunda del declive espartano señalan los historiadores?', 'La concentración de lotes de tierra redujo el cuerpo cívico. Leuctra (371 a. C.) y la liberación de Mesenia liquidaron después su base económica.', 3, true
-  from public.topics where slug = 'grecia'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La corrupción moral de sus reyes', false, 0),
-  ('El desplome demográfico de los espartiatas de pleno derecho, de unos 8.000 a poco más de mil', true, 1),
-  ('La pérdida de su flota en Salamina', false, 2),
-  ('La conversión al culto de Atenea', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: grecia-12
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué distinción metodológica introduce Tucídides al explicar la guerra del Peloponeso?', 'Es una de las aportaciones fundacionales de la historiografía: separar lo que desencadena un conflicto de lo que lo hace probable.', 3, true
-  from public.topics where slug = 'grecia'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Entre fuentes escritas y orales', false, 0),
-  ('Entre la causa profunda —el crecimiento del poder ateniense y el miedo espartano— y los pretextos inmediatos', true, 1),
-  ('Entre historia sagrada y profana', false, 2),
-  ('Entre guerra justa e injusta', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: grecia-13
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué argumento ponen los atenienses en el diálogo de Melos?', 'Es el texto clásico sobre la lógica del poder desnudo, y precede al exterminio de una ciudad que solo pedía permanecer neutral.', 3, true
-  from public.topics where slug = 'grecia'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que la guerra debe seguir reglas religiosas', false, 0),
-  ('Que los fuertes hacen lo que pueden y los débiles sufren lo que deben', true, 1),
-  ('Que la neutralidad debe respetarse siempre', false, 2),
-  ('Que Esparta era la verdadera agresora', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: grecia-14
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué permitió cuestionar la distinción sofística entre physis y nomos?', 'Esa distinción abrió la posibilidad de criticar el orden establecido como acuerdo y no como orden natural. Protágoras la llevó al relativismo.', 3, true
-  from public.topics where slug = 'grecia'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que los dioses existieran', false, 0),
-  ('Si las leyes vigentes son naturales o meras convenciones humanas modificables', true, 1),
-  ('Si la tierra era esférica', false, 2),
-  ('Si la guerra era inevitable', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: grecia-15
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Por qué se considera problemática la genealogía «Grecia, cuna de la democracia occidental»?', 'Además, la transmisión de los textos griegos pasó decisivamente por el árabe y por Bizancio. Lo verdaderamente inédito fue la práctica de deliberar públicamente sobre reglas modificables.', 3, true
-  from public.topics where slug = 'grecia'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Porque Atenas nunca tuvo instituciones democráticas', false, 0),
-  ('Porque la democracia ateniense era directa, sorteada, excluyente y esclavista, y la continuidad es una construcción del siglo XIX', true, 1),
-  ('Porque los textos griegos se perdieron por completo', false, 2),
-  ('Porque Grecia no influyó en Roma', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: grecia-16
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué revela que Atenas financiara comedias que atacaban a sus propios dirigentes?', 'La coregía obligaba a los ricos a costear las representaciones. Que una democracia financiara su propia crítica más feroz es un dato notable sobre el sistema.', 3, true
-  from public.topics where slug = 'grecia'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que el teatro era privado y clandestino', false, 0),
-  ('Que la crítica política formaba parte de una institución cívica financiada por ciudadanos ricos', true, 1),
-  ('Que Aristófanes era extranjero', false, 2),
-  ('Que la democracia había sido abolida', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: guerra-fria-1
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿En qué consistía la contención formulada por Kennan en 1946?', 'El propio Kennan criticó después la militarización de su idea en documentos como el NSC-68.', 3, true
-  from public.topics where slug = 'guerra-fria'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('En atacar preventivamente a la URSS aprovechando el monopolio atómico', false, 0),
-  ('En frenar con firmeza paciente la expansión soviética sin buscar la guerra, esperando su transformación interna', true, 1),
-  ('En dividir Alemania en cuatro zonas de ocupación permanentes', false, 2),
-  ('En retirar las tropas estadounidenses de Europa', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: guerra-fria-2
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Por qué prohibió la URSS a sus satélites participar en el Plan Marshall?', 'La respuesta fue el Kominform y la sovietización acelerada de Europa oriental, con el golpe de Praga de 1948 como punto de no retorno.', 3, true
-  from public.topics where slug = 'guerra-fria'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Porque la ayuda estaba reservada a los países vencedores', false, 0),
-  ('Porque su condición de coordinación económica funcionaba como instrumento de integración occidental', true, 1),
-  ('Porque la cantidad ofrecida era simbólica', false, 2),
-  ('Porque exigía la disolución previa de los partidos comunistas', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: guerra-fria-3
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué acontecimientos de 1949 cambiaron la escala del conflicto?', 'Esa alarma se tradujo en el NSC-68 de 1950, que definió el conflicto como global y convirtió cualquier lugar del planeta en un frente posible.', 3, true
-  from public.topics where slug = 'guerra-fria'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La guerra de Corea y la creación del Pacto de Varsovia', false, 0),
-  ('La primera bomba atómica soviética y la victoria comunista en China', true, 1),
-  ('La crisis de Suez y la revolución húngara', false, 2),
-  ('El lanzamiento del Sputnik y la construcción del Muro', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: guerra-fria-4
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué lección dejó la guerra de Corea sobre la dinámica del conflicto?', 'La entrada de voluntarios chinos devolvió el frente al paralelo 38 y fijó las reglas implícitas del enfrentamiento.', 3, true
-  from public.topics where slug = 'guerra-fria'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que las superpotencias combatirían directamente en cuanto se presentara la ocasión', false, 0),
-  ('Que la escalada podía y debía detenerse: tres millones de muertos y ninguna frontera cambiada', true, 1),
-  ('Que las armas nucleares se usarían de forma rutinaria', false, 2),
-  ('Que Naciones Unidas era capaz de imponer la paz por sí sola', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: guerra-fria-5
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué es la destrucción mutua asegurada?', 'La vulnerabilidad recíproca, garantizada sobre todo por los submarinos lanzamisiles, se convirtió paradójicamente en fundamento de la estabilidad.', 3, true
-  from public.topics where slug = 'guerra-fria'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('El plan de defensa civil ante un ataque nuclear', false, 0),
-  ('La situación en la que ambos bandos conservan capacidad de represalia, de modo que atacar equivale a suicidarse', true, 1),
-  ('El tratado que prohibió los ensayos nucleares en la atmósfera', false, 2),
-  ('La doctrina de primer golpe adoptada por la OTAN en 1957', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: guerra-fria-6
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cómo se resolvió la crisis de los misiles de Cuba de 1962?', 'Los documentos desclasificados muestran incidentes que ningún gobierno controlaba, incluido un submarino soviético con torpedo nuclear.', 3, true
-  from public.topics where slug = 'guerra-fria'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Con la invasión estadounidense de la isla', false, 0),
-  ('Con la retirada de los misiles a cambio del compromiso de no invadir Cuba y de la retirada discreta de los Júpiter de Turquía', true, 1),
-  ('Con la entrega de Cuba a la administración de Naciones Unidas', false, 2),
-  ('Con un ultimátum soviético que Estados Unidos aceptó sin contrapartidas', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: guerra-fria-7
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué factor aceleró la descolonización tras 1945?', 'A eso se sumó que las dos superpotencias emergentes eran, por motivos distintos, retóricamente anticoloniales.', 3, true
-  from public.topics where slug = 'guerra-fria'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La decisión de las Naciones Unidas de disolver los imperios por votación', false, 0),
-  ('La guerra, que destruyó el prestigio y los recursos de las metrópolis y movilizó a las colonias con promesas de contrapartidas', true, 1),
-  ('La retirada voluntaria de Gran Bretaña de todas sus posesiones en 1946', false, 2),
-  ('La prohibición del comercio colonial impuesta por el Plan Marshall', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: guerra-fria-8
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué caracterizó a las descolonizaciones más violentas?', 'La guerra de Argelia costó cientos de miles de muertos, empleó la tortura como método y derribó de paso a la Cuarta República francesa.', 3, true
-  from public.topics where slug = 'guerra-fria'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La ausencia de partidos nacionalistas organizados', false, 0),
-  ('La presencia de colonos europeos instalados, como en Argelia, Kenia o las colonias portuguesas', true, 1),
-  ('La falta de interés económico de la metrópoli', false, 2),
-  ('La intervención directa de la Unión Soviética', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: guerra-fria-9
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué designa el neocolonialismo en la formulación de Nkrumah?', 'Los nuevos Estados heredaron fronteras trazadas en Berlín, economías de una o dos materias primas y administraciones escasas.', 3, true
-  from public.topics where slug = 'guerra-fria'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La reconquista militar de las antiguas colonias', false, 0),
-  ('La soberanía formal acompañada de dependencia económica y decisiones tomadas fuera del país', true, 1),
-  ('La ocupación de África por las superpotencias', false, 2),
-  ('El regreso de administradores europeos como asesores técnicos', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: guerra-fria-10
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué fue el Movimiento de Países No Alineados?', 'No fue neutralidad pasiva. Egipto, por ejemplo, financió la presa de Asuán con dinero soviético tras la retirada de la oferta estadounidense.', 3, true
-  from public.topics where slug = 'guerra-fria'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Una alianza militar alternativa a la OTAN y al Pacto de Varsovia', false, 0),
-  ('Un intento de convertir la rivalidad de las superpotencias en margen de maniobra propio, surgido de Bandung', true, 1),
-  ('Una organización de países neutrales europeos', false, 2),
-  ('El bloque de países que rechazaron la ayuda económica de ambos bandos', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: guerra-fria-11
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué aporta la lectura de la Guerra Fría propuesta por Westad?', 'Los archivos muestran además que los actores locales tenían proyectos propios y con frecuencia arrastraron a sus patrocinadores.', 3, true
-  from public.topics where slug = 'guerra-fria'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que el conflicto se decidió íntegramente en Europa', false, 0),
-  ('Que hay que leerlo desde el sur, donde hubo intervenciones y guerras que costaron millones de vidas mientras la línea europea no se movía', true, 1),
-  ('Que las superpotencias controlaban por completo a sus aliados locales', false, 2),
-  ('Que la descolonización fue independiente del enfrentamiento bipolar', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: guerra-fria-12
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué consecuencia tuvo la ruptura chino-soviética?', 'Convirtió un conflicto de dos en un triángulo y permitió presionar a Moscú por dos flancos.', 3, true
-  from public.topics where slug = 'guerra-fria'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La entrada de China en el Pacto de Varsovia', false, 0),
-  ('La quiebra de la bipolaridad, con choques armados en 1969 y el viaje de Nixon a Pekín en 1972', true, 1),
-  ('La unificación de los partidos comunistas asiáticos', false, 2),
-  ('El fin de la ayuda soviética a Vietnam del Norte', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: guerra-fria-13
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué efecto imprevisto tuvo el Acta Final de Helsinki de 1975?', 'La Carta 77 y los comités de Helsinki lo usaron para exigir el cumplimiento de un texto que Moscú había firmado creyéndolo retórico.', 3, true
-  from public.topics where slug = 'guerra-fria'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Provocó la retirada soviética de Europa oriental', false, 0),
-  ('Su capítulo de derechos humanos dio a la disidencia una base legal firmada por sus propios gobiernos', true, 1),
-  ('Obligó a disolver el Pacto de Varsovia', false, 2),
-  ('Impuso elecciones libres en Polonia', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: guerra-fria-14
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué problemas económicos arrastraba la URSS desde los años setenta?', 'El hundimiento del precio del petróleo en 1986 cerró la vía de seguir igual, aunque por sí solo no imponía un cambio de régimen.', 3, true
-  from public.topics where slug = 'guerra-fria'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Una hiperinflación provocada por el gasto en consumo', false, 0),
-  ('Planificación incapaz de asimilar la informática, agricultura deficitaria, gasto militar desproporcionado y dependencia del precio del crudo', true, 1),
-  ('La pérdida de todos sus mercados exteriores', false, 2),
-  ('La ausencia de industria pesada', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: guerra-fria-15
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué hizo posible que las revoluciones de 1989 fueran casi incruentas?', 'La renuncia a la doctrina Brézhnev fue el cambio decisivo: lo excepcional no fue la caída de los regímenes sino que ocurriera sin sangre.', 3, true
-  from public.topics where slug = 'guerra-fria'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La mediación de Naciones Unidas en cada país', false, 0),
-  ('La decisión previa de Gorbachov de no sostener con tropas soviéticas a los gobiernos de Europa oriental', true, 1),
-  ('La disolución del Pacto de Varsovia en 1988', false, 2),
-  ('La presencia de tropas de la OTAN en la frontera', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: guerra-fria-16
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué defienden Archie Brown y Stephen Kotkin sobre el hundimiento soviético?', 'La historiografía tiende a combinar declive estructural y contingencia, rechazando tanto el determinismo económico como el relato de una victoria planificada.', 3, true
-  from public.topics where slug = 'guerra-fria'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que fue consecuencia inevitable del gasto militar impuesto por Reagan', false, 0),
-  ('Que la crisis no imponía el desenlace y fue la decisión de reformar y de no usar la fuerza lo que produjo una disolución pacífica', true, 1),
-  ('Que el golpe de agosto de 1991 fue orquestado desde el exterior', false, 2),
-  ('Que el sistema era económicamente viable hasta 1990', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: helenismo-1
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cuál era la función de la falange de sarisas en el sistema militar macedonio?', 'Es un sistema de armas combinadas. La sarisa daba profundidad a costa de maniobrabilidad; la decisión venía del ala de caballería.', 3, true
-  from public.topics where slug = 'helenismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Decidir la batalla mediante la carga frontal', false, 0),
-  ('Fijar al enemigo mientras la caballería de los compañeros daba el golpe decisivo', true, 1),
-  ('Proteger el campamento durante los asedios', false, 2),
-  ('Sustituir a la caballería, cuyo uso se abandonó', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: helenismo-2
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué encontró Alejandro ya preparado al acceder al trono en 336 a. C.?', 'Filipo II había militarizado Macedonia durante veinticinco años, vencido en Queronea y enviado ya una avanzadilla a Asia Menor.', 3, true
-  from public.topics where slug = 'helenismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Un imperio persa en descomposición interna', false, 0),
-  ('Una alianza con Roma contra Persia', false, 1),
-  ('El ejército reformado, la hegemonía sobre Grecia y la guerra contra Persia ya declarada por la Liga de Corinto', true, 2),
-  ('Un tesoro real intacto y sin deudas', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: helenismo-3
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué financió la transformación de Macedonia bajo Filipo II?', 'Diodoro cifra su rendimiento en unos mil talentos anuales, que pagaron el ejército permanente y la corrupción de élites griegas.', 3, true
-  from public.topics where slug = 'helenismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Las minas de oro del Pangeo', true, 0),
-  ('Los tributos de las ciudades jonias', false, 1),
-  ('El comercio de grano del mar Negro', false, 2),
-  ('Los subsidios del rey persa', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: helenismo-4
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cuál es el problema central de las fuentes sobre Alejandro?', 'Calístenes, Ptolomeo, Aristóbulo y Nearco se perdieron. Arriano, Diodoro, Curcio, Plutarco y Justino trabajan sobre ese material ya filtrado.', 3, true
-  from public.topics where slug = 'helenismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que solo se conservan en traducción árabe', false, 0),
-  ('Que ningún relato contemporáneo se ha conservado: los autores que leemos escriben entre tres y cinco siglos después', true, 1),
-  ('Que todas fueron escritas por persas derrotados', false, 2),
-  ('Que son exclusivamente inscripciones oficiales', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: helenismo-5
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué sostuvo William Tarn en 1948 y por qué se abandonó su lectura?', 'La posición actual, formulada por Bosworth, describe a un gobernante muy capaz y muy violento cuyo proyecto último las fuentes no permiten reconstruir.', 3, true
-  from public.topics where slug = 'helenismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que Alejandro fue un mal general; se abandonó por las victorias documentadas', false, 0),
-  ('Que Alejandro nunca llegó a la India; se abandonó por hallazgos arqueológicos', false, 1),
-  ('Que Alejandro buscaba la hermandad de la humanidad; Badian mostró que la integración fue pragmática y que el registro incluye purgas y matanzas civiles', true, 2),
-  ('Que Alejandro era persa de origen; se abandonó por razones filológicas', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: helenismo-6
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué batalla frustró definitivamente la reunificación del imperio de Alejandro?', 'Curupedio, en 281, terminó de fijar el mapa: tres grandes reinos y una periferia de monarquías menores.', 3, true
-  from public.topics where slug = 'helenismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Gaugamela (331 a. C.)', false, 0),
-  ('Ipsos (301 a. C.), donde murió Antígono Monoftalmos', true, 1),
-  ('Queronea (338 a. C.)', false, 2),
-  ('Pidna (168 a. C.)', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: helenismo-7
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿En qué se fundaba la legitimidad de la realeza helenística?', 'De ahí la necesidad permanente de victorias, el peso de la corte sobre cualquier órgano representativo y la difusión del culto al soberano.', 3, true
-  from public.topics where slug = 'helenismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('En la elección por una asamblea de ciudadanos', false, 0),
-  ('En la consagración por el oráculo de Delfos', false, 1),
-  ('En la herencia dinástica reconocida por las poleis', false, 2),
-  ('En la victoria militar: la tierra era *doríktetos chóra*, conquistada con la lanza', true, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: helenismo-8
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Por qué el Egipto ptolemaico es el reino helenístico mejor documentado?', 'Los papiros muestran una maquinaria fiscal densa superpuesta a una estructura agraria y sacerdotal egipcia que siguió funcionando.', 3, true
-  from public.topics where slug = 'helenismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Porque el clima seco conservó decenas de miles de papiros de gestión, como el archivo de Zenón', true, 0),
-  ('Porque sus reyes escribieron autobiografías', false, 1),
-  ('Porque Roma conservó sus archivos en el Capitolio', false, 2),
-  ('Porque fue el único con escritura propia', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: helenismo-9
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué era la koiné?', 'En koiné se redactaron los contratos del Fayum, la traducción de los Setenta y, tres siglos después, el Nuevo Testamento.', 3, true
-  from public.topics where slug = 'helenismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La moneda común de los reinos helenísticos', false, 0),
-  ('El griego común derivado del ático, lengua de administración y cultura del Adriático a Bactriana', true, 1),
-  ('La asamblea federal de las ciudades griegas', false, 2),
-  ('El tratado de paz entre los diádocos', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: helenismo-10
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué ocurrió con la polis bajo las monarquías helenísticas?', 'El relato de una decadencia general de la ciudad ha sido revisado. El gimnasio pasó a marcar la pertenencia al cuerpo cívico griego.', 3, true
-  from public.topics where slug = 'helenismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Desapareció como institución', false, 0),
-  ('Fue sustituida por asambleas de campesinos', false, 1),
-  ('Perdió autonomía exterior pero conservó asambleas, magistraturas y una vida cívica intensa, sostenida por el evergetismo', true, 2),
-  ('Se convirtió en una entidad puramente religiosa', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: helenismo-11
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué disciplina nació en la Biblioteca de Alejandría?', 'Zenódoto, Aristófanes de Bizancio y Aristarco de Samotracia fijaron el método. Calímaco compuso los *Pínakes*, primer catálogo razonado.', 3, true
-  from public.topics where slug = 'helenismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La filología: establecimiento del texto de Homero, signos críticos, acentuación y puntuación', true, 0),
-  ('La retórica judicial', false, 1),
-  ('La historiografía política', false, 2),
-  ('La lógica formal', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: helenismo-12
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cómo conocemos la hipótesis heliocéntrica de Aristarco de Samos?', 'La ciencia helenística se lee en gran parte a través de sus huecos: obras perdidas conocidas por citas de terceros.', 3, true
-  from public.topics where slug = 'helenismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Por el hallazgo de su tratado original en Herculano', false, 0),
-  ('Porque Arquímedes la resume para discutirla; la obra de Aristarco se perdió', true, 1),
-  ('Por una inscripción en el Museo de Alejandría', false, 2),
-  ('Por su transmisión directa hasta Copérnico', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: helenismo-13
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué demuestra el cilindro de Antíoco I de Borsipa (268 a. C.)?', 'Junto con el decreto de Rosetta y los diarios astronómicos cuneiformes, es la base para sustituir la difusión por la negociación.', 3, true
-  from public.topics where slug = 'helenismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que los seléucidas prohibieron las lenguas locales', false, 0),
-  ('Que Babilonia había sido despoblada tras la conquista', false, 1),
-  ('Que un rey seléucida se presentaba en acadio y con el formulario babilonio tradicional como restaurador del templo Ezida', true, 2),
-  ('Que el griego era la única lengua de las inscripciones reales', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: helenismo-14
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, 'En el Egipto ptolemaico, ¿qué era ser «griego»?', 'Determinaba tribunal e impuestos. Hay egipcios documentados con dos nombres, uno griego y otro egipcio, según el contexto.', 3, true
-  from public.topics where slug = 'helenismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Una condición estrictamente hereditaria y cerrada', false, 0),
-  ('Una categoría jurídica y fiscal accesible por lengua, educación y servicio, aunque el mando siguió reservado a la minoría grecomacedonia', true, 1),
-  ('Una designación religiosa vinculada al culto de Sarapis', false, 2),
-  ('Un título concedido por el faraón a título individual', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: helenismo-15
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cómo describe hoy la investigación la revuelta macabea?', 'Bickerman situó la iniciativa en la élite helenizante de Jerusalén y Hengel mostró que el judaísmo del siglo II a. C. estaba ya profundamente helenizado.', 3, true
-  from public.topics where slug = 'helenismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Como una guerra civil judía con intervención real, y no como un choque entre helenismo y judaísmo', true, 0),
-  ('Como una invasión romana de Judea', false, 1),
-  ('Como una revuelta campesina sin contenido religioso', false, 2),
-  ('Como el primer conflicto entre judíos y cristianos', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: helenismo-16
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Por qué el final político de los reinos helenísticos no es un final cultural?', 'Además, los textos científicos pasaron al siríaco y al árabe entre los siglos VIII y X y regresaron a Europa por vía latina desde el XII.', 3, true
-  from public.topics where slug = 'helenismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Porque Roma prohibió el latín en Oriente', false, 0),
-  ('Porque los reinos siguieron existiendo como protectorados hasta el siglo IV', false, 1),
-  ('Porque el Mediterráneo oriental siguió funcionando en griego bajo Roma, y de ahí arrancan el Nuevo Testamento y el Imperio bizantino', true, 2),
-  ('Porque la ciencia helenística se perdió íntegramente en 30 a. C.', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: ilustracion-1
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cómo define Kant la Ilustración en 1784?', 'No falta entendimiento, falta decisión para usarlo sin guía ajena. Y Kant llama a su tiempo época de ilustración, no época ilustrada.', 3, true
-  from public.topics where slug = 'ilustracion'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Como el triunfo definitivo de la razón sobre la superstición', false, 0),
-  ('Como la salida del ser humano de una minoría de edad de la que él mismo es culpable', true, 1),
-  ('Como el conjunto de doctrinas contenidas en la *Encyclopédie*', false, 2),
-  ('Como la sustitución de la monarquía por la república', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: ilustracion-2
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué distingue Kant entre uso público y uso privado de la razón?', 'Esa distinción explica cómo la Ilustración pudo convivir con monarquías absolutas: se obedece la orden y se critica la norma.', 3, true
-  from public.topics where slug = 'ilustracion'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('El uso público se hace en la corte y el privado en la universidad', false, 0),
-  ('El uso público es el del autor ante un público lector, donde la crítica no tiene límite; el privado es el del funcionario en su cargo, donde debe obediencia', true, 1),
-  ('El uso público corresponde a los ilustrados y el privado a los eclesiásticos', false, 2),
-  ('El uso público requiere permiso del censor y el privado no', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: ilustracion-3
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué designa la «esfera pública» de Habermas?', 'Sus lugares son cafés, salones, logias, sociedades económicas y prensa. Excluía a los analfabetos y a las mujeres de la representación política.', 3, true
-  from public.topics where slug = 'ilustracion'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('El conjunto de instituciones estatales encargadas de la instrucción', false, 0),
-  ('Un espacio entre el Estado y la vida privada donde particulares razonan sobre asuntos comunes y, en principio, vale el mejor argumento', true, 1),
-  ('La red de academias reales financiadas por los monarcas', false, 2),
-  ('El mercado del libro clandestino', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: ilustracion-4
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cuál fue la novedad organizativa de la *Encyclopédie*?', 'La clasificación no es teológica. Y el artículo inocuo remitía al que decía lo que no podía decirse en el vigilado.', 3, true
-  from public.topics where slug = 'ilustracion'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Ser la primera obra impresa con láminas grabadas', false, 0),
-  ('Clasificar el saber según las facultades humanas —memoria, razón, imaginación— y usar reenvíos para sortear la censura', true, 1),
-  ('Publicarse íntegramente sin privilegio real', false, 2),
-  ('Estar escrita por un solo autor', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: ilustracion-5
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué mostró Robert Darnton al estudiar la *Encyclopédie* desde los archivos de sus editores?', 'La censura del Antiguo Régimen no era un muro, sino un sistema poroso con el que se negociaba.', 3, true
-  from public.topics where slug = 'ilustracion'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que fue un fracaso comercial sostenido por mecenas', false, 0),
-  ('Que fue un gran negocio atravesado por ediciones baratas, contrabando, censores tolerantes y suscriptores clérigos y funcionarios', true, 1),
-  ('Que la mayoría de los artículos eran plagios de obras inglesas', false, 2),
-  ('Que se distribuyó solo en París', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: ilustracion-6
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué agrupaban los libreros clandestinos bajo la etiqueta *livres philosophiques*?', 'La categoría es del propio siglo XVIII. Para Darnton, ese material desprestigió a la monarquía más que los tratados de teoría política.', 3, true
-  from public.topics where slug = 'ilustracion'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Solo los tratados de metafísica prohibidos por la Sorbona', false, 0),
-  ('Filosofía prohibida, libelos contra la corte y pornografía política, en una misma categoría comercial', true, 1),
-  ('Las obras de autores extranjeros no traducidas', false, 2),
-  ('Los manuales de las academias provinciales', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: ilustracion-7
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué dos ideas duraderas aporta *Del espíritu de las leyes*?', 'Su lectura de la constitución inglesa era en parte imaginaria y, aun así, fundó el constitucionalismo moderno.', 3, true
-  from public.topics where slug = 'ilustracion'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La voluntad general y el derecho de resistencia', false, 0),
-  ('La adecuación de las leyes a las condiciones de cada pueblo y la disposición institucional para que el poder frene al poder', true, 1),
-  ('La abolición de la tortura y la proporcionalidad de las penas', false, 2),
-  ('La libre circulación de granos y el producto neto agrario', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: ilustracion-8
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, 'En el *Contrato social*, ¿dónde reside la soberanía?', 'De ahí procede la democracia moderna y también la sospecha, formulada en el siglo XX, de que la voluntad general puede silenciar a la minoría.', 3, true
-  from public.topics where slug = 'ilustracion'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('En el monarca, como representante del pueblo', false, 0),
-  ('En la voluntad general del cuerpo político, inalienable e indelegable', true, 1),
-  ('En la asamblea de propietarios', false, 2),
-  ('En la constitución escrita', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: ilustracion-9
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cuál es el argumento central de Beccaria contra la tortura?', 'Varios Estados abolieron el tormento en las dos décadas siguientes. Fue la victoria más rápida de la Ilustración.', 3, true
-  from public.topics where slug = 'ilustracion'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que es contraria a la caridad cristiana', false, 0),
-  ('Que produce confesiones falsas y castiga antes de juzgar; la disuasión depende de la certeza del castigo, no de su crueldad', true, 1),
-  ('Que resulta demasiado costosa para el erario', false, 2),
-  ('Que solo debería aplicarse a los delitos contra el Estado', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: ilustracion-10
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué se suele olvidar de *La riqueza de las naciones* de Adam Smith?', 'La metáfora de la mano invisible aparece una vez y convive con una crítica explícita a los intereses de los mercaderes.', 3, true
-  from public.topics where slug = 'ilustracion'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que defiende el monopolio de las compañías privilegiadas', false, 0),
-  ('Que advierte contra la colusión de los comerciantes y contra los efectos embrutecedores del trabajo repetitivo', true, 1),
-  ('Que rechaza la división del trabajo', false, 2),
-  ('Que fue escrita antes que la obra de los fisiócratas', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: ilustracion-11
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué texto ilustrado denunció la conquista y la esclavitud y llegó a anunciar un vengador negro?', 'Fue un superventas europeo y circuló entre los revolucionarios haitianos. Matiza, sin anularlo, el reproche de Sala-Molins a la Ilustración francesa.', 3, true
-  from public.topics where slug = 'ilustracion'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('El *Emilio* de Rousseau', false, 0),
-  ('La *Historia de las dos Indias* de Raynal y Diderot', true, 1),
-  ('El *Tratado sobre la tolerancia* de Voltaire', false, 2),
-  ('El *Informe sobre la ley agraria* de Jovellanos', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: ilustracion-12
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Por qué se sostiene que el racismo moderno no es un residuo premoderno?', 'La jerarquía racial se articula con lenguaje científico, no con lenguaje bíblico. Es uno de los puntos ciegos mejor documentados del siglo.', 3, true
-  from public.topics where slug = 'ilustracion'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Porque no existió antes del siglo XIX', false, 0),
-  ('Porque se formula con el vocabulario clasificatorio de la historia natural ilustrada, en Linneo, Buffon y en textos de Hume y Kant', true, 1),
-  ('Porque lo inventaron los abolicionistas para combatirlo', false, 2),
-  ('Porque procede exclusivamente de la teología medieval', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: ilustracion-13
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué reclamaba sobre todo Mary Wollstonecraft en 1792?', 'Respondía al *Emilio*, que prescribía para Sofía una educación subordinada. Olympe de Gouges había calcado en 1791 la Declaración de 1789.', 3, true
-  from public.topics where slug = 'ilustracion'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('El voto femenino inmediato', false, 0),
-  ('Educación igual para las mujeres, sin la cual no hay virtud ni ciudadanía posibles', true, 1),
-  ('La abolición del matrimonio', false, 2),
-  ('La igualdad salarial en los oficios', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: ilustracion-14
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cuál es la tesis de *Dialéctica de la Ilustración* de Horkheimer y Adorno?', 'Escrito en 1944. La réplica habitual: las herramientas para denunciar esclavitud, patriarcado y colonialismo son en buena medida ilustradas.', 3, true
-  from public.topics where slug = 'ilustracion'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que la Ilustración fue insuficientemente racional', false, 0),
-  ('Que la razón convertida en dominio instrumental de la naturaleza acaba volviéndose contra los seres humanos', true, 1),
-  ('Que la Ilustración fue un fenómeno exclusivamente francés', false, 2),
-  ('Que el progreso técnico garantiza el progreso moral', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: ilustracion-15
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué caracteriza al despotismo ilustrado?', 'Códigos, regalismo, expulsión de los jesuitas, obras públicas y enseñanza técnica. La frase «todo para el pueblo, sin el pueblo» es una síntesis posterior, no una cita.', 3, true
-  from public.topics where slug = 'ilustracion'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La convocatoria de asambleas representativas para aprobar las reformas', false, 0),
-  ('Reformas administrativas, jurídicas y económicas impulsadas desde arriba sin ceder soberanía ni admitir participación política', true, 1),
-  ('La renuncia de los monarcas al control sobre la Iglesia nacional', false, 2),
-  ('La supresión de la nobleza como estamento', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: ilustracion-16
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué sostiene Roger Chartier sobre la relación entre Ilustración y Revolución francesa?', 'Invierte la tesis de Mornet. La formulación aceptada: los textos no hacen revoluciones, pero dan el lenguaje para plantear la crisis como problema de soberanía.', 3, true
-  from public.topics where slug = 'ilustracion'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que la Revolución fue consecuencia directa y previsible de la difusión de los libros filosóficos', false, 0),
-  ('Que fue la Revolución la que construyó a la Ilustración como su origen, seleccionando y canonizando autores para legitimarse', true, 1),
-  ('Que la Ilustración fue en realidad contrarrevolucionaria', false, 2),
-  ('Que los dos procesos no tuvieron relación alguna', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: imperialismo-1
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué designa el imperialismo del librecambio de Gallagher y Robinson?', 'Su regla resume la lógica: comercio informal si es posible, gobierno formal si es necesario. Lo que cambia hacia 1870 es que lo informal deja de garantizar el acceso.', 3, true
-  from public.topics where slug = 'imperialismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La política arancelaria británica posterior a 1870', false, 0),
-  ('El dominio informal mediante tratados, deuda y presión naval sin administrar el territorio', true, 1),
-  ('El reparto pactado de África en la Conferencia de Berlín', false, 2),
-  ('La apertura de los mercados europeos a los productos coloniales', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: imperialismo-2
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué estableció realmente la Conferencia de Berlín de 1884-1885?', 'Al exigir presencia administrativa real para reconocer una reclamación, convirtió el mapa en una carrera de puestos militares y tratados con jefes locales.', 3, true
-  from public.topics where slug = 'imperialismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Las reglas del reparto, con el principio de ocupación efectiva y la libertad de navegación fluvial', true, 0),
-  ('El reparto territorial concreto de África entre las potencias', false, 1),
-  ('La independencia de los Estados africanos bajo tutela europea', false, 2),
-  ('La creación de una administración internacional conjunta del continente', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: imperialismo-3
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, 'Según Headrick, ¿qué factor sanitario hizo posible la penetración europea en el interior africano?', 'Antes de la quinina profiláctica moría más de la mitad de los europeos que entraban en el primer año. Sin resolver eso, la ocupación del interior era inviable.', 3, true
-  from public.topics where slug = 'imperialismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La vacuna contra la viruela', false, 0),
-  ('La producción industrial de quinina y su uso profiláctico sistemático', true, 1),
-  ('El descubrimiento del vector de la malaria por Ross en 1897', false, 2),
-  ('La potabilización del agua en los puestos coloniales', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: imperialismo-4
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cuál era el estatuto jurídico del Estado Libre del Congo entre 1885 y 1908?', 'Leopoldo lo obtuvo presentándolo como empresa filantrópica y antiesclavista. Bélgica solo lo anexionó en 1908, tras el escándalo del caucho.', 3, true
-  from public.topics where slug = 'imperialismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Colonia del Reino de Bélgica administrada por su parlamento', false, 0),
-  ('Propiedad personal de Leopoldo II reconocida internacionalmente', true, 1),
-  ('Protectorado conjunto de Bélgica, Francia y Portugal', false, 2),
-  ('Territorio bajo mandato de la Conferencia de Berlín', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: imperialismo-5
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué se discute hoy sobre la cifra de diez millones de muertos en el Congo leopoldino?', 'Vansina y otros demógrafos insisten en que la estimación deriva de censos muy posteriores. El sistema está documentado por los propios administradores.', 3, true
-  from public.topics where slug = 'imperialismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que el sistema de cuotas del caucho no llegó a aplicarse', false, 0),
-  ('El método y la magnitud, no la existencia del sistema: es una caída poblacional acumulada por violencia, hambre y enfermedad, difícil de cuantificar sin censos', true, 1),
-  ('Que las mutilaciones fueron una invención de la propaganda británica', false, 2),
-  ('Que la mortalidad fue muy superior a la estimada por Hochschild', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: imperialismo-6
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué ocurrió en Adua en 1896?', 'Menelik II había comprado armamento moderno, centralizado el país y explotado las rivalidades europeas. Demuestra que la ventaja técnica era transferible.', 3, true
-  from public.topics where slug = 'imperialismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Francia y Gran Bretaña estuvieron a punto de entrar en guerra por el alto Nilo', false, 0),
-  ('Alemania inició la represión de los herero', false, 1),
-  ('Etiopía derrotó a Italia y preservó su independencia', true, 2),
-  ('Los bóxers sitiaron el barrio de las legaciones', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: imperialismo-7
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué sostiene la tesis del drenaje de Dadabhai Naoroji?', 'La cuantificación se discute. Menos discutible es la caída de la participación india en la manufactura mundial y el estancamiento de la renta por habitante.', 3, true
-  from public.topics where slug = 'imperialismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que la India perdió población por la emigración forzada a otras colonias', false, 0),
-  ('Que la India transfería a Gran Bretaña una renta neta permanente mediante home charges, deuda y superávit comercial', true, 1),
-  ('Que el algodón indio se agotó por la sobreexplotación del suelo', false, 2),
-  ('Que el Raj gastaba más de lo que ingresaba y arruinaba al contribuyente británico', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: imperialismo-8
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué caracteriza a China como semicolonia frente a la India colonial?', 'Ninguna potencia gobernaba China, pero los aranceles se fijaban desde fuera y las indemnizaciones hipotecaban durante décadas los ingresos aduaneros.', 3, true
-  from public.topics where slug = 'imperialismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que no sufrió intervención militar extranjera en ningún momento', false, 0),
-  ('Que fue administrada conjuntamente por las ocho potencias desde 1900', false, 1),
-  ('Que mantuvo el control de sus aranceles y de sus aduanas', false, 2),
-  ('Que conservó la soberanía formal mientras perdía su contenido mediante tratados desiguales, extraterritorialidad y esferas de influencia', true, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: imperialismo-9
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Por qué el ascenso de Japón tuvo un efecto ideológico tan grande en Asia?', 'La victoria sobre Rusia en 1905 fue la primera de una potencia asiática sobre una europea en guerra abierta, y resonó desde Estambul hasta Calcuta.', 3, true
-  from public.topics where slug = 'imperialismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Porque renunció a expandirse y ofreció un modelo pacífico', false, 0),
-  ('Porque demostró que la industrialización defensiva era posible y que el imperialismo no era una propiedad racial europea', true, 1),
-  ('Porque fue el único país asiático que adoptó el cristianismo', false, 2),
-  ('Porque logró la independencia sin transformar su Estado', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: imperialismo-10
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué añade Mike Davis a la explicación de las hambrunas de 1876-1902?', 'El marco de Amartya Sen apoya el argumento: una hambruna depende del acceso a los alimentos, no solo de su disponibilidad física.', 3, true
-  from public.topics where slug = 'imperialismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que la sequía por sí sola basta para explicar la mortalidad', false, 0),
-  ('Que la escala dependió de la exportación de grano en plena carestía, la no interferencia en los precios y la fiscalidad rígida', true, 1),
-  ('Que las hambrunas fueron menores de lo que indicaban los informes coloniales', false, 2),
-  ('Que el ferrocarril agravó la carestía en todos los casos documentados', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: imperialismo-11
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué explicación del reparto propusieron Robinson y Gallagher en 1961?', 'La ocupación de Egipto en 1882, disparada por la revuelta de Urabi y por la seguridad de la ruta a la India, es su caso demostrativo.', 3, true
-  from public.topics where slug = 'imperialismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La crisis en la periferia y el cálculo estratégico de la mente oficial, no la presión de los inversores', true, 0),
-  ('La exportación de capital excedente desde las metrópolis', false, 1),
-  ('El atavismo de élites aristocráticas sin función económica', false, 2),
-  ('La necesidad de desactivar el conflicto de clase en la metrópoli', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: imperialismo-12
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué concluyeron Davis y Huttenback en 1986 sobre la rentabilidad del imperio británico?', 'La defensa imperial se pagaba con impuestos generales. El imperio funcionó como transferencia interna: coste socializado, beneficio concentrado.', 3, true
-  from public.topics where slug = 'imperialismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que enriqueció por igual a todas las clases británicas', false, 0),
-  ('Que no compensó al contribuyente medio pero sí a una élite con capital colocado en ultramar', true, 1),
-  ('Que fue ruinoso para todos los grupos sociales implicados', false, 2),
-  ('Que la mayor parte de la inversión británica se dirigió a las colonias tropicales', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: imperialismo-13
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué propone Edward Said con el concepto de orientalismo?', 'Ha sido discutido por su selección de fuentes y por atribuir demasiada coherencia a un campo diverso, y aun así reorganizó los estudios poscoloniales.', 3, true
-  from public.topics where slug = 'imperialismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Un método filológico para editar textos árabes y persas', false, 0),
-  ('Que el saber occidental sobre Oriente construyó un objeto esencializado e inmóvil, inseparable del poder que lo financiaba', true, 1),
-  ('Que la literatura de viajes fue el único vehículo del prejuicio colonial', false, 2),
-  ('Que Oriente y Occidente son categorías geográficas objetivas', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: imperialismo-14
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué papel cumplió la colaboración local en el dominio colonial?', 'Mamdani analizó la contrapartida: la administración inventó autoridades tradicionales que quedaron como estructura de poder heredada tras la independencia.', 3, true
-  from public.topics where slug = 'imperialismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Fue marginal: la administración europea gobernaba directamente cada aldea', false, 0),
-  ('Se limitó a la recaudación de impuestos en las ciudades portuarias', false, 1),
-  ('Fue estructural: unos pocos miles de europeos solo podían gobernar millones de personas con príncipes, jefes y élites locales integrados', true, 2),
-  ('Solo existió en la India y no en el África subsahariana', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: imperialismo-15
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué ocurrió con los herero y los nama entre 1904 y 1908?', 'Se calcula que murió en torno al ochenta por ciento de los herero. La orden de von Trotha es uno de los documentos coloniales más explícitos que se conservan.', 3, true
-  from public.topics where slug = 'imperialismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Firmaron un protectorado negociado con la administración alemana', false, 0),
-  ('Fueron objeto de una guerra de exterminio con órdenes explícitas, empuje al desierto y campos de trabajo, reconocida por Alemania como genocidio en 2021', true, 1),
-  ('Emigraron en masa a la colonia británica de El Cabo', false, 2),
-  ('Derrotaron a las tropas alemanas y conservaron su territorio', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: imperialismo-16
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué relación estableció el imperialismo con la guerra de 1914?', 'Las crisis marroquíes de 1905 y 1911 se resolvieron sin guerra. El efecto fue acumulativo, no un detonante único.', 3, true
-  from public.topics where slug = 'imperialismo'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La causó directamente: las crisis coloniales desembocaron en combate entre potencias', false, 0),
-  ('La preparó indirectamente: normalizó la carrera naval, cimentó los bloques de alianzas y habituó a la opinión pública a un lenguaje de lucha entre razas y naciones', true, 1),
-  ('La retrasó, porque el reparto africano canalizó todas las tensiones hasta 1939', false, 2),
-  ('No tuvo ninguna relación: fueron procesos independientes', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: india-1
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Por qué son excepcionales los edictos de Ashoka como fuente?', 'Se descifraron en 1837. Hasta entonces el rey más citado de los textos budistas carecía de pruebas materiales.', 3, true
-  from public.topics where slug = 'india'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Porque están escritos en sánscrito clásico', false, 0),
-  ('Porque son la única voz directa de un gobernante de la Antigüedad india, grabada en varias lenguas', true, 1),
-  ('Porque los redactaron embajadores griegos', false, 2),
-  ('Porque describen la vida cotidiana campesina', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: india-2
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué defiende Romila Thapar sobre el dharma de Ashoka?', 'Ashoka patrocinó al budismo y financió misiones a Sri Lanka y Asia central, sin las cuales su expansión posterior habría sido distinta.', 3, true
-  from public.topics where slug = 'india'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que fue budismo convertido en religión oficial del imperio', false, 0),
-  ('Que fue una ética cívica pensada para cohesionar un imperio de enorme diversidad lingüística y religiosa', true, 1),
-  ('Que fue un código penal aplicado por los funcionarios', false, 2),
-  ('Que fue una doctrina inventada por la historiografía nacionalista', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: india-3
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cómo hay que leer textos como las leyes de Manu?', 'Las cuatro varnas rituales se articularon en la práctica en miles de jatis con reglas variables por región y por oficio.', 3, true
-  from public.topics where slug = 'india'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Como descripción fiel de la sociedad de su tiempo', false, 0),
-  ('Como prescripciones de letrados brahmánicos, frente a las cuales la historia social muestra más movilidad y variación regional', true, 1),
-  ('Como recopilaciones de derecho consuetudinario local', false, 2),
-  ('Como falsificaciones de época colonial', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: india-4
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cuál fue la transferencia técnica india de mayor alcance mundial?', 'Aryabhata trabajó con notación posicional en 499 y Brahmagupta formuló en el siglo VII reglas para el cero y los números negativos.', 3, true
-  from public.topics where slug = 'india'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La metalurgia del acero de Damasco', false, 0),
-  ('El sistema decimal posicional con cero, transmitido al mundo islámico y de ahí a Europa', true, 1),
-  ('La navegación con vela latina', false, 2),
-  ('El cultivo del algodón', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: india-5
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué caracterizó al movimiento bhakti?', 'Es el mejor argumento contra la imagen de una sociedad india estática y jerárquica sin fisuras.', 3, true
-  from public.topics where slug = 'india'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La restauración del ritual védico en sánscrito', false, 0),
-  ('La devoción personal expresada en lenguas vernáculas, con poetas mujeres y de castas bajas', true, 1),
-  ('La organización de monasterios budistas en el sur', false, 2),
-  ('La codificación jurídica de las obligaciones de casta', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: india-6
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué hizo insólito al imperio Chola en la historia india?', 'Mantuvo además relaciones diplomáticas con la China Song, y sus templos y bronces están entre las obras mayores del arte mundial.', 3, true
-  from public.topics where slug = 'india'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Unificó todo el subcontinente por primera vez', false, 0),
-  ('Proyectó poder naval, con expediciones a Sri Lanka, las Maldivas y Sumatra', true, 1),
-  ('Abolió el sistema de castas en su territorio', false, 2),
-  ('Adoptó el islam como religión de Estado', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: india-7
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cómo se difundió la influencia india por el sudeste asiático?', 'Angkor y Borobudur son los ejemplos mayores. La India no exportó imperio: exportó modelos.', 3, true
-  from public.topics where slug = 'india'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Mediante campañas de conquista de los Guptas', false, 0),
-  ('Sin conquista militar, por adopción local de formas políticas, religiosas y artísticas', true, 1),
-  ('Por la migración masiva de población desde Bengala', false, 2),
-  ('Por imposición de los comerciantes portugueses', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: india-8
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué novedad introdujeron los portugueses en el comercio del índico?', 'No dominaron el comercio índico, cuyo volumen los superaba con mucho, pero impusieron una violencia armada que no era la práctica del océano.', 3, true
-  from public.topics where slug = 'india'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('El uso de la brújula y de cartas náuticas', false, 0),
-  ('La disposición a usar artillería naval para monopolizar rutas y un sistema de permisos', true, 1),
-  ('El comercio de textiles de algodón', false, 2),
-  ('La creación de las primeras redes de comerciantes armenios', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: india-9
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, 'Según Richard Eaton, ¿por qué las zonas de mayoría musulmana acabaron siendo Bengala oriental y el noroeste?', 'La conversión fue lenta, desigual y periférica, y no coincidió con los centros del poder político musulmán.', 3, true
-  from public.topics where slug = 'india'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Porque allí se concentraron las guarniciones del sultanato', false, 0),
-  ('Porque eran regiones de frontera agraria donde el islam llegó con la roturación de tierras y las órdenes sufíes', true, 1),
-  ('Porque fueron las primeras conquistadas en 711', false, 2),
-  ('Porque el sultanato impuso allí la conversión obligatoria', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: india-10
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué lógica tenía en buena parte la destrucción de templos por gobernantes musulmanes?', 'La destrucción está documentada y no debe minimizarse, pero reducir siglos de historia a un conflicto religioso continuo proyecta hacia atrás categorías del siglo XX.', 3, true
-  from public.topics where slug = 'india'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Una campaña sistemática de conversión religiosa', false, 0),
-  ('Una lógica política: los templos reales eran depósitos de riqueza y símbolos de soberanía, y reyes hindúes también saqueaban los de sus rivales', true, 1),
-  ('La necesidad de materiales de construcción', false, 2),
-  ('La prohibición coránica de las imágenes', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: india-11
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Con qué instrumentos construyó Akbar el sistema imperial mogol?', 'El zabt de Todar Mal se basaba en medir la tierra, clasificar suelos y calcular el impuesto sobre promedios de precios.', 3, true
-  from public.topics where slug = 'india'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Ejército mercenario europeo, monopolio del comercio y expulsión de las élites locales', false, 0),
-  ('Rangos numéricos mansabdari, sistema fiscal zabt e integración de las élites rajputas en el gobierno', true, 1),
-  ('Administración eclesiástica y tribunales religiosos únicos', false, 2),
-  ('Delegación del gobierno en gobernadores hereditarios', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: india-12
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué significaba el principio de sulh-i kull?', 'Akbar suprimió el impuesto a los no musulmanes, patrocinó traducciones del sánscrito al persa y organizó debates entre teólogos de todas las religiones.', 3, true
-  from public.topics where slug = 'india'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('La igualdad jurídica de todos los súbditos', false, 0),
-  ('Una doctrina de soberanía situada por encima de las comunidades religiosas, y no una tolerancia en sentido moderno', true, 1),
-  ('La obligación de convertirse al islam para servir en la administración', false, 2),
-  ('La separación entre poder religioso y poder político', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: india-13
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué peso económico tenía el subcontinente en el siglo XVII?', 'El imperio absorbía plata americana y japonesa para pagar esos textiles. La imagen de una India premoderna pobre es un efecto del siglo XIX.', 3, true
-  from public.topics where slug = 'india'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Marginal en el comercio mundial', false, 0),
-  ('En torno a la cuarta parte del producto mundial, con textiles que se vendían de Japón a México', true, 1),
-  ('Similar al de las colonias americanas', false, 2),
-  ('Dependiente por completo de las importaciones europeas', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: india-14
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Cómo leen historiadores como Truschke y Richards el reinado de Aurangzeb?', 'Restableció el impuesto a los no musulmanes y ordenó destrucciones de templos, y a la vez llevó el imperio a su máxima extensión con una guerra ruinosa en el Decán.', 3, true
-  from public.topics where slug = 'india'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Como una política religiosa coherente de persecución sistemática', false, 0),
-  ('Situando sus decisiones en su contexto político: también patrocinó templos hindúes y empleó a más nobles hindúes que ningún predecesor', true, 1),
-  ('Como un período sin cambios respecto de Akbar', false, 2),
-  ('Como una etapa de retirada militar del imperio', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: india-15
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué muestra la historiografía reciente sobre el siglo XVIII indio?', 'Marathas, Awadh, Bengala y Haidarabad tenían capacidad fiscal y militar. El colonialismo se construyó sobre esas estructuras, no sobre su ausencia.', 3, true
-  from public.topics where slug = 'india'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que hubo un vacío de poder que los británicos ocuparon sin resistencia', false, 0),
-  ('Que hubo regionalización con Estados sucesores dinámicos y financieros potentes, en cuyo sistema competitivo intervino la Compañía', true, 1),
-  ('Que la economía india se hundió tras la muerte de Aurangzeb', false, 2),
-  ('Que el imperio mogol conservó intacto su poder hasta 1857', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: india-16
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué problema plantea la periodización propuesta por James Mill en 1817?', 'Dividir el pasado en épocas hindú, musulmana y británica sugiere además que el gobierno musulmán fue una ocupación extranjera permanente.', 3, true
-  from public.topics where slug = 'india'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que sitúa mal las fechas de las dinastías', false, 0),
-  ('Que convierte la religión en criterio organizador de mil años de historia y sirvió de base a las lecturas comunalistas', true, 1),
-  ('Que ignora por completo el sur del subcontinente', false, 2),
-  ('Que exagera la importancia del comercio índico', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: industrializacion-1
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Qué muestra Pomeranz al comparar el delta del Yangtsé con Inglaterra hacia 1750?', 'Su explicación de la divergencia es contingente: carbón accesible y acres fantasma coloniales, no superioridad europea previa.', 3, true
-  from public.topics where slug = 'industrializacion'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Que China llevaba tres siglos de atraso técnico', false, 0),
-  ('Que ambas regiones tenían niveles de vida, mercados y sofisticación comercial comparables', true, 1),
-  ('Que Inglaterra tenía ya el doble de renta por habitante', false, 2),
-  ('Que China carecía de mercados de tierra y de trabajo', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: industrializacion-2
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, 'Según Robert Allen, ¿por qué se mecanizó primero Gran Bretaña?', 'La spinning jenny era rentable en Lancashire y ruinosa en Bengala. La diferencia estaba en los precios relativos, no en el ingenio.', 3, true
-  from public.topics where slug = 'industrializacion'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Porque disponía de mejores ingenieros que el continente', false, 0),
-  ('Porque el trabajo era caro y la energía barata, lo que hacía rentable sustituir mano de obra por máquinas', true, 1),
-  ('Porque protegió sus inventos con patentes más estrictas', false, 2),
-  ('Porque tenía un mercado interior mayor que el francés', false, 3)
-) as opcion(label, is_correct, position);
-
--- Pregunta: industrializacion-3
-with nueva as (
-  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
-  select id, '¿Por qué la water frame de Arkwright obligó a crear la fábrica?', 'La jenny todavía se usaba en el taller doméstico. La fábrica nace de la máquina que no cabe en una casa.', 3, true
-  from public.topics where slug = 'industrializacion'
-  returning id
-)
-insert into public.question_options (question_id, label, is_correct, position)
-select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
-  ('Porque requería obreros con formación universitaria', false, 0),
-  ('Porque necesitaba energía hidráulica y no cabía en una casa, lo que impuso edificio, horario y vigilancia', true, 1),
-  ('Porque el Parlamento prohibió el hilado doméstico', false, 2),
-  ('Porque su patente exigía instalarla en ciudades', false, 3)
-) as opcion(label, is_correct, position);
 
 -- Pregunta: industrializacion-4
 with nueva as (
@@ -4820,6 +233,3831 @@ select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (v
   ('La hégira de 622, porque marca la fundación de una comunidad política en Medina', true, 1),
   ('La toma de La Meca en 630', false, 2),
   ('La muerte de Mahoma en 632', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: islam-2
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué contexto geopolítico favoreció la expansión árabe?', 'Veintiséis años de guerra dejaron a ambos imperios sin reservas y con sus sistemas clientelares en el norte de Arabia desarticulados.', 3, true
+  from public.topics where slug = 'islam'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La alianza entre Bizancio y Persia', false, 0),
+  ('El agotamiento mutuo de Bizancio y Persia tras la guerra de 602-628', true, 1),
+  ('La ausencia de ejércitos en Oriente Próximo', false, 2),
+  ('El apoyo militar chino', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: islam-3
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cuál fue la aportación política del islam a la sociedad tribal árabe?', 'La lealtad dejó de organizarse solo por linajes. Esa unificación canalizó hacia el exterior una energía militar antes consumida en conflictos internos.', 3, true
+  from public.topics where slug = 'islam'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La creación de una monarquía hereditaria', false, 0),
+  ('Sustituir el vínculo de parentesco por la umma, comunidad de creyentes', true, 1),
+  ('La abolición del comercio', false, 2),
+  ('La imposición del arameo como lengua común', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: islam-4
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué problema metodológico plantean las fuentes sobre la vida de Mahoma?', 'La propia tradición islámica desarrolló el análisis del isnad, la cadena de transmisores, como ciencia crítica para evaluar su fiabilidad.', 3, true
+  from public.topics where slug = 'islam'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que están escritas en persa', false, 0),
+  ('Que la sira y los hadices se compilaron entre siglo y medio y dos siglos después de los hechos', true, 1),
+  ('Que no existe ninguna fuente escrita', false, 2),
+  ('Que fueron redactadas en el siglo XIX', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: islam-5
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué evidencia debilitó las tesis revisionistas radicales sobre la formación tardía del Corán?', 'Apuntan a un texto estable muy temprano. Hoy se distingue entre el Corán, antiguo y coherente, y los relatos biográficos posteriores, que exigen cautela.', 3, true
+  from public.topics where slug = 'islam'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Las crónicas bizantinas', false, 0),
+  ('Los manuscritos de Saná y las dataciones por radiocarbono de folios coránicos muy tempranos', true, 1),
+  ('Las inscripciones de la Kaaba', false, 2),
+  ('Los archivos otomanos', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: islam-6
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, 'Según Bulliet, ¿cuándo alcanzaron mayoría musulmana las poblaciones conquistadas?', 'La reconstrucción a partir de la onomástica muestra conversiones lentas. Además, la conversión reducía los ingresos por yizia, así que los omeyas no la fomentaron.', 3, true
+  from public.topics where slug = 'islam'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Inmediatamente tras la conquista', false, 0),
+  ('En los siglos IX o X, doscientos o trescientos años después', true, 1),
+  ('Nunca la alcanzaron', false, 2),
+  ('En el siglo XV', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: islam-7
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué implicaba el estatuto de dhimmi?', 'Era subordinación jurídica, no igualdad, pero suponía una tolerancia práctica muy superior a la contemporánea en la Europa cristiana.', 3, true
+  from public.topics where slug = 'islam'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La conversión forzosa al islam', false, 0),
+  ('Libertad de culto y autonomía jurídica a cambio del impuesto de capitación, en régimen de subordinación legal', true, 1),
+  ('La expulsión del territorio', false, 2),
+  ('La igualdad plena con los musulmanes', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: islam-8
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cómo valora hoy la historiografía la batalla de Poitiers de 732?', 'El repliegue musulmán del sur de Francia respondió más a problemas internos —la revolución abasí se acercaba— que a esa derrota concreta.', 3, true
+  from public.topics where slug = 'islam'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Como la batalla que salvó a Europa del islam', false, 0),
+  ('Probablemente como la derrota de una expedición de saqueo, magnificada por la historiografía francesa del siglo XIX', true, 1),
+  ('Como una victoria musulmana', false, 2),
+  ('Como un episodio inventado', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: islam-9
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cuál fue el origen de la división entre suníes y chiíes?', 'Mahoma no dejó procedimiento de sucesión establecido. Los partidarios de Alí defendían la línea familiar del Profeta; los suníes, la legitimidad de los califas efectivos.', 3, true
+  from public.topics where slug = 'islam'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Una disputa sobre el texto del Corán', false, 0),
+  ('La cuestión de quién debía dirigir la comunidad tras la muerte del Profeta', true, 1),
+  ('El desacuerdo sobre la fecha del Ramadán', false, 2),
+  ('La invasión mongola', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: islam-10
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué convirtió la disputa sucesoria en identidad religiosa duradera?', 'Kerbala es el centro emocional del chiismo. Conviene no proyectar sobre el pasado los alineamientos sectarios contemporáneos, que responden a la política del siglo XX.', 3, true
+  from public.topics where slug = 'islam'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La fundación de Bagdad', false, 0),
+  ('La muerte de Husayn en Kerbala en 680, conmemorada anualmente en la Ashura', true, 1),
+  ('La conquista de al-Ándalus', false, 2),
+  ('La traducción de Aristóteles', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: islam-11
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué cambio social trajo la revolución abasí de 750?', 'La administración adoptó modelos persas y el Estado se burocratizó. La capital pasó de Damasco a Bagdad, fundada en 762.', 3, true
+  from public.topics where slug = 'islam'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La expulsión de los persas de la administración', false, 0),
+  ('La integración de los mawali, musulmanes no árabes, cuya marginación bajo los omeyas había alimentado la revuelta', true, 1),
+  ('La abolición del califato', false, 2),
+  ('El retorno de la capital a La Meca', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: islam-12
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, 'Según Dimitri Gutas, ¿qué fue el movimiento de traducción abasí?', 'Cristianos nestorianos, judíos y zoroastrianos participaron de forma central como traductores. No fue conservación pasiva, sino ampliación crítica.', 3, true
+  from public.topics where slug = 'islam'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Una iniciativa privada de eruditos aislados', false, 0),
+  ('Una política de Estado sostenida durante dos siglos con demanda social real', true, 1),
+  ('Una consecuencia accidental de la conquista de Egipto', false, 2),
+  ('Un proyecto exclusivamente religioso', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: islam-13
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué aportó Ibn al-Haytham (Alhacén)?', 'Al-Juarismi sistematizó el álgebra, Avicena escribió el Canon e Ibn Jaldún formuló la asabiyya. Alhacén estableció bases experimentales de la óptica.', 3, true
+  from public.topics where slug = 'islam'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La sistematización del álgebra', false, 0),
+  ('La refutación de la teoría de la visión por emisión y un método experimental riguroso en óptica', true, 1),
+  ('El Canon de medicina', false, 2),
+  ('La teoría de la asabiyya', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: islam-14
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Por qué está desacreditada la tesis de que al-Ghazali causó el declive científico islámico?', 'Hoy se investiga por qué no se dio el paso institucional europeo del siglo XVII, con explicaciones centradas en financiación, universidades e imprenta.', 3, true
+  from public.topics where slug = 'islam'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Porque al-Ghazali nunca criticó a los filósofos', false, 0),
+  ('Porque la producción científica continuó siglos: Maragha en el siglo XIII desarrolló modelos que reaparecen en Copérnico', true, 1),
+  ('Porque no hubo ciencia islámica antes del siglo XIII', false, 2),
+  ('Porque el iytihad nunca se cerró en ninguna escuela', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: islam-15
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué papel tuvo Toledo tras 1085 en la historia intelectual europea?', 'Gerardo de Cremona y otros trabajaron con frecuencia a través de intermediarios judíos y mozárabes. El relato del «redescubrimiento» renacentista suele omitir este eslabón.', 3, true
+  from public.topics where slug = 'islam'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Fue la capital del califato de Córdoba', false, 0),
+  ('Fue el principal centro de traducción del árabe al latín: Ptolomeo, Aristóteles con Averroes, Avicena, álgebra y óptica', true, 1),
+  ('Allí se fundó la primera universidad europea', false, 2),
+  ('Fue el puerto del comercio de especias', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: islam-16
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué tecnología llegó al mundo islámico tras la batalla de Talas (751)?', 'Su difusión abarató drásticamente la producción de libros en el mundo islámico, siglos antes de que ocurriera lo mismo en Europa.', 3, true
+  from public.topics where slug = 'islam'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La pólvora', false, 0),
+  ('El papel', true, 1),
+  ('La imprenta de tipos móviles', false, 2),
+  ('La brújula', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: japon-1
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué dos elementos del modelo chino no importó Japón?', 'Sin mandato del Cielo no hay doctrina que autorice a sustituir a la dinastía: el emperador japonés reina por descendencia divina y ninguna otra casa lo ha reemplazado.', 3, true
+  from public.topics where slug = 'japon'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La escritura y el budismo', false, 0),
+  ('Los exámenes como vía de acceso al cargo y el mandato del Cielo', true, 1),
+  ('El catastro y los códigos legales', false, 2),
+  ('La burocracia de rangos y el patrocinio religioso', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: japon-2
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué fueron los shōen y qué efecto tuvieron?', 'Sus propietarios necesitaban hombres armados para protegerlos y cobrar rentas, y de ahí salieron los grupos guerreros que acabaron gobernando.', 3, true
+  from public.topics where slug = 'japon'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Guarniciones militares provinciales que reforzaron el poder central', false, 0),
+  ('Dominios privados exentos de impuestos que vaciaron de recursos al Estado de Heian', true, 1),
+  ('Escuelas de formación de funcionarios', false, 2),
+  ('Puertos abiertos al comercio con China', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: japon-3
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Por qué escribieron en kana las autoras de la corte de Heian?', 'De esa exclusión salieron el Genji monogatari y el Libro de la almohada, las obras mayores del período.', 3, true
+  from public.topics where slug = 'japon'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Porque el kana era la escritura oficial del Estado', false, 0),
+  ('Porque estaban excluidas de la escritura china, reservada a los asuntos serios de los hombres', true, 1),
+  ('Porque el chino no permitía expresar poesía', false, 2),
+  ('Porque lo ordenó la familia Fujiwara', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: japon-4
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Por qué arruinó al shogunato de Kamakura la victoria sobre los mongoles?', 'El sistema se sostenía sobre la concesión de tierra a cambio de servicio, y una guerra defensiva no genera botín territorial.', 3, true
+  from public.topics where slug = 'japon'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Porque las fortificaciones costeras se destruyeron en los tifones', false, 0),
+  ('Porque no hubo tierras conquistadas con las que recompensar a los vasallos movilizados', true, 1),
+  ('Porque perdió el apoyo del emperador', false, 2),
+  ('Porque los mongoles impusieron un tributo anual', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: japon-5
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué caracterizó al período sengoku?', 'Hubo roturaciones, minas, mercados, castillos y ciudades libres de comerciantes como Sakai.', 3, true
+  from public.topics where slug = 'japon'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Un cierre completo del país al comercio exterior', false, 0),
+  ('Fragmentación en dominios en guerra y, a la vez, crecimiento económico impulsado por los daimyō para financiar sus ejércitos', true, 1),
+  ('La restauración del gobierno directo del emperador', false, 2),
+  ('El dominio de los monasterios budistas sobre todo el territorio', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: japon-6
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Por qué prohibieron los unificadores el cristianismo?', 'El cristianismo llegó a tener varios cientos de miles de fieles y el apoyo de daimyō del sur interesados también en el comercio.', 3, true
+  from public.topics where slug = 'japon'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Por incompatibilidad doctrinal con el budismo zen', false, 0),
+  ('Porque veían en él una lealtad exterior incompatible con el orden político que estaban construyendo', true, 1),
+  ('Porque los misioneros se negaban a comerciar', false, 2),
+  ('Porque lo exigieron los comerciantes neerlandeses', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: japon-7
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué hizo Hideyoshi con la requisa de armas de 1588?', 'Ordenó además un catastro nacional. Sus dos invasiones de Corea en la década de 1590 fueron un desastre y la última aventura exterior en siglos.', 3, true
+  from public.topics where slug = 'japon'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Desarmó a los daimyō rivales', false, 0),
+  ('Separó jurídicamente a guerreros y campesinos, fijando la base del orden social Tokugawa', true, 1),
+  ('Prohibió la fabricación de armas de fuego', false, 2),
+  ('Creó un ejército nacional de reclutas', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: japon-8
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué función tenía el sankin-kōtai?', 'Funcionaba como rehén institucionalizado y, de paso, creó una red de carreteras, posadas y consumo urbano que integró la economía nacional.', 3, true
+  from public.topics where slug = 'japon'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Recaudar el impuesto sobre la tierra en los dominios', false, 0),
+  ('Obligar a los daimyō a residir en años alternos en Edo dejando allí a su familia, como control político', true, 1),
+  ('Rotar a los gobernadores de las ciudades del shogunato', false, 2),
+  ('Organizar el comercio con los neerlandeses', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: japon-9
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué ocurrió con el orden estamental teórico durante el período Tokugawa?', 'En las ciudades floreció además una cultura urbana propia con kabuki, novela popular y estampa ukiyo-e.', 3, true
+  from public.topics where slug = 'japon'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Se aplicó con rigidez completa durante dos siglos y medio', false, 0),
+  ('Se apartó pronto de la práctica: samuráis convertidos en funcionarios endeudados y comerciantes de Osaka con gran riqueza', true, 1),
+  ('Desapareció tras la rebelión de Shimabara', false, 2),
+  ('Se sustituyó por un sistema de castas hereditarias cerradas', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: japon-10
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué demostró Ronald Toby sobre la política de sakoku?', 'Neerlandeses en Deshima, chinos en Nagasaki, Corea vía Tsushima y los ainu y Ryukyu por otros dominios. La palabra sakoku ni siquiera se usaba entonces.', 3, true
+  from public.topics where slug = 'japon'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que el aislamiento fue aún más estricto de lo que se creía', false, 0),
+  ('Que hubo cuatro vías reguladas de contacto y que se trató de un monopolio estatal de las relaciones exteriores, no de su ausencia', true, 1),
+  ('Que el comercio con Europa continuó sin restricciones', false, 2),
+  ('Que la prohibición nunca llegó a aplicarse', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: japon-11
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué fue el rangaku y por qué importa?', 'Médicos japoneses tradujeron manuales de anatomía europeos y comprobaron su exactitud con disecciones.', 3, true
+  from public.topics where slug = 'japon'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Una escuela de artes marciales para samuráis sin guerra', false, 0),
+  ('Los estudios holandeses de medicina, astronomía y balística, que dejaron un grupo de japoneses informados sobre el mundo antes de 1853', true, 1),
+  ('La doctrina neoconfuciana oficial del shogunato', false, 2),
+  ('El sistema de escuelas de templo para la alfabetización popular', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: japon-12
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cómo cambió la estrategia de Satsuma y Chōshū durante el bakumatsu?', 'El cambio se produjo tras comprobar en combate directo la superioridad naval occidental.', 3, true
+  from public.topics where slug = 'japon'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Pasaron de apoyar al shogunato a defenderlo militarmente', false, 0),
+  ('Pasaron de querer expulsar a los extranjeros a adquirir su tecnología para poder resistirlos', true, 1),
+  ('Renunciaron a la restauración imperial', false, 2),
+  ('Se aliaron con Rusia contra Estados Unidos', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: japon-13
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Por qué es engañoso llamar restauración a lo ocurrido en 1868?', 'En una década se abolieron los dominios, se liquidaron los estipendios samuráis y se implantó el servicio militar obligatorio.', 3, true
+  from public.topics where slug = 'japon'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Porque el emperador no llegó a recuperar el trono', false, 0),
+  ('Porque se presentó como retorno a un orden antiguo y fue una revolución dirigida desde arriba por samuráis que desmontaron su propia clase', true, 1),
+  ('Porque el shogunato siguió gobernando hasta 1877', false, 2),
+  ('Porque no cambió la estructura administrativa del país', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: japon-14
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué modelo siguió la Constitución Meiji de 1889?', 'El Rescripto sobre la Educación de 1890 completó el marco con una ideología de lealtad enseñada en todas las escuelas.', 3, true
+  from public.topics where slug = 'japon'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('El británico, con un gabinete responsable ante el Parlamento', false, 0),
+  ('El prusiano: dieta electa con poderes limitados y emperador sagrado e inviolable', true, 1),
+  ('El estadounidense, con separación estricta de poderes', false, 2),
+  ('El francés de la Tercera República', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: japon-15
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, 'Según Thomas Smith, ¿qué base heredó el Japón Meiji del período Tokugawa?', 'Meiji no partió de cero: aceleró y reorientó tendencias que llevaban un siglo en marcha.', 3, true
+  from public.topics where slug = 'japon'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Un ejército moderno ya organizado', false, 0),
+  ('Agricultura comercial, alfabetización amplia, mercados internos y capacidad administrativa', true, 1),
+  ('Una industria pesada en funcionamiento', false, 2),
+  ('Un sistema bancario de crédito internacional', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: japon-16
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué hay que tener en cuenta al usar el término bushidō?', 'Como categoría de análisis exige la misma cautela que llamar feudal a Japón: ambas importan marcos que ocultan lo específico del caso.', 3, true
+  from public.topics where slug = 'japon'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que es un código escrito del siglo XII conservado íntegramente', false, 0),
+  ('Que se codificó cuando los samuráis llevaban siglos sin combatir y se popularizó con un libro escrito en inglés en 1900', true, 1),
+  ('Que fue una invención de los misioneros jesuitas', false, 2),
+  ('Que solo se aplicaba a los daimyō y no a sus vasallos', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: mesopotamia-1
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Por qué la agricultura mesopotámica exigía más intervención humana que la egipcia?', 'El calendario del Tigris y el Éufrates no encajaba con el ciclo del cereal, así que hacían falta canales, diques y drenaje activo.', 3, true
+  from public.topics where slug = 'mesopotamia'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Porque no llovía nunca', false, 0),
+  ('Porque la crecida era brusca, impredecible y llegaba con el cereal ya en el campo', true, 1),
+  ('Porque los suelos eran estériles', false, 2),
+  ('Porque no disponían de arado', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: mesopotamia-2
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué revela el paso del trigo a la cebada en los archivos del sur entre 2400 y 1700 a. C.?', 'La cebada tolera mejor la sal. Jacobsen y Adams vincularon en 1958 este desplazamiento y la caída de rendimientos con la degradación del suelo.', 3, true
+  from public.topics where slug = 'mesopotamia'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Un cambio de gustos alimentarios', false, 0),
+  ('Una salinización progresiva de los suelos irrigados', true, 1),
+  ('La llegada de nuevos cultivos desde la India', false, 2),
+  ('Una prohibición religiosa del trigo', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: mesopotamia-3
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, 'Según Schmandt-Besserat, ¿cuál fue el origen de la escritura?', 'Las primeras tablillas de Uruk son documentos económicos. La escritura nace como tecnología de gestión; la literatura llega siglos después.', 3, true
+  from public.topics where slug = 'mesopotamia'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La necesidad de registrar poemas religiosos', false, 0),
+  ('La contabilidad: fichas de arcilla guardadas en bullae cuyas marcas externas acabaron sustituyendo al contenido', true, 1),
+  ('La correspondencia diplomática', false, 2),
+  ('La necesidad de escribir leyes', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: mesopotamia-4
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Por qué disponemos de archivos mesopotámicos tan completos?', 'La destrucción por fuego, ruinosa para el edificio, fue una suerte documental: los archivos de Ur III suman más de cien mil tablillas.', 3, true
+  from public.topics where slug = 'mesopotamia'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Porque se escribían en pergamino tratado', false, 0),
+  ('Porque la arcilla se cocía en los incendios y se conservaba mejor', true, 1),
+  ('Porque se copiaron en época romana', false, 2),
+  ('Porque se guardaban en tumbas selladas', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: mesopotamia-5
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué objeción decisiva se plantea a leer el Código de Hammurabi como derecho vigente?', 'Kraus y Bottéro propusieron por eso leerlo como monumento ideológico y colección de precedentes ejemplares, no como código aplicable.', 3, true
+  from public.topics where slug = 'mesopotamia'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que la estela está incompleta', false, 0),
+  ('Que los documentos judiciales de la época casi nunca lo citan y a veces resuelven en sentido contrario', true, 1),
+  ('Que fue escrito en sumerio, lengua ya muerta', false, 2),
+  ('Que se descubrió fuera de Mesopotamia', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: mesopotamia-6
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué eran las proclamaciones de misharum?', 'Evitaban que el endeudamiento y la esclavitud por deudas privaran al Estado de contribuyentes y de reclutas. Eran una medida de estabilidad fiscal, no de caridad.', 3, true
+  from public.topics where slug = 'mesopotamia'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Campañas militares anuales', false, 0),
+  ('Cancelaciones generales de deudas decretadas por el rey', true, 1),
+  ('Censos de población', false, 2),
+  ('Fiestas de año nuevo', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: mesopotamia-7
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué demostró Diakonoff frente al modelo de «ciudad-templo» de Deimel?', 'El modelo hoy aceptado es pluralista: templo, palacio y sector privado conviven en proporciones variables según la época y la ciudad.', 3, true
+  from public.topics where slug = 'mesopotamia'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que los templos no existían', false, 0),
+  ('Que los archivos de Lagash correspondían a un solo templo y coexistían tierra comunal y propiedad privada', true, 1),
+  ('Que toda la tierra era del rey', false, 2),
+  ('Que la economía era plenamente capitalista', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: mesopotamia-8
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué documenta el archivo de los mercaderes asirios de Kanesh?', 'Es el argumento empírico más citado contra la tesis sustantivista de Polanyi sobre la ausencia de mercados en el mundo antiguo.', 3, true
+  from public.topics where slug = 'mesopotamia'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Un sistema económico sin precios ni crédito', false, 0),
+  ('Sociedades mercantiles, créditos, intereses y arbitraje de precios entre Assur y Anatolia', true, 1),
+  ('La conquista de Anatolia por Sargón', false, 2),
+  ('La construcción de la ziggurat de Ur', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: mesopotamia-9
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué innovación política representa el imperio de Sargón de Acad?', 'Sargón somete las ciudades sumerias e impone una estructura supraurbana. Su hija Enheduanna, sacerdotisa en Ur, es la primera autora conocida por su nombre.', 3, true
+  from public.topics where slug = 'mesopotamia'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La primera ciudad-Estado', false, 0),
+  ('El primer imperio territorial: gobernadores designados, guarniciones y lengua administrativa común', true, 1),
+  ('La primera democracia', false, 2),
+  ('La primera federación de templos', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: mesopotamia-10
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué función administrativa tenían las deportaciones neoasirias?', 'La política afectó a varios millones de personas en tres siglos y combinaba disuasión mediante el terror con una lógica de gestión de recursos humanos.', 3, true
+  from public.topics where slug = 'mesopotamia'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Ninguna: eran castigos arbitrarios', false, 0),
+  ('Desarraigar élites locales, romper solidaridades y reasentar mano de obra donde se necesitaba', true, 1),
+  ('Repoblar el desierto', false, 2),
+  ('Financiar el ejército mediante rescates', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: mesopotamia-11
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué legado numérico mesopotámico seguimos utilizando?', 'La base 60 sobrevive en la medida del tiempo y de los ángulos. La tablilla Plimpton 322 recoge además ternas pitagóricas mucho antes de Pitágoras.', 3, true
+  from public.topics where slug = 'mesopotamia'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('El sistema decimal', false, 0),
+  ('El sistema sexagesimal: minutos, segundos y grados', true, 1),
+  ('La numeración romana', false, 2),
+  ('El cero posicional', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: mesopotamia-12
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cómo presenta el Cilindro de Ciro la conquista de Babilonia en 539 a. C.?', 'Es propaganda dirigida a la élite sacerdotal local: legitima al conquistador presentándolo como restaurador del orden religioso tradicional.', 3, true
+  from public.topics where slug = 'mesopotamia'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Como una masacre ejemplar', false, 0),
+  ('Como una restauración del culto de Marduk frente a un rey impío', true, 1),
+  ('Como una anexión pactada con Egipto', false, 2),
+  ('Como una victoria de los dioses persas sobre los babilonios', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: mesopotamia-13
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Por qué Mesopotamia dependió estructuralmente del comercio de larga distancia?', 'Madera del Líbano, cobre de Omán, lapislázuli de Afganistán, cornalina del Indo: el control de rutas se convirtió en un asunto de Estado.', 3, true
+  from public.topics where slug = 'mesopotamia'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Porque su población era demasiado grande para autoabastecerse de grano', false, 0),
+  ('Porque la llanura aluvial carece de piedra, madera y metales', true, 1),
+  ('Porque prohibía la artesanía local', false, 2),
+  ('Porque su moneda solo era aceptada en el extranjero', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: mesopotamia-14
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué papel tuvo la inscripción de Behistún?', 'Rawlinson copió el texto de Darío I grabado en un acantilado. El persa antiguo, más simple, abrió la puerta al elamita y al acadio.', 3, true
+  from public.topics where slug = 'mesopotamia'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Fue el primer código legal conocido', false, 0),
+  ('Su versión trilingüe permitió descifrar el cuneiforme, como la piedra de Rosetta con los jeroglíficos', true, 1),
+  ('Contiene la Epopeya de Gilgamesh', false, 2),
+  ('Registra el censo del imperio asirio', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: mesopotamia-15
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué distinción social establece el Código de Hammurabi?', 'La misma agresión tiene consecuencias distintas según a quién se cometa. El talión convive con la compensación económica según el estatus de la víctima.', 3, true
+  from public.topics where slug = 'mesopotamia'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Ninguna: todos eran iguales ante la ley', false, 0),
+  ('Awilum, mushkenum y wardum, con penas diferenciadas según el estatus', true, 1),
+  ('Solo entre hombres y mujeres', false, 2),
+  ('Solo entre sacerdotes y laicos', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: mundo-actual-1
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué afirmaba realmente la tesis del fin de la historia de Fukuyama?', 'La tesis se cita casi siempre en su versión caricaturizada. Huntington respondió en 1993 con el marco alternativo del choque de civilizaciones.', 3, true
+  from public.topics where slug = 'mundo-actual'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que dejarían de producirse acontecimientos relevantes', false, 0),
+  ('Que no quedaban alternativas sistémicas con pretensión universal frente a la democracia liberal y el mercado', true, 1),
+  ('Que las guerras futuras serían entre civilizaciones', false, 2),
+  ('Que Estados Unidos gobernaría el mundo indefinidamente', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: mundo-actual-2
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué medidas componían el llamado Consenso de Washington?', 'Se aplicó como condición de préstamos internacionales con resultados muy desiguales: hundimiento en Rusia, crecimiento en países asiáticos que no lo siguieron.', 3, true
+  from public.topics where slug = 'mundo-actual'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Planificación central, control de precios y política industrial', false, 0),
+  ('Disciplina fiscal, liberalización comercial y financiera, privatizaciones y desregulación', true, 1),
+  ('Ayuda al desarrollo sin condiciones y condonación de deuda', false, 2),
+  ('Proteccionismo selectivo y sustitución de importaciones', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: mundo-actual-3
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué apuesta institucional hizo el Tratado de Maastricht?', 'La crisis de la eurozona en 2010 mostró el coste de esa asimetría: Estados que no emitían en una moneda propia y sin prestamista de última instancia.', 3, true
+  from public.topics where slug = 'mundo-actual'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Unificar la política exterior antes que la economía', false, 0),
+  ('Unificar la moneda sin unificar la política fiscal, confiando en que la integración monetaria arrastrase al resto', true, 1),
+  ('Crear un ejército europeo común', false, 2),
+  ('Establecer una constitución federal para Europa', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: mundo-actual-4
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué concluyó el informe Chilcot sobre la invasión de Irak?', 'La desintegración posterior de Irak y la disolución de su ejército generaron el caos del que salió la organización que proclamó un califato en 2014.', 3, true
+  from public.topics where slug = 'mundo-actual'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que las armas de destrucción masiva existían pero fueron trasladadas', false, 0),
+  ('Que la acción militar no fue el último recurso y que la inteligencia se presentó con una certeza injustificada', true, 1),
+  ('Que la invasión contó con autorización expresa del Consejo de Seguridad', false, 2),
+  ('Que la ocupación se planificó con detalle antes de la guerra', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: mundo-actual-5
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cuál fue el balance a medio plazo de las revueltas árabes de 2011?', 'Produjeron además la mayor crisis de refugiados desde 1945. El papel de las redes sociales fue instrumental y se exageró después.', 3, true
+  from public.topics where slug = 'mundo-actual'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Democratización generalizada en toda la región', false, 0),
+  ('Consolidación frágil solo en Túnez, restauración autoritaria en Egipto y guerras prolongadas en Libia, Siria y Yemen', true, 1),
+  ('Restauración de las monarquías derribadas', false, 2),
+  ('Intervención militar de Naciones Unidas en todos los países afectados', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: mundo-actual-6
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué muestra Adam Tooze sobre la crisis de 2008?', 'La eurozona convirtió después una crisis bancaria en una crisis de deuda soberana por carecer de prestamista de última instancia hasta 2012.', 3, true
+  from public.topics where slug = 'mundo-actual'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que fue un problema exclusivamente estadounidense', false, 0),
+  ('Que fue profundamente transatlántica: los bancos europeos sobrevivieron gracias a líneas de dólares de la Reserva Federal', true, 1),
+  ('Que la causó el endeudamiento público de los países del sur de Europa', false, 2),
+  ('Que se resolvió sin intervención pública', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: mundo-actual-7
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué dimensión política tuvo el debate sobre la austeridad europea?', 'Al debate técnico sobre si el ajuste era necesario o excesivo se sumó otro sobre quién había decidido y con qué legitimidad.', 3, true
+  from public.topics where slug = 'mundo-actual'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Ninguna: fue una discusión exclusivamente técnica', false, 0),
+  ('Los programas los negociaban instituciones sin responsabilidad electoral ante las poblaciones afectadas', true, 1),
+  ('Se aprobaron en referéndum en cada país afectado', false, 2),
+  ('Los decidió el Parlamento Europeo por mayoría cualificada', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: mundo-actual-8
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué apuesta occidental sobre China no se cumplió?', 'El sistema se consolidó como Estado de partido único con economía mixta, planificación a largo plazo y un aparato de vigilancia tecnológica sin precedentes.', 3, true
+  from public.topics where slug = 'mundo-actual'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que su economía crecería con rapidez', false, 0),
+  ('Que la integración económica produciría convergencia política', true, 1),
+  ('Que se integraría en las cadenas globales de valor', false, 2),
+  ('Que reduciría la pobreza extrema', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: mundo-actual-9
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cómo se describe mejor la reacción comercial estadounidense frente a China desde 2018?', 'Incluyó aranceles, restricciones a la exportación de semiconductores avanzados y política de reindustrialización, sin llegar a una separación total.', 3, true
+  from public.topics where slug = 'mundo-actual'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Una desconexión económica completa entre ambos países', false, 0),
+  ('Una fragmentación selectiva de las cadenas de suministro con costes crecientes y terceros países evitando alinearse', true, 1),
+  ('Un acuerdo de libre comercio bilateral', false, 2),
+  ('La expulsión de China de la Organización Mundial del Comercio', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: mundo-actual-10
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué caracteriza al sistema internacional actual según el tema?', 'India, Brasil, Indonesia, Turquía, los Estados del Golfo y varios países africanos actúan en una posición que recuerda al No Alineamiento sin su vocabulario.', 3, true
+  from public.topics where slug = 'mundo-actual'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Un orden bipolar entre Estados Unidos y China', false, 0),
+  ('Un sistema ni unipolar ni bipolar, con potencias medias que actúan con autonomía y rechazan alinearse automáticamente', true, 1),
+  ('Una hegemonía europea sobre las instituciones multilaterales', false, 2),
+  ('Un vacío de poder sin actores relevantes', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: mundo-actual-11
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué designa Shoshana Zuboff como capitalismo de vigilancia?', 'Otros análisis subrayan más los efectos de red y la lógica de monopolio natural, pero coinciden en el diagnóstico de concentración.', 3, true
+  from public.topics where slug = 'mundo-actual'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('El control estatal de las comunicaciones privadas', false, 0),
+  ('Un modelo de negocio basado en extraer datos de comportamiento para predecir y orientar la conducta futura', true, 1),
+  ('La venta directa de datos personales entre empresas', false, 2),
+  ('El uso de reconocimiento facial en espacios públicos', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: mundo-actual-12
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Por qué importa históricamente el hundimiento económico del periodismo profesional?', 'A la vez que las plataformas desintermediaban el acceso a la información, abarataban hasta lo trivial la producción de desinformación.', 3, true
+  from public.topics where slug = 'mundo-actual'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Porque redujo el número de empleos cualificados', false, 0),
+  ('Porque era el principal actor que producía verificación de manera sistemática', true, 1),
+  ('Porque impidió el acceso a internet en zonas rurales', false, 2),
+  ('Porque provocó la concentración de las plataformas digitales', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: mundo-actual-13
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿En qué se diferencia el Acuerdo de París del Protocolo de Kioto?', 'El coste de las renovables se ha hundido más rápido de lo previsto, lo que ha hecho viable una transición que hace veinte años parecía inasumible.', 3, true
+  from public.topics where slug = 'mundo-actual'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('París es vinculante y Kioto era voluntario', false, 0),
+  ('París tiene participación casi universal con compromisos nacionales voluntarios; Kioto era vinculante y parcial, sin Estados Unidos', true, 1),
+  ('París solo afecta a los países desarrollados', false, 2),
+  ('Kioto incluía objetivos de adaptación y París no', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: mundo-actual-14
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué muestra la curva del elefante de Milanovic?', 'La desigualdad entre países se redujo por primera vez desde la revolución industrial, mientras crecía dentro de la mayoría de los países ricos.', 3, true
+  from public.topics where slug = 'mundo-actual'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que todos los grupos de renta mundiales mejoraron por igual entre 1988 y 2008', false, 0),
+  ('Que ganaron sobre todo las clases medias asiáticas y el uno por ciento global, mientras se estancaban los trabajadores industriales de Occidente', true, 1),
+  ('Que la desigualdad global aumentó de forma continua', false, 2),
+  ('Que la pobreza extrema no se redujo pese al crecimiento', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: mundo-actual-15
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué proponen Levitsky y Ziblatt como factor crítico de la erosión democrática?', 'Su explicación compite y se combina con las económicas de Rodrik y las culturales de Norris e Inglehart.', 3, true
+  from public.topics where slug = 'mundo-actual'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La intervención militar extranjera', false, 0),
+  ('La erosión de las normas no escritas de la competencia democrática y el pacto de partidos establecidos con fuerzas que no aceptan las reglas', true, 1),
+  ('La ausencia de constituciones escritas', false, 2),
+  ('El aumento del gasto público', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: mundo-actual-16
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué dificultades específicas tiene escribir la historia de este período?', 'La abundancia de datos no equivale a disponibilidad, y la única defensa frente a la falta de distancia es describir con precisión y desconfiar de las conclusiones redondas.', 3, true
+  from public.topics where slug = 'mundo-actual'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La escasez de acontecimientos relevantes', false, 0),
+  ('Fuentes clasificadas, dispersas o en formatos degradables, y falta de perspectiva para saber qué resultará decisivo', true, 1),
+  ('La imposibilidad de acceder a datos económicos', false, 2),
+  ('La ausencia de debate historiográfico', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: plena-edad-media-1
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué ventaja añade la rotación trienal frente a la bienal, además de sembrar más superficie?', 'Un cambio de calendario agrícola es también un cambio de dieta: la leguminosa aporta proteína y devuelve fertilidad al suelo.', 3, true
+  from public.topics where slug = 'plena-edad-media'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Elimina por completo la necesidad de barbecho', false, 0),
+  ('La siembra de primavera introduce leguminosas, que fijan nitrógeno y mejoran la dieta', true, 1),
+  ('Permite prescindir del arado pesado', false, 2),
+  ('Duplica el rendimiento por semilla en un solo año', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: plena-edad-media-2
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué se le ha objetado a la tesis de Lynn White Jr. sobre la técnica medieval?', 'La técnica estaba disponible antes de generalizarse. La explicación apunta a la demanda, a la estabilidad tras las incursiones y a señores interesados en excedente comercializable.', 3, true
+  from public.topics where slug = 'plena-edad-media'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que las innovaciones que describe nunca existieron', false, 0),
+  ('Que su cronología adelanta o comprime la difusión real y que el determinismo técnico no explica por qué se adoptó cuando se adoptó', true, 1),
+  ('Que ignoró por completo la energía hidráulica', false, 2),
+  ('Que confundió el arado pesado con el romano', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: plena-edad-media-3
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cómo debe manejarse el llamado «óptimo climático medieval»?', 'Es un factor favorable, no una explicación. El motor del crecimiento fue la roturación y la mejora técnica sostenidas durante tres siglos.', 3, true
+  from public.topics where slug = 'plena-edad-media'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Como la causa principal del crecimiento europeo', false, 0),
+  ('Como un mito sin ninguna base en los datos', false, 1),
+  ('Como un factor favorable pero moderado: las reconstrucciones muestran anomalías regionales, no un calentamiento global sincrónico', true, 2),
+  ('Como un fenómeno limitado al Mediterráneo oriental', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: plena-edad-media-4
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, 'En la Edad Media, ¿qué define a una ciudad?', 'La mayoría de las localidades con estatuto urbano tenía entre dos mil y diez mil habitantes. Lo decisivo era el derecho, no el tamaño.', 3, true
+  from public.topics where slug = 'plena-edad-media'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Su número de habitantes', false, 0),
+  ('Su estatuto jurídico: una carta que concede tribunal propio, mercado, milicia y censo fijo en dinero', true, 1),
+  ('La presencia de una catedral', false, 2),
+  ('Estar rodeada de murallas de piedra', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: plena-edad-media-5
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué era una comuna urbana?', 'Aparece en el norte de Italia a finales del siglo XI. Derivó en repúblicas urbanas con cónsules y después con *podestà* forasteros.', 3, true
+  from public.topics where slug = 'plena-edad-media'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Un impuesto sobre el comercio local', false, 0),
+  ('Una asamblea convocada por el obispo para administrar limosnas', false, 1),
+  ('El conjunto de tierras comunales de una villa', false, 2),
+  ('Una asociación jurada de vecinos que negociaba o arrancaba a su señor el gobierno de la ciudad', true, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: plena-edad-media-6
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Por qué las ciudades italianas contrataban un *podestà* forastero?', 'Era un magistrado contratado por un año. La imparcialidad se buscaba por diseño institucional, no por confianza personal.', 3, true
+  from public.topics where slug = 'plena-edad-media'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Porque la ley imperial se lo imponía', false, 0),
+  ('Precisamente para que no tuviera clientela ni familia en la ciudad que gobernaba', true, 1),
+  ('Porque no había juristas formados en Italia', false, 2),
+  ('Para evitar pagarle un salario', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: plena-edad-media-7
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué función cumplían las ferias de Champaña?', 'Un ciclo de seis ferias anuales encadenadas en cuatro localidades, bajo protección condal, durante casi dos siglos.', 3, true
+  from public.topics where slug = 'plena-edad-media'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Eran mercados exclusivamente agrícolas de ámbito comarcal', false, 0),
+  ('Servían de puerto fluvial para la Hansa', false, 1),
+  ('Funcionaban como cámara de compensación entre Flandes e Italia: allí se saldaban deudas y se cambiaban monedas, además de venderse mercancías', true, 2),
+  ('Eran asambleas judiciales de los condes de Champaña', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: plena-edad-media-8
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué rasgos de la empresa moderna anticipa la *commenda*?', 'Es el antepasado directo de la sociedad en comandita. El reparto habitual daba tres cuartas partes del beneficio al capital.', 3, true
+  from public.topics where slug = 'plena-edad-media'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La cotización en bolsa y el reparto de dividendos', false, 0),
+  ('La separación entre capital y gestión y la limitación de la pérdida al capital aportado', true, 1),
+  ('La responsabilidad ilimitada de todos los socios', false, 2),
+  ('La contratación de trabajo asalariado permanente', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: plena-edad-media-9
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cómo se convivió con la prohibición canónica de la usura?', 'Los teólogos afinaron excepciones como el *damnum emergens* y el *lucrum cessans*, y la práctica mercantil avanzó por ese hueco.', 3, true
+  from public.topics where slug = 'plena-edad-media'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Se suprimió el crédito en toda la cristiandad', false, 0),
+  ('Se ignoró abiertamente sin consecuencias', false, 1),
+  ('Se rodeó con técnica jurídica: el interés se ocultaba en el diferencial de cambio, en el reparto del riesgo o en penalizaciones pactadas', true, 2),
+  ('Se autorizó expresamente en el IV Concilio de Letrán', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: plena-edad-media-10
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué objeción plantean Goitein y Udovitch a la idea de «revolución comercial» europea?', 'Se acepta la magnitud del cambio europeo y se rechaza la invención desde cero: Europa sistematizó y llevó a escala lo que recibió.', 3, true
+  from public.topics where slug = 'plena-edad-media'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que el comercio europeo nunca alcanzó volumen relevante', false, 0),
+  ('Que los documentos de la Gueniza muestran instrumentos equivalentes en uso antes en el mundo islámico: la *suftaya* y el *qirad*', true, 1),
+  ('Que la partida doble se inventó en China', false, 2),
+  ('Que las ferias de Champaña son una invención historiográfica', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: plena-edad-media-11
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué significaba originalmente *universitas*?', 'La universidad medieval es literalmente un gremio de la enseñanza, y ese origen corporativo explica sus privilegios y su autogobierno.', 3, true
+  from public.topics where slug = 'plena-edad-media'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('El conjunto de todas las ciencias', false, 0),
+  ('El edificio donde se impartían las lecciones', false, 1),
+  ('Corporación: un grupo asociado con personalidad jurídica, estatutos y jurisdicción propias', true, 2),
+  ('La licencia concedida por el papa para fundar una escuela', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: plena-edad-media-12
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿En qué se diferenciaban los modelos de Bolonia y París?', 'De esos dos modelos derivan las dos familias europeas de gobierno universitario. La fecha de 1088 para Bolonia se fijó en 1888.', 3, true
+  from public.topics where slug = 'plena-edad-media'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('En Bolonia la corporación era de estudiantes, que contrataban y multaban a los profesores; en París, de maestros', true, 0),
+  ('Bolonia enseñaba en romance y París en latín', false, 1),
+  ('París admitía mujeres y Bolonia no', false, 2),
+  ('Bolonia dependía del papa y París del emperador', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: plena-edad-media-13
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cómo consiguió la Universidad de París sus estatutos propios en 1231?', 'Gregorio IX cedió con *Parens scientiarum*. El derecho de autogobierno académico nació de un conflicto laboral.', 3, true
+  from public.topics where slug = 'plena-edad-media'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Por concesión espontánea del rey de Francia', false, 0),
+  ('Comprándolos al canciller de la catedral', false, 1),
+  ('Tras una huelga de dos años en la que los maestros suspendieron las clases y abandonaron la ciudad', true, 2),
+  ('Por decisión del IV Concilio de Letrán', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: plena-edad-media-14
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué muestra el método de *Sic et non* de Abelardo?', 'De ahí derivan la *quaestio* y la *disputatio*, ejercicio público de argumentos enfrentados ante un maestro que determina.', 3, true
+  from public.topics where slug = 'plena-edad-media'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que la teología debía basarse solo en la Biblia', false, 0),
+  ('Que pensar consistía en organizar el desacuerdo: alinea cuestiones con autoridades contradictorias y deja la resolución al lector', true, 1),
+  ('Que las autoridades antiguas debían rechazarse', false, 2),
+  ('Que la lógica era incompatible con la fe', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: plena-edad-media-15
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, 'Según Harold Berman, ¿qué consecuencia jurídica tuvo la querella de las investiduras?', 'Berman la llamó «revolución papal» y la sitúa en el origen de la tradición jurídica occidental.', 3, true
+  from public.topics where slug = 'plena-edad-media'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La desaparición del derecho romano en Europa', false, 0),
+  ('La sumisión completa del papado al emperador', false, 1),
+  ('La unificación de los tribunales laicos y eclesiásticos', false, 2),
+  ('Dos jurisdicciones que se reconocen mutuamente obligaron a delimitar competencias, y de ahí salieron el derecho canónico como sistema y la idea de un poder sometido a un derecho que no fabrica él mismo', true, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: plena-edad-media-16
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cuál es el núcleo de la tesis de R. I. Moore sobre la sociedad persecutoria?', 'Entre 1000 y 1250 se crearon categorías estables de excluidos e instituciones permanentes para identificarlos. La crítica matiza el peso de la hostilidad social previa.', 3, true
+  from public.topics where slug = 'plena-edad-media'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que la persecución fue obra de un poder letrado y burocrático que necesitaba definir sus fronteras, y no solo del fanatismo popular espontáneo', true, 0),
+  ('Que no hubo persecuciones significativas antes de 1300', false, 1),
+  ('Que la Inquisición fue una institución exclusivamente española', false, 2),
+  ('Que las minorías perseguidas no existían realmente como grupos', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: prehistoria-1
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Por qué se critica el criterio de la escritura como frontera de la prehistoria?', 'La prehistoria termina en fechas muy distintas según la región. Muchos autores prefieren hablar de «sociedades sin escritura» o usar directamente secuencias arqueológicas.', 3, true
+  from public.topics where slug = 'prehistoria'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Porque la escritura no puede datarse', false, 0),
+  ('Porque es relativo y hace del alfabetismo el requisito para «entrar en la historia», con sesgo eurocéntrico', true, 1),
+  ('Porque ninguna sociedad antigua escribió', false, 2),
+  ('Porque la arqueología no estudia textos', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: prehistoria-2
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué implican las herramientas de Lomekwi, de 3,3 millones de años?', 'Rompen la ecuación entre fabricar herramientas y pertenecer al género Homo, y obligan a separar rasgos que antes se presentaban como un paquete.', 3, true
+  from public.topics where slug = 'prehistoria'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que Homo sapiens es más antiguo de lo que se creía', false, 0),
+  ('Que la fabricación de útiles es anterior al género Homo', true, 1),
+  ('Que los australopitecos usaban fuego', false, 2),
+  ('Que el bipedismo apareció después que la talla', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: prehistoria-3
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué proporción del genoma de los humanos actuales no africanos es de origen neandertal?', 'El mestizaje quedó demostrado con la secuenciación del genoma neandertal en 2010. Los neandertales no se extinguieron sin dejar descendencia genética.', 3, true
+  from public.topics where slug = 'prehistoria'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Ninguna', false, 0),
+  ('Entre el 1 % y el 2 %', true, 1),
+  ('En torno al 15 %', false, 2),
+  ('Más del 30 %', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: prehistoria-4
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué muestra la paleopatología al comparar los primeros agricultores con los cazadores-recolectores previos?', 'La agricultura aumentó la capacidad de carga demográfica, pero empeoró la dieta media y la salud individual. De ahí la provocación de Diamond sobre «el peor error» de la especie.', 3, true
+  from public.topics where slug = 'prehistoria'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Mayor estatura y mejor dentadura en los agricultores', false, 0),
+  ('Menor estatura, más caries, más anemia y más marcadores de estrés en los agricultores', true, 1),
+  ('Ninguna diferencia apreciable', false, 2),
+  ('Menor mortalidad infantil en los agricultores', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: prehistoria-5
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Por qué Göbekli Tepe obligó a revisar las explicaciones de la neolitización?', 'Invierte la secuencia esperada: la construcción monumental precede a la economía agrícola, lo que apoya explicaciones que dan primacía al cambio simbólico.', 3, true
+  from public.topics where slug = 'prehistoria'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Porque es el primer poblado agrícola conocido', false, 0),
+  ('Porque es monumental y lo levantaron poblaciones que aún no practicaban agricultura plena', true, 1),
+  ('Porque contiene las primeras inscripciones', false, 2),
+  ('Porque demuestra la hipótesis del oasis de Childe', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: prehistoria-6
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, 'Según la paleogenética, ¿cómo llegó la agricultura a Europa?', 'El ADN antiguo muestra un reemplazo poblacional sustancial entre 7000 y 5500 a. C., con mayor continuidad local en el Báltico y en zonas atlánticas.', 3, true
+  from public.topics where slug = 'prehistoria'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Solo por transmisión de ideas entre poblaciones locales', false, 0),
+  ('Por migración de agricultores anatolios que se mezclaron en grado variable con los cazadores-recolectores', true, 1),
+  ('Por invasión desde Egipto', false, 2),
+  ('Por desarrollo independiente en cada región europea', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: prehistoria-7
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué demostró Colin Renfrew sobre el megalitismo atlántico?', 'La revolución del radiocarbono calibrado obligó a reconocer desarrollos autónomos y a abandonar el modelo de una civilización oriental que irradia hacia periferias pasivas.', 3, true
+  from public.topics where slug = 'prehistoria'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que deriva de las pirámides egipcias', false, 0),
+  ('Que es anterior a las pirámides egipcias, lo que invalida la explicación difusionista', true, 1),
+  ('Que es posterior al Imperio romano', false, 2),
+  ('Que no puede datarse con radiocarbono', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: prehistoria-8
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué sesgo introduce la conservación diferencial en el registro prehistórico?', 'Lo duradero sobrevive y lo perecedero desaparece, así que la cultura material que estudiamos está sistemáticamente inclinada hacia unos materiales concretos.', 3, true
+  from public.topics where slug = 'prehistoria'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Ninguno: todo se conserva por igual', false, 0),
+  ('Sobrerrepresenta la piedra y el hueso frente a la madera, la fibra y la piel', true, 1),
+  ('Sobrerrepresenta los objetos orgánicos', false, 2),
+  ('Solo afecta a los yacimientos al aire libre', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: prehistoria-9
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué aportó la Sima de los Huesos de Atapuerca?', 'Es un conjunto sin equivalente por su tamaño. La Gran Dolina, en el mismo complejo, aportó además los restos de Homo antecessor con marcas de canibalismo.', 3, true
+  from public.topics where slug = 'prehistoria'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Las pinturas rupestres más antiguas de Europa', false, 0),
+  ('Más de 6.500 fósiles de al menos 28 individuos, genéticamente situados en el linaje neandertal', true, 1),
+  ('El primer útil de bronce peninsular', false, 2),
+  ('La tumba megalítica más antigua', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: prehistoria-10
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué objeción metodológica se plantea a las dataciones que atribuyen arte rupestre a neandertales?', 'La crítica de White y otros señala riesgo de sobrestimación por contaminación y por sistemas abiertos. El debate es fundamentalmente técnico y sigue sin cerrarse.', 3, true
+  from public.topics where slug = 'prehistoria'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que el uranio-torio no funciona en cuevas', false, 0),
+  ('Que se data la costra de carbonato sobre el pigmento, no el pigmento, y el sistema puede estar abierto al agua', true, 1),
+  ('Que las pinturas son demasiado recientes', false, 2),
+  ('Que no existen pigmentos en esos yacimientos', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: prehistoria-11
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, 'Los enterramientos de Sunguir, con miles de cuentas de marfil, sugieren que…', 'Las cuentas representan miles de horas de trabajo destinadas a unos pocos individuos. La desigualdad no espera al Neolítico.', 3, true
+  from public.topics where slug = 'prehistoria'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La desigualdad social solo aparece con la agricultura', false, 0),
+  ('Existían diferencias de estatus marcadas ya entre cazadores-recolectores del Paleolítico', true, 1),
+  ('El marfil carecía de valor', false, 2),
+  ('Se trataba de una sociedad agrícola', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: prehistoria-12
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué población transformó la genética europea hacia 3000 a. C., después de los agricultores anatolios?', 'La expansión desde la estepa póntica aportó un tercer componente genético mayoritario en Europa y se asocia con la difusión de las lenguas indoeuropeas.', 3, true
+  from public.topics where slug = 'prehistoria'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Los fenicios', false, 0),
+  ('Los pastores esteparios de la cultura Yamnaya', true, 1),
+  ('Los egipcios', false, 2),
+  ('Los etruscos', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: prehistoria-13
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Por qué el bronce favoreció el poder de las élites?', 'Quien controlaba las rutas del estaño controlaba la producción de bronce. La metalurgia introdujo una dependencia de larga distancia que el cobre local no imponía.', 3, true
+  from public.topics where slug = 'prehistoria'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Porque era abundante en toda Europa', false, 0),
+  ('Porque el estaño era escaso y de distribución desigual, lo que exigía controlar redes de intercambio largas', true, 1),
+  ('Porque solo servía para objetos rituales', false, 2),
+  ('Porque su fundición no requería especialistas', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: prehistoria-14
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué significa que la domesticación deje «huellas morfológicas»?', 'Por eso la frontera entre recolectar y cultivar es un gradiente: hubo siglos de manipulación humana antes de que los cambios morfológicos se consolidaran.', 3, true
+  from public.topics where slug = 'prehistoria'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que aparece de golpe en una generación', false, 0),
+  ('Que produce cambios como espigas que no se disgregan o cuernos reducidos, fijados a lo largo de siglos', true, 1),
+  ('Que solo afecta a los animales', false, 2),
+  ('Que es indetectable en el registro arqueológico', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: reforma-1
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué operación financiera está detrás de la predicación de indulgencias de 1517?', 'La otra mitad iba a las obras de San Pedro. La cumbre artística del Renacimiento romano y la protesta de Lutero comparten fuente de financiación.', 3, true
+  from public.topics where slug = 'reforma'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La financiación de la guerra contra los turcos', false, 0),
+  ('La deuda de Alberto de Brandeburgo con los Fugger para acumular el arzobispado de Maguncia, saldada con la mitad de lo recaudado', true, 1),
+  ('La compra de la corona imperial por Carlos V', false, 2),
+  ('El rescate de Francisco I tras Pavía', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: reforma-2
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué se sabe con certeza sobre las 95 tesis?', 'Las tesis no niegan el purgatorio ni la autoridad papal: sostienen que la indulgencia no sustituye al arrepentimiento. Lutero pedía una disputa académica.', 3, true
+  from public.topics where slug = 'reforma'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que Lutero las clavó en la puerta de la iglesia del castillo el 31 de octubre de 1517', false, 0),
+  ('Que se conserva la carta con la que Lutero las envió al arzobispo de Maguncia; el clavado lo relata Melanchthon en 1546', true, 1),
+  ('Que fueron redactadas en alemán para el gran público', false, 2),
+  ('Que negaban desde el principio la autoridad del papa', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: reforma-3
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué admitió Lutero en la disputa de Leipzig de 1519 y por qué fue decisivo?', 'De ahí salen los tratados de 1520 y la ruptura. La radicalización llegó por el propio proceso de disputa, no estaba en las tesis iniciales.', 3, true
+  from public.topics where slug = 'reforma'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que los concilios también podían errar, lo que dejaba a la Escritura como única autoridad final', true, 0),
+  ('Que la venta de indulgencias era legítima si el papa la autorizaba', false, 1),
+  ('Que aceptaba la transustanciación sin reservas', false, 2),
+  ('Que renunciaba a publicar en alemán', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: reforma-4
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Por qué prendió Lutero donde Hus había fracasado un siglo antes?', 'A eso se sumaron la fragmentación política del Imperio, los agravios fiscales de los príncipes y una tradición urbana de autogobierno comunal.', 3, true
+  from public.topics where slug = 'reforma'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Porque contaba con apoyo militar otomano', false, 0),
+  ('Porque el papado había perdido toda autoridad tras el cisma', false, 1),
+  ('Porque escribió en alemán, breve y barato: cerca de un tercio de todo lo impreso en alemán entre 1518 y 1525 salió de su pluma', true, 2),
+  ('Porque sus tesis eran teológicamente más moderadas', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: reforma-5
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué incentivo material tenían los príncipes alemanes para apoyar la Reforma?', 'Federico el Sabio protegió a Lutero sin compartir del todo sus tesis. Carlos V, que sí quería reprimirlo, estuvo ocupado con Francia y con el avance otomano.', 3, true
+  from public.topics where slug = 'reforma'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('El monopolio del comercio báltico', false, 0),
+  ('La secularización de los bienes eclesiásticos de sus territorios y el recorte de la jurisdicción y la fiscalidad romanas', true, 1),
+  ('Las subvenciones de Carlos V a los territorios reformados', false, 2),
+  ('La exención de participar en la defensa contra los turcos', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: reforma-6
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué reclamaban los Doce Artículos de Memmingen de 1525?', 'Argumentaban con citas bíblicas. Es uno de los primeros textos europeos que formula derechos colectivos, y se imprimió en unas veinticinco ediciones en dos meses.', 3, true
+  from public.topics where slug = 'reforma'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La restauración del emperador como única autoridad religiosa', false, 0),
+  ('La expulsión de los judíos de los territorios imperiales', false, 1),
+  ('La supresión de los gremios urbanos', false, 2),
+  ('Elegir al párroco, suprimir el diezmo menor, abolir la servidumbre porque Cristo redimió a todos y recuperar bosques y aguas comunales', true, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: reforma-7
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué consecuencia tuvo la guerra de los campesinos para el rumbo de la Reforma?', 'Lutero llamó a reprimir sin misericordia en *Contra las hordas asesinas*. La represión causó entre setenta mil y cien mil muertos.', 3, true
+  from public.topics where slug = 'reforma'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Consolidó la vía comunal como modelo dominante', false, 0),
+  ('Dejó de ser un movimiento comunal y pasó a ser asunto de príncipes y magistrados, con la autoridad civil al frente de la iglesia territorial', true, 1),
+  ('Provocó la reconciliación con Roma', false, 2),
+  ('Llevó a Lutero a apoyar la abolición de la servidumbre', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: reforma-8
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Por qué el coloquio de Marburgo de 1529 es significativo?', 'Si la Escritura es la única autoridad, no hay instancia que zanje las lecturas divergentes. La fragmentación es estructural, no accidental.', 3, true
+  from public.topics where slug = 'reforma'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Porque unificó a luteranos y católicos', false, 0),
+  ('Porque Lutero y Zuinglio acordaron catorce de quince artículos y rompieron por la eucaristía: la Reforma nació incapaz de unificarse', true, 1),
+  ('Porque estableció la paz religiosa en el Imperio', false, 2),
+  ('Porque condenó formalmente al anabaptismo', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: reforma-9
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué hizo del calvinismo el protestantismo más exportable?', 'Esa autonomía organizativa explica su papel en las guerras civiles francesas y en la revuelta neerlandesa. La ejecución de Servet en 1553 muestra que la tolerancia no estaba en el programa.', 3, true
+  from public.topics where slug = 'reforma'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Su alianza permanente con las monarquías', false, 0),
+  ('Su rechazo de toda organización eclesiástica', false, 1),
+  ('Un sistema teológico completo y una estructura de sínodos y consistorios capaz de funcionar sin el príncipe e incluso contra él', true, 2),
+  ('Su tolerancia hacia otras confesiones', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: reforma-10
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué caracterizó la ruptura inglesa de 1534?', 'El contenido doctrinal llegó con Eduardo VI, se revirtió con María I y se estabilizó en 1559 en una fórmula deliberadamente ambigua.', 3, true
+  from public.topics where slug = 'reforma'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Fue jurisdiccional y dinástica antes que teológica, y la disolución de monasterios creó un grupo con interés material en que no se revirtiera', true, 0),
+  ('Fue una reforma doctrinal calvinista desde el primer momento', false, 1),
+  ('La impuso el Parlamento contra la voluntad del rey', false, 2),
+  ('Se produjo tras una guerra civil religiosa', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: reforma-11
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué distinción propuso Hubert Jedin en 1946?', 'La distinción se ha impuesto, con la advertencia de que ambos procesos se entrelazan y que separarlos es un recurso analítico.', 3, true
+  from public.topics where slug = 'reforma'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Entre reforma alemana y reforma suiza', false, 0),
+  ('Entre una reforma católica de impulso interno anterior a 1517 y una contrarreforma de combate contra el protestantismo', true, 1),
+  ('Entre Trento y el Vaticano I', false, 2),
+  ('Entre religiosidad popular y religiosidad de élite', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: reforma-12
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, 'Además de cerrar la doctrina, ¿qué innovación disciplinar aportó Trento?', 'Ese aparato administrativo es tan característico del periodo como la polémica doctrinal, y encaja con la tesis de la confesionalización.', 3, true
+  from public.topics where slug = 'reforma'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La elección de los obispos por los fieles', false, 0),
+  ('La supresión de las órdenes religiosas', false, 1),
+  ('Residencia obligatoria de los obispos, seminarios para formar al clero y registro sistemático de bautismos y matrimonios', true, 2),
+  ('La traducción oficial de la Biblia a las lenguas vulgares', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: reforma-13
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué estableció la paz de Augsburgo de 1555 y cuál fue su defecto?', 'Fue una tregua con fecha de caducidad incorporada. Westfalia añadiría el calvinismo en 1648.', 3, true
+  from public.topics where slug = 'reforma'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Libertad individual de conciencia; falló por falta de aplicación', false, 0),
+  ('Que cada príncipe fijaba la confesión de su territorio, pero reconocía solo catolicismo y luteranismo, dejando fuera al calvinismo, que seguía creciendo', true, 1),
+  ('La unificación religiosa del Imperio bajo el catolicismo', false, 2),
+  ('La supresión de los principados eclesiásticos', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: reforma-14
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué muestra que la guerra de los Treinta Años dejó de ser un conflicto confesional?', 'Acabó siendo una guerra europea de hegemonía. El Imperio perdió en torno al veinte por ciento de su población, con regiones por encima del cincuenta.', 3, true
+  from public.topics where slug = 'reforma'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que el papa la condenó desde el principio', false, 0),
+  ('Que los ejércitos eran mercenarios', false, 1),
+  ('Que la Francia católica financió y después combatió junto a los príncipes protestantes contra los Habsburgo', true, 2),
+  ('Que terminó sin tratado de paz', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: reforma-15
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Por qué es un mito que Westfalia fundara la soberanía estatal moderna?', 'Lo que sí consagró Westfalia fue la práctica de resolver los conflictos europeos en congresos multilaterales.', 3, true
+  from public.topics where slug = 'reforma'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Porque los tratados no llegaron a firmarse', false, 0),
+  ('Porque solo participaron potencias protestantes', false, 1),
+  ('Porque Osiander mostró en 2001 que esa lectura es una construcción del siglo XIX: los tratados no contienen doctrina de soberanía ni de no injerencia', true, 2),
+  ('Porque la soberanía ya estaba definida en Augsburgo', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: reforma-16
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué objeción plantearon Becker y Woessmann a la tesis de Weber?', 'Midieron la distancia de cada comarca prusiana a Wittenberg. La correlación entre confesión y desarrollo se mantiene; el mecanismo cambia.', 3, true
+  from public.topics where slug = 'reforma'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que el capitalismo es anterior a la Reforma', false, 0),
+  ('Que la ventaja económica protestante desaparece al controlar por alfabetización: lo decisivo fue leer la Biblia, no una ética específica', true, 1),
+  ('Que Weber nunca estudió datos alemanes', false, 2),
+  ('Que el calvinismo prohibía el préstamo con interés', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: renacimiento-1
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Quién construyó el relato de un «renacer» de las artes y su periodización en tres etapas?', 'Vasari escribió desde Florencia sobre artistas casi todos toscanos, con Miguel Ángel como punto de llegada. Michelet convirtió la palabra en periodo histórico en 1855 y Burckhardt fijó su contenido en 1860.', 3, true
+  from public.topics where slug = 'renacimiento'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Petrarca en sus cartas a los autores antiguos', false, 0),
+  ('Giorgio Vasari en las *Vidas* (1550, ampliadas en 1568)', true, 1),
+  ('Jacob Burckhardt en 1860', false, 2),
+  ('Lorenzo Valla al refutar la Donación de Constantino', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: renacimiento-2
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿De dónde procede la expresión «Edad Media»?', 'Los humanistas hablaron de *tenebrae* y de *media aetas*. La periodización que todavía usamos la redactó una de las partes en litigio.', 3, true
+  from public.topics where slug = 'renacimiento'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('De las crónicas monásticas del siglo X', false, 0),
+  ('Del Concilio de Trento, que necesitaba fechar la tradición', false, 1),
+  ('De los propios humanistas, que llamaron así al hueco entre la Antigüedad y ellos mismos', true, 2),
+  ('De la historiografía alemana del siglo XIX', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: renacimiento-3
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué sostuvo Charles H. Haskins en 1927?', 'Si «renacimiento» significa recuperación deliberada de la Antigüedad, la Edad Media tuvo varios: el carolingio, el otoniano y el del siglo XII.', 3, true
+  from public.topics where slug = 'renacimiento'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que el Renacimiento italiano empezó antes de lo que se creía, hacia 1300', false, 0),
+  ('Que ya hubo un renacimiento en el siglo XII: universidades, derecho romano y Aristóteles recuperado a través del árabe', true, 1),
+  ('Que el Renacimiento fue un fenómeno exclusivamente artístico', false, 2),
+  ('Que la imprenta explica por sí sola el cambio cultural del siglo XV', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: renacimiento-4
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué disciplinas componían los *studia humanitatis*?', 'Quedaban fuera la lógica, la filosofía natural, la metafísica, el derecho, la medicina y la teología, que siguieron enseñándose en las facultades sin apenas cambios.', 3, true
+  from public.topics where slug = 'renacimiento'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Teología, derecho, medicina y artes liberales', false, 0),
+  ('Lógica, filosofía natural, metafísica y matemáticas', false, 1),
+  ('Gramática, retórica, poesía, historia y filosofía moral', true, 2),
+  ('Aritmética, geometría, música y astronomía', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: renacimiento-5
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cuál es la definición de humanismo que domina hoy la investigación?', 'Es la definición de Kristeller. Hubo humanistas platónicos, aristotélicos, escépticos y devotos: buscar una filosofía común es un error de categoría.', 3, true
+  from public.topics where slug = 'renacimiento'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Una filosofía unitaria sobre la dignidad del ser humano', false, 0),
+  ('Un programa de estudios y una profesión, compatible con posiciones filosóficas y religiosas muy distintas', true, 1),
+  ('Un movimiento antirreligioso de intelectuales laicos', false, 2),
+  ('La ideología oficial de la república de Florencia', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: renacimiento-6
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cómo demostró Valla en 1440 que la Donación de Constantino era falsa?', 'Nació así la crítica textual moderna: un documento puede fecharse por cómo está escrito, con independencia de lo que afirme.', 3, true
+  from public.topics where slug = 'renacimiento'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Encontrando el original auténtico en los archivos vaticanos', false, 0),
+  ('Analizando su lengua: vocabulario inexistente en el siglo IV, errores institucionales y latín tardío imposible en la cancillería constantiniana', true, 1),
+  ('Comparándola con una copia griega conservada en Constantinopla', false, 2),
+  ('Demostrando que Constantino nunca visitó Roma', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: renacimiento-7
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué consecuencia tuvo que Erasmo tradujera en 1516 el griego *metanoeite* como «arrepentíos» y no como «haced penitencia»?', 'Una corrección filológica se convirtió en fractura religiosa. Erasmo nunca rompió con Roma, pero su obra completa acabó en el Índice de 1559.', 3, true
+  from public.topics where slug = 'renacimiento'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Ninguna: fue una discusión estrictamente académica', false, 0),
+  ('Provocó su excomunión inmediata', false, 1),
+  ('Dejó sin apoyo textual el sacramento de la penitencia, y Lutero abrió con ese argumento la primera de sus 95 tesis', true, 2),
+  ('Obligó a reescribir la Vulgata por orden del papa', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: renacimiento-8
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué muestran los contratos de encargo estudiados por Baxandall?', 'La pintura era una mercancía por encargo con especificaciones, dirigida a un público entrenado. El artista libre y solitario es una construcción romántica posterior.', 3, true
+  from public.topics where slug = 'renacimiento'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que los artistas trabajaban con total libertad temática', false, 0),
+  ('Que fijaban plazos, la calidad del azul de ultramar, la cantidad de oro y qué figuras debía pintar el maestro en persona', true, 1),
+  ('Que la Iglesia era el único cliente posible', false, 2),
+  ('Que los precios se pactaban siempre después de entregar la obra', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: renacimiento-9
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿En qué consiste el debate entre Robert Lopez y Richard Goldthwaite?', 'Para Lopez el arte absorbió capital que ya no encontraba inversión rentable; para Goldthwaite hubo un auge genuino del consumo y de la construcción. La discusión sigue abierta.', 3, true
+  from public.topics where slug = 'renacimiento'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('En si el Renacimiento empezó en Florencia o en Venecia', false, 0),
+  ('En si la perspectiva lineal se descubrió o se inventó', false, 1),
+  ('En si la inversión en arte respondía a una caída de la rentabilidad productiva o a una expansión real de la demanda de bienes', true, 2),
+  ('En si el mecenazgo era religioso o político', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: renacimiento-10
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué vínculo económico une la cumbre artística del Renacimiento romano con el estallido de la Reforma?', 'La basílica de Julio II y de León X y la protesta de Lutero de 1517 comparten fuente de financiación.', 3, true
+  from public.topics where slug = 'renacimiento'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Las obras de San Pedro se financiaron en parte con indulgencias predicadas por toda Europa', true, 0),
+  ('Los banqueros alemanes retiraron sus depósitos del banco Médicis', false, 1),
+  ('Miguel Ángel fue acusado de simonía por el papa León X', false, 2),
+  ('Las guerras italianas arruinaron a los mecenas florentinos', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: renacimiento-11
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Quién codificó por escrito la perspectiva lineal como método?', 'Brunelleschi hizo el experimento óptico hacia 1413 y Masaccio lo aplicó hacia 1427; Alberti convirtió el hallazgo en método escrito con la pirámide visual y la pintura como ventana.', 3, true
+  from public.topics where slug = 'renacimiento'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Masaccio en la *Trinidad* de Santa Maria Novella', false, 0),
+  ('Brunelleschi en su experimento del Baptisterio', false, 1),
+  ('Leonardo en sus cuadernos', false, 2),
+  ('Alberti en *De pictura* (1435)', true, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: renacimiento-12
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué hizo Vesalio en *De humani corporis fabrica* (1543)?', 'Galeno había descrito animales, no humanos. Solo la imprenta permitía que una lámina fuese idéntica para todos los lectores y, por tanto, discutible.', 3, true
+  from public.topics where slug = 'renacimiento'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Descubrir la circulación de la sangre', false, 0),
+  ('Corregir a Galeno desde la disección directa y presentar el argumento en láminas grabadas', true, 1),
+  ('Traducir al latín los tratados médicos árabes', false, 2),
+  ('Prohibir la disección de cadáveres humanos en Padua', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: renacimiento-13
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, 'Dado que China y Corea imprimían con tipos móviles antes que Europa, ¿cuál fue la aportación específica de Gutenberg?', 'Funcionó porque el alfabeto latino necesita pocos caracteres, algo que penalizaba a los sistemas de escritura asiáticos.', 3, true
+  from public.topics where slug = 'renacimiento'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Inventar el papel y la tinta de imprenta', false, 0),
+  ('Aplicar por primera vez los tipos móviles a un texto religioso', false, 1),
+  ('Un sistema de punzón y matriz para fundir en serie tipos metálicos idénticos, con tinta grasa y prensa adaptada', true, 2),
+  ('Sustituir el pergamino por el papel en toda Europa', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: renacimiento-14
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué objetó Adrian Johns (1998) a la tesis de Eisenstein sobre la imprenta?', 'El consenso actual sitúa la imprenta como condición necesaria pero no suficiente: sus efectos dependieron de gremios, privilegios, censura y mercados.', 3, true
+  from public.topics where slug = 'renacimiento'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que la imprenta no se difundió realmente hasta el siglo XVII', false, 0),
+  ('Que la fijeza del texto no fue automática: hubo piratería, ediciones defectuosas y pies de imprenta falsos, y la fiabilidad hubo que construirla socialmente', true, 1),
+  ('Que los incunables eran demasiado caros para influir en nada', false, 2),
+  ('Que la Reforma se habría producido igualmente sin libros', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: renacimiento-15
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué muestra la difusión impresa del *Malleus maleficarum* (1487)?', 'El manual tuvo alrededor de treinta ediciones. Junto a los almanaques astrológicos y las profecías, fue uno de los géneros de mayor venta.', 3, true
+  from public.topics where slug = 'renacimiento'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que la imprenta amplificó todo lo que circulaba, no solo la crítica humanista', true, 0),
+  ('Que la censura eclesiástica funcionó desde el primer momento', false, 1),
+  ('Que los libros en latín no tenían público', false, 2),
+  ('Que la caza de brujas fue anterior a la imprenta y no guarda relación con ella', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: renacimiento-16
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué respondió Joan Kelly en 1977 a su pregunta «¿Tuvieron las mujeres un Renacimiento?»?', 'La revisión posterior matiza la respuesta según clase, ciudad y década, pero mantiene el hallazgo metodológico: una periodización hecha sobre una minoría masculina no describe al conjunto de la sociedad.', 3, true
+  from public.topics where slug = 'renacimiento'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que sí, gracias a las humanistas y pintoras documentadas del periodo', false, 0),
+  ('Que la pregunta no puede responderse por falta de fuentes', false, 1),
+  ('Que no, o no en el mismo sentido: las mujeres de la nobleza perdieron funciones y se endurecieron las normas de castidad, dote y reclusión', true, 2),
+  ('Que el Renacimiento fue indiferente a la posición de las mujeres', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-cientifica-1
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cuál era la objeción empírica más seria contra el heliocentrismo en el siglo XVI?', 'La respuesta copernicana —las estrellas están lejísimos— era cierta, pero indistinguible entonces de una excusa. El paralaje no se midió hasta 1838.', 3, true
+  from public.topics where slug = 'revolucion-cientifica'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que las mareas no podían explicarse sin una Tierra inmóvil', false, 0),
+  ('Que no se observaba paralaje estelar: las estrellas no parecían desplazarse a lo largo del año', true, 1),
+  ('Que el modelo de Copérnico no permitía predecir eclipses', false, 2),
+  ('Que contradecía las observaciones de Tycho Brahe sobre los cometas', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-cientifica-2
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué hizo Andreas Osiander con el libro de Copérnico?', 'El prefacio amortiguó la reacción durante décadas. La obra no entró en el Índice hasta 1616.', 3, true
+  from public.topics where slug = 'revolucion-cientifica'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Retrasó su publicación hasta después del Concilio de Trento', false, 0),
+  ('Añadió sin permiso un prefacio anónimo que presentaba el heliocentrismo como simple recurso de cálculo', true, 1),
+  ('Tradujo la obra al alemán para el gran público', false, 2),
+  ('Suprimió los capítulos dedicados al movimiento de la Tierra', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-cientifica-3
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué demostraron las observaciones de Tycho Brahe de la nova de 1572 y el cometa de 1577?', 'Cayeron las esferas cristalinas incorruptibles. Tycho, sin embargo, mantuvo un modelo híbrido con la Tierra inmóvil en el centro.', 3, true
+  from public.topics where slug = 'revolucion-cientifica'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que la Tierra gira alrededor del Sol', false, 0),
+  ('Que había fenómenos cambiantes más allá de la Luna, contra la incorruptibilidad de los cielos', true, 1),
+  ('Que las órbitas planetarias son elípticas', false, 2),
+  ('Que existen satélites alrededor de Júpiter', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-cientifica-4
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué llevó a Kepler a abandonar la órbita circular?', 'La precisión de Tycho, de alrededor de un minuto de arco, hacía inaceptable ese desajuste. Tomarse los datos en serio produjo la elipse.', 3, true
+  from public.topics where slug = 'revolucion-cientifica'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Una discrepancia de ocho minutos de arco en los datos de Marte que se negó a atribuir a error de observación', true, 0),
+  ('La lectura del *Sidereus nuncius* de Galileo', false, 1),
+  ('La medición del paralaje estelar', false, 2),
+  ('El cálculo del periodo orbital de los satélites de Júpiter', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-cientifica-5
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Por qué la aportación física de Galileo era imprescindible para el heliocentrismo?', 'Sin física nueva, el heliocentrismo chocaba con la experiencia cotidiana. La astronomía sola no bastaba.', 3, true
+  from public.topics where slug = 'revolucion-cientifica'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Porque permitía calcular las órbitas con mayor precisión que Kepler', false, 0),
+  ('Porque el principio de inercia y la relatividad del movimiento uniforme respondían a la objeción de que un cuerpo lanzado quedaría atrás', true, 1),
+  ('Porque demostraba matemáticamente la gravitación universal', false, 2),
+  ('Porque probaba la existencia del vacío', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-cientifica-6
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué refutaban las fases de Venus observadas por Galileo?', 'Precisión importante: la evidencia disponible en 1613 no permitía elegir entre Copérnico y Tycho, solo descartar a Ptolomeo.', 3, true
+  from public.topics where slug = 'revolucion-cientifica'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('El sistema de Tycho Brahe', false, 0),
+  ('El modelo ptolemaico puro, aunque no el modelo híbrido de Tycho', true, 1),
+  ('Las leyes de Kepler', false, 2),
+  ('La teoría del ímpetus medieval', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-cientifica-7
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué factores, además del contenido astronómico, explican la condena de Galileo en 1633?', 'Poner el argumento del papa en boca de Simplicio fue un error político. La tesis del conflicto entre ciencia y fe está abandonada como marco general.', 3, true
+  from public.topics where slug = 'revolucion-cientifica'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Únicamente la literalidad bíblica defendida por el Santo Oficio', false, 0),
+  ('El género dialogado y el uso del toscano, el mecenazgo roto con Urbano VIII, la presión de la guerra y los intereses de los aristotélicos universitarios', true, 1),
+  ('Su negativa a publicar en la Royal Society', false, 2),
+  ('La prohibición general de usar telescopios en los Estados Pontificios', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-cientifica-8
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué proponía el método de Bacon en el *Novum Organum*?', 'Bacon no hizo descubrimientos, pero su Casa de Salomón inspiró la Royal Society. Definió una institución más que una técnica.', 3, true
+  from public.topics where slug = 'revolucion-cientifica'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Deducir la física a partir de principios evidentes por sí mismos', false, 0),
+  ('Recoger historias naturales y ascender por inducción a axiomas generales, mediante trabajo colectivo', true, 1),
+  ('Reducir toda la naturaleza a extensión y movimiento', false, 2),
+  ('Someter toda hipótesis a experimento crucial matemático', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-cientifica-9
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué es un «testigo virtual» según Shapin y Schaffer?', 'La autoridad del hecho experimental se apoya en el testimonio colectivo. Hobbes objetó que ese consenso era frágil y prefería la demostración.', 3, true
+  from public.topics where slug = 'revolucion-cientifica'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Un miembro de la Royal Society que asiste al experimento sin intervenir', false, 0),
+  ('El lector al que la prosa experimental, minuciosamente detallada, convierte en testigo de un hecho al que no asistió', true, 1),
+  ('Un instrumento que registra automáticamente los resultados', false, 2),
+  ('Un aristotélico invitado a refutar el experimento', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-cientifica-10
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué función cumplieron las *Philosophical Transactions* desde 1665?', 'Junto con la imprenta, hicieron el conocimiento reproducible, comparable y corregible por terceros.', 3, true
+  from public.topics where slug = 'revolucion-cientifica'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Sustituir a los libros como único formato aceptado', false, 0),
+  ('Fechar la prioridad de los hallazgos, someter los textos al juicio de otros miembros y crear un archivo acumulativo', true, 1),
+  ('Financiar los experimentos de la Royal Society', false, 2),
+  ('Traducir al inglés las obras latinas del continente', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-cientifica-11
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué unificaron los *Principia* de 1687?', 'De esa ley se deducen las tres leyes de Kepler, las mareas y las trayectorias cometarias. Una sola física para el cielo y la tierra.', 3, true
+  from public.topics where slug = 'revolucion-cientifica'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La óptica y la acústica bajo una teoría ondulatoria', false, 0),
+  ('La caída de los cuerpos en la Tierra y las órbitas planetarias bajo una misma ley de atracción inversa al cuadrado de la distancia', true, 1),
+  ('La química y la alquimia en una sola disciplina', false, 2),
+  ('La astronomía de Ptolomeo y la de Copérnico en un modelo mixto', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-cientifica-12
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué quiso decir Newton con *hypotheses non fingo*?', 'A los cartesianos la acción a distancia les pareció una cualidad oculta. Newton desplazó lo que se considera una explicación satisfactoria.', 3, true
+  from public.topics where slug = 'revolucion-cientifica'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que rechazaba el uso de las matemáticas en la filosofía natural', false, 0),
+  ('Que no proponía una causa para la gravedad y se limitaba a deducir y verificar sus efectos', true, 1),
+  ('Que negaba la existencia de la atracción a distancia', false, 2),
+  ('Que sus resultados no admitían discusión', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-cientifica-13
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué encontró Keynes al estudiar los manuscritos inéditos de Newton?', 'De ahí su frase: no el primero de la edad de la razón, sino el último de los magos. La modernidad de la ciencia se seleccionó dentro de intereses mucho más amplios.', 3, true
+  from public.topics where slug = 'revolucion-cientifica'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Una demostración temprana de la relatividad', false, 0),
+  ('Más páginas dedicadas a la alquimia y a la cronología bíblica que a la física', true, 1),
+  ('La prueba de que no escribió los *Principia*', false, 2),
+  ('Correspondencia inédita con Descartes', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-cientifica-14
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué sostiene la tesis de Zilsel sobre el origen del método experimental?', 'Es una posición externalista, como la de Hessen. Koyré replicó desde el internalismo. Hoy no se sostiene ninguna en estado puro.', 3, true
+  from public.topics where slug = 'revolucion-cientifica'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que procede íntegramente de las universidades escolásticas', false, 0),
+  ('Que nace del contacto entre el saber manual de artesanos, ingenieros y navegantes y la formación matemática universitaria', true, 1),
+  ('Que es una consecuencia directa de la Reforma protestante', false, 2),
+  ('Que fue importado del mundo islámico junto con la astronomía', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-cientifica-15
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué documenta George Saliba sobre la astronomía islámica?', 'La coincidencia técnica está establecida y sugiere transmisión, no invención paralela. La ruta exacta hasta Cracovia sigue discutiéndose.', 3, true
+  from public.topics where slug = 'revolucion-cientifica'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que Copérnico tradujo directamente los textos de Maraga al latín', false, 0),
+  ('Que los modelos de la escuela de Maraga, como el par de Tusi, son matemáticamente equivalentes a los que empleó Copérnico', true, 1),
+  ('Que el heliocentrismo se formuló en Bagdad en el siglo IX', false, 2),
+  ('Que la astronomía islámica rechazó el sistema ptolemaico en bloque', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-cientifica-16
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cuál es el estado actual del debate sobre la etiqueta «revolución científica»?', 'Equilibrio entre Koyré y Shapin: la etiqueta sirve para ordenar el relato, no para explicar por sí sola lo ocurrido.', 3, true
+  from public.topics where slug = 'revolucion-cientifica'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Se ha abandonado por completo en favor de «ciencia medieval tardía»', false, 0),
+  ('Se conserva como periodización útil, se rechaza el relato heroico y se admite que hacia 1700 había cambiado qué contaba como prueba y quién podía producirla', true, 1),
+  ('Se ha ampliado hasta abarcar de 1200 a 1900', false, 2),
+  ('Se reserva exclusivamente para la obra de Newton', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-francesa-1
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cuál fue la causa inmediata de la convocatoria de los Estados Generales en 1789?', 'La revuelta aristocrática de 1787-1788 abrió la puerta. La aristocracia bloqueó el arreglo fiscal en nombre de la libertad.', 3, true
+  from public.topics where slug = 'revolucion-francesa'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('El hambre provocada por la mala cosecha de 1788', false, 0),
+  ('El bloqueo de la reforma fiscal por la Asamblea de Notables, que remitió la decisión a la nación reunida', true, 1),
+  ('La derrota francesa en la guerra de los Siete Años', false, 2),
+  ('La presión de los filósofos ilustrados sobre la corte', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-francesa-2
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Por qué no funciona explicar 1789 por el empobrecimiento de Francia?', 'Francia recaudaba mal, no era pobre. La cosecha desastrosa de 1788 agravó la crisis, no la causó.', 3, true
+  from public.topics where slug = 'revolucion-francesa'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Porque la población francesa disminuía desde 1750', false, 0),
+  ('Porque el siglo XVIII fue de crecimiento demográfico, comercial y agrario: lo que estaba roto era la hacienda, no la economía', true, 1),
+  ('Porque Francia carecía de deuda pública', false, 2),
+  ('Porque el precio del pan se mantuvo estable hasta 1792', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-francesa-3
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué acto se considera fundacional del nuevo régimen?', 'Unos representantes deciden que la soberanía reside en la nación y actúan en consecuencia. Todo lo demás se apoya en ese gesto.', 3, true
+  from public.topics where slug = 'revolucion-francesa'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La toma de la Bastilla el 14 de julio', false, 0),
+  ('La autoproclamación del tercer estado como Asamblea Nacional el 17 de junio y el juramento del Juego de Pelota del 20', true, 1),
+  ('La marcha de las mujeres a Versalles en octubre', false, 2),
+  ('La ejecución de Luis XVI en enero de 1793', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-francesa-4
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué destruían preferentemente los campesinos durante el Gran Miedo?', 'El objetivo era el título jurídico, no el edificio. Esa presión forzó la noche del 4 de agosto.', 3, true
+  from public.topics where slug = 'revolucion-francesa'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Las cosechas de los grandes propietarios', false, 0),
+  ('Los archivos señoriales donde constaban sus obligaciones y rentas', true, 1),
+  ('Las iglesias parroquiales', false, 2),
+  ('Los molinos y las herrerías', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-francesa-5
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué letra pequeña tuvo la abolición de los derechos señoriales del 4 de agosto?', 'La supresión sin indemnización llegó en 1793. El campesinado se anticipó a la ley por la vía de los hechos.', 3, true
+  from public.topics where slug = 'revolucion-francesa'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Se aplazaba su entrada en vigor hasta 1793', false, 0),
+  ('Los derechos considerados propiedad debían rescatarse mediante pago, condición que el campesinado ignoró', true, 1),
+  ('Solo afectaba a los territorios del norte', false, 2),
+  ('Exigía la aprobación previa del rey', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-francesa-6
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Por qué la Constitución civil del clero fue una ruptura decisiva?', 'Tackett demostró que el mapa del juramento de 1790-1791 predice comarca a comarca el de la resistencia posterior.', 3, true
+  from public.topics where slug = 'revolucion-francesa'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Porque prohibió el culto católico', false, 0),
+  ('Porque el juramento exigido al clero dividió al país por la mitad y anticipa la geografía de la contrarrevolución', true, 1),
+  ('Porque devolvió a la Iglesia los bienes nacionalizados', false, 2),
+  ('Porque instauró el culto del Ser Supremo', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-francesa-7
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué prueba la ley Le Chapelier de 1791 sobre el alcance de la igualdad revolucionaria?', 'Se prohibió la organización obrera en nombre de la libertad individual y de la unidad de la nación.', 3, true
+  from public.topics where slug = 'revolucion-francesa'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que se extendió al ámbito económico y laboral', false, 0),
+  ('Que era igualdad jurídica y no social: prohibió coaliciones y asociaciones profesionales, y estuvo vigente hasta 1864', true, 1),
+  ('Que se reconocieron los derechos políticos de los asalariados', false, 2),
+  ('Que los gremios se mantuvieron intactos', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-francesa-8
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Quién se opuso a declarar la guerra en 1792 y con qué argumento?', 'La guerra la querían los girondinos, para propagar la libertad, y la corte, que esperaba la derrota. Ambos por motivos opuestos.', 3, true
+  from public.topics where slug = 'revolucion-francesa'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Los girondinos, por temor a la derrota militar', false, 0),
+  ('Robespierre, con el argumento de que nadie ama a los misioneros armados', true, 1),
+  ('La corte, que confiaba en la victoria revolucionaria', false, 2),
+  ('Danton, por falta de recursos financieros', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-francesa-9
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cuántas condenas a muerte dictaron aproximadamente los tribunales revolucionarios?', 'La mayor parte de la violencia se concentró en zonas de guerra civil y de frontera, no en París.', 3, true
+  from public.topics where slug = 'revolucion-francesa'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Alrededor de 2.000', false, 0),
+  ('Alrededor de 17.000, con un total de víctimas de la represión estimado entre 30.000 y 40.000', true, 1),
+  ('Más de 300.000', false, 2),
+  ('Menos de 500', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-francesa-10
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cómo terminó el Terror?', 'La ley de Pradial había suprimido las garantías procesales y acelerado las ejecuciones, incluidas las de diputados.', 3, true
+  from public.topics where slug = 'revolucion-francesa'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Con una invasión extranjera que ocupó París', false, 0),
+  ('Por implosión: la propia Convención derribó a Robespierre el 9 de Termidor temiendo ser la siguiente en la lista', true, 1),
+  ('Con un plebiscito popular', false, 2),
+  ('Con la victoria electoral de los girondinos', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-francesa-11
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cuál es el argumento de Furet sobre el origen del Terror?', 'Frente a la lectura circunstancial de Mathiez y Soboul. Tackett propone una tercera vía: radicalización contingente por miedo y aprendizaje político.', 3, true
+  from public.topics where slug = 'revolucion-francesa'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que fue una respuesta proporcionada a la invasión extranjera', false, 0),
+  ('Que una soberanía concebida como voluntad general indivisible no deja lugar a la oposición: el que discrepa se convierte en enemigo', true, 1),
+  ('Que lo impusieron los sans-culottes contra la voluntad de la Convención', false, 2),
+  ('Que fue obra exclusiva de Robespierre', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-francesa-12
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cuál es la posición mayoritaria de la historiografía académica sobre la Vendée?', 'La calificación de genocidio de Secher es minoritaria en la academia. Hay acuerdo en la magnitud: entre 150.000 y 250.000 muertos.', 3, true
+  from public.topics where slug = 'revolucion-francesa'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que hubo un plan estatal de exterminio de la población vendeana', false, 0),
+  ('Que la represión fue atroz pero descentralizada y sin plan de exterminio poblacional, en un marco de guerra civil', true, 1),
+  ('Que las víctimas fueron menos de diez mil', false, 2),
+  ('Que no hubo represión significativa', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-francesa-13
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué negó Alfred Cobban en 1964?', 'Abrió el revisionismo. La historiografía actual ha vuelto a lo social sin recuperar el esquema de dos clases.', 3, true
+  from public.topics where slug = 'revolucion-francesa'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que hubiera existido violencia revolucionaria', false, 0),
+  ('Que existiera una burguesía capitalista enfrentada a una nobleza feudal: los revolucionarios eran sobre todo juristas y funcionarios', true, 1),
+  ('Que la Declaración de 1789 tuviera efectos jurídicos', false, 2),
+  ('Que Napoleón fuera heredero de la Revolución', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-francesa-14
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué hizo el régimen napoleónico con la esclavitud colonial?', 'El ciclo revolucionario produjo la primera abolición moderna de la esclavitud y también su primera restauración.', 3, true
+  from public.topics where slug = 'revolucion-francesa'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Mantuvo la abolición decretada en 1794', false, 0),
+  ('La restableció en 1802; la expedición enviada a Saint-Domingue fue derrotada y la colonia proclamó su independencia como Haití en 1804', true, 1),
+  ('La abolió por primera vez en 1804', false, 2),
+  ('Delegó la decisión en las asambleas coloniales', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-francesa-15
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué contradicción interna contiene el Código Civil de 1804?', 'Fue exportado a media Europa con las dos caras a la vez: igualdad civil para los varones, subordinación jurídica para las mujeres.', 3, true
+  from public.topics where slug = 'revolucion-francesa'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Reconoce la propiedad colectiva y la privada al mismo tiempo', false, 0),
+  ('Proclama la igualdad ante la ley y la libertad contractual mientras consagra la autoridad marital y la incapacidad jurídica de la mujer casada', true, 1),
+  ('Restablece los gremios suprimidos en 1791', false, 2),
+  ('Devuelve la jurisdicción señorial a los antiguos propietarios', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-francesa-16
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué efecto no buscado tuvo el bloqueo continental decretado en 1806?', 'De los más de seiscientos mil hombres de la Grande Armée que entraron en Rusia regresaron unas pocas decenas de miles.', 3, true
+  from public.topics where slug = 'revolucion-francesa'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Provocó la quiebra inmediata del Banco de Inglaterra', false, 0),
+  ('Arruinó a los aliados y satélites de Francia y empujó al Imperio a intervenir en España en 1808 y a invadir Rusia en 1812', true, 1),
+  ('Cerró el comercio francés con América', false, 2),
+  ('Obligó a Gran Bretaña a firmar la paz en 1807', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-rusa-1
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué fue el mir en la Rusia anterior a 1917?', 'Bloqueaba la mejora individual y sostenía la aspiración colectiva a la tierra. Stolypin trató de disolverla para crear propietarios que apoyaran al régimen.', 3, true
+  from public.topics where slug = 'revolucion-rusa'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('El parlamento electivo concedido en 1905', false, 0),
+  ('La comuna campesina que repartía periódicamente la tierra entre sus miembros', true, 1),
+  ('La policía política del régimen zarista', false, 2),
+  ('El sindicato de los obreros metalúrgicos de Petrogrado', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-rusa-2
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cuál fue la novedad organizativa aparecida en la revolución de 1905?', 'Nació como comité de huelga en Petersburgo. En 1917 ya era una forma disponible que obreros y soldados sabían usar sin que nadie la impusiera.', 3, true
+  from public.topics where slug = 'revolucion-rusa'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('El partido bolchevique', false, 0),
+  ('La Duma imperial', false, 1),
+  ('El sóviet, consejo elegido en las fábricas', true, 2),
+  ('El koljós agrícola', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-rusa-3
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué hecho resultó decisivo para el triunfo de la revolución de febrero de 1917?', 'Sin ejército obediente la autocracia dejó de existir. Ningún partido revolucionario dirigió esas jornadas.', 3, true
+  from public.topics where slug = 'revolucion-rusa'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La llegada de Lenin a Petrogrado', false, 0),
+  ('La negativa de la guarnición de Petrogrado a disparar contra los manifestantes', true, 1),
+  ('La derrota militar en la ofensiva de junio', false, 2),
+  ('La disolución de la Duma por el zar', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-rusa-4
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿En qué consistía el doble poder entre febrero y octubre de 1917?', 'La dirección menchevique y socialista revolucionaria del sóviet no quería gobernar: sostenía que a una revolución burguesa le tocaba un gobierno burgués.', 3, true
+  from public.topics where slug = 'revolucion-rusa'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('En el reparto de competencias entre el zar y la Duma', false, 0),
+  ('En la coexistencia del gobierno provisional, con legitimidad legal, y el sóviet de Petrogrado, con autoridad real', true, 1),
+  ('En la división del país entre zonas rojas y blancas', false, 2),
+  ('En el gobierno conjunto de bolcheviques y mencheviques', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-rusa-5
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué establecía la Orden número 1 del sóviet de Petrogrado?', 'Fue la mayor transferencia de autoridad del año: desmontó la disciplina del ejército desde abajo.', 3, true
+  from public.topics where slug = 'revolucion-rusa'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La nacionalización inmediata de la banca', false, 0),
+  ('La salida de Rusia de la guerra sin condiciones', false, 1),
+  ('La obediencia al gobierno solo si no contradecía al sóviet, y la elección de comités de soldados', true, 2),
+  ('La convocatoria inmediata de la Asamblea Constituyente', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-rusa-6
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué proponía Lenin en las Tesis de Abril?', 'Rompía con la línea de su propio partido y dejaba a los bolcheviques como la única fuerza sin responsabilidad de gobierno.', 3, true
+  from public.topics where slug = 'revolucion-rusa'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Apoyo crítico al gobierno provisional hasta la Asamblea Constituyente', false, 0),
+  ('Ningún apoyo al gobierno, todo el poder a los sóviets, paz, tierra y control obrero', true, 1),
+  ('La colectivización inmediata de la agricultura', false, 2),
+  ('Una coalición de todos los partidos socialistas', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-rusa-7
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué consecuencia tuvo el intento de golpe de Kornílov en agosto de 1917?', 'En septiembre los bolcheviques ya tenían mayoría en los sóviets de Petrogrado y Moscú.', 3, true
+  from public.topics where slug = 'revolucion-rusa'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Consolidó a Kerenski como árbitro entre la derecha y la izquierda', false, 0),
+  ('Obligó a armar a los obreros de Petrogrado y dejó al gobierno desacreditado ante ambos lados', true, 1),
+  ('Provocó la salida inmediata de Rusia de la guerra', false, 2),
+  ('Restauró la disciplina en el ejército del frente', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-rusa-8
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué resultado dieron las elecciones a la Asamblea Constituyente de noviembre de 1917?', 'Fueron las únicas elecciones verdaderamente libres de la Rusia moderna. La Asamblea se reunió un día y fue disuelta por la guardia.', 3, true
+  from public.topics where slug = 'revolucion-rusa'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Mayoría absoluta bolchevique', false, 0),
+  ('Empate entre bolcheviques y mencheviques', false, 1),
+  ('Mayoría socialista revolucionaria, con los bolcheviques en torno a la cuarta parte de los votos', true, 2),
+  ('Mayoría de los partidos liberales', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-rusa-9
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Por qué ganaron los rojos la guerra civil?', 'Devolver la tierra a los terratenientes, que era lo que los blancos representaban, resultaba inaceptable para la mayoría rural.', 3, true
+  from public.topics where slug = 'revolucion-rusa'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Por su superioridad numérica y armamentística desde el primer momento', false, 0),
+  ('Por el apoyo militar de las potencias occidentales', false, 1),
+  ('Por controlar el centro industrial y ferroviario, tener unidad de mando y porque los blancos no ofrecían nada al campesinado', true, 2),
+  ('Porque los ejércitos verdes campesinos combatieron a su lado', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-rusa-10
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué caracterizó al comunismo de guerra de 1918-1921?', 'Combinado con la sequía produjo la hambruna de 1921 y 1922, con unos cinco millones de muertos.', 3, true
+  from public.topics where slug = 'revolucion-rusa'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La sustitución de la requisa por un impuesto en especie', false, 0),
+  ('La nacionalización total, la supresión del mercado y la requisa armada del grano', true, 1),
+  ('La apertura al capital extranjero para reconstruir la industria', false, 2),
+  ('La entrega de las fábricas a cooperativas obreras autónomas', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-rusa-11
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué relación hubo entre Kronstadt y la NEP en 1921?', 'Los marinos pedían sóviets sin bolcheviques. Ese mismo congreso prohibió además las fracciones dentro del partido.', 3, true
+  from public.topics where slug = 'revolucion-rusa'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La rebelión fue aplastada y a la vez aceptada en sustancia: el mismo congreso aprobó el giro económico', true, 0),
+  ('La NEP se aprobó para premiar la lealtad de los marinos de Kronstadt', false, 1),
+  ('La rebelión triunfó e impuso el fin del partido único', false, 2),
+  ('No hubo ninguna relación entre ambos hechos', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-rusa-12
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Desde qué posición construyó Stalin su poder?', 'Ganó la sucesión aliándose sucesivamente contra Trotski, después contra Zinóviev y Kámenev y por último contra Bujarin.', 3, true
+  from public.topics where slug = 'revolucion-rusa'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Desde el mando del Ejército Rojo', false, 0),
+  ('Desde la dirección de la Internacional Comunista', false, 1),
+  ('Desde la secretaría general, un cargo administrativo que controlaba los nombramientos', true, 2),
+  ('Desde la presidencia del sóviet de Moscú', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-rusa-13
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué fue el gran giro de 1928?', 'La cuestión de fondo era de dónde saldrían los recursos para industrializar un país agrario y aislado. La respuesta fue el grano campesino.', 3, true
+  from public.topics where slug = 'revolucion-rusa'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La firma del pacto germano-soviético', false, 0),
+  ('El abandono de la NEP por el plan quinquenal y la colectivización forzosa del campo', true, 1),
+  ('La disolución de la Internacional Comunista', false, 2),
+  ('La adopción de la Constitución de 1936', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-rusa-14
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿En qué coinciden las dos posiciones del debate sobre la hambruna de 1932-1933?', 'La discrepancia entre Conquest o Applebaum y Davies o Wheatcroft es sobre la intención y sobre la aplicación de la categoría de genocidio.', 3, true
+  from public.topics where slug = 'revolucion-rusa'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('En que fue consecuencia exclusiva de la sequía', false, 0),
+  ('En que fue evitable y en que las decisiones que la agravaron están documentadas', true, 1),
+  ('En que afectó solo a Ucrania', false, 2),
+  ('En que las cifras de muertos son imposibles de estimar', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-rusa-15
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué reveló la apertura de los archivos sobre el Gran Terror de 1936-1938?', 'Los archivos dan en torno a seiscientas ochenta mil ejecuciones en dos años. Las operaciones de masas no se conocieron hasta 1991.', 3, true
+  from public.topics where slug = 'revolucion-rusa'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que los procesos de Moscú fueron el grueso de la represión', false, 0),
+  ('Que las operaciones de masas por cuotas contra categorías sociales y nacionales enteras mataron a mucha más gente que los procesos públicos', true, 1),
+  ('Que no hubo ejecuciones sistemáticas fuera del ejército', false, 2),
+  ('Que las cifras de la guerra fría se quedaron muy cortas', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revolucion-rusa-16
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué aportó la corriente revisionista de Fitzpatrick y Getty al estudio del estalinismo?', 'Denuncias vecinales, iniciativa local y cuotas regionales sobrecumplidas explican una implicación social mucho más amplia que la de una maquinaria puramente descendente.', 3, true
+  from public.topics where slug = 'revolucion-rusa'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La demostración de que la represión fue muy inferior a lo denunciado', false, 0),
+  ('El estudio de la sociedad desde abajo, mostrando que un régimen puede ser a la vez extremadamente violento y socialmente enraizado', true, 1),
+  ('La tesis de que Stalin no controlaba el aparato del partido', false, 2),
+  ('La atribución del terror exclusivamente a las autoridades locales', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revoluciones-liberales-1
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué sostiene Paul Schroeder sobre el orden salido del Congreso de Viena?', 'Europa no conoció una guerra general entre 1815 y 1914. El sistema sustituyó el equilibrio como competencia armada por un orden con congresos periódicos.', 3, true
+  from public.topics where slug = 'revoluciones-liberales'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que fue una restauración literal del mapa anterior a 1789', false, 0),
+  ('Que fue una transformación real de la política internacional, con reglas pactadas que evitaron una guerra general durante décadas', true, 1),
+  ('Que careció de efectos porque se rompió en 1821', false, 2),
+  ('Que su único objetivo era repartir las colonias americanas', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revoluciones-liberales-2
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué herencia napoleónica conservaron los regímenes de la Restauración?', 'Los monarcas restaurados heredaron un aparato estatal mucho más eficaz que el de 1789 y lo conservaron porque servía para gobernar.', 3, true
+  from public.topics where slug = 'revoluciones-liberales'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('El sufragio universal masculino', false, 0),
+  ('La república como forma de gobierno', false, 1),
+  ('Los códigos civiles, la administración uniforme, el registro civil y la propiedad plena de la tierra', true, 2),
+  ('La libertad de prensa sin censura previa', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revoluciones-liberales-3
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Por qué es anacrónico identificar liberalismo decimonónico con democracia?', 'En la Francia de Luis Felipe votaba menos del uno por ciento de la población. La ciudadanía política funcionaba como premio a la propiedad.', 3, true
+  from public.topics where slug = 'revoluciones-liberales'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Porque el liberalismo rechazaba las constituciones escritas', false, 0),
+  ('Porque defendía derechos y división de poderes, pero reservaba el voto a los propietarios y desconfiaba del sufragio universal', true, 1),
+  ('Porque los liberales eran partidarios del absolutismo ilustrado', false, 2),
+  ('Porque la democracia no existía como concepto en el siglo XIX', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revoluciones-liberales-4
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué distinguió Benjamin Constant en 1819?', 'Constant concluyó que la libertad de los modernos era la propia de las sociedades comerciales, y que la participación directa resultaba impracticable en ellas.', 3, true
+  from public.topics where slug = 'revoluciones-liberales'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La nación política de la nación cultural', false, 0),
+  ('La libertad de los antiguos, participación directa en las decisiones colectivas, de la de los modernos, disfrute sin interferencias de la vida privada', true, 1),
+  ('El liberalismo económico del liberalismo político', false, 2),
+  ('La soberanía nacional de la soberanía compartida', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revoluciones-liberales-5
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cuál fue el efecto social predominante de las desamortizaciones en el sur de Europa?', 'La tierra salió al mercado en subasta pública, y solo pudo comprarla quien disponía de dinero líquido.', 3, true
+  from public.topics where slug = 'revoluciones-liberales'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La creación de una sociedad de pequeños propietarios', false, 0),
+  ('El reparto gratuito de tierras entre los jornaleros', false, 1),
+  ('La concentración de la propiedad en manos de quienes ya tenían capital para pujar en las subastas', true, 2),
+  ('La devolución de las tierras a los municipios', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revoluciones-liberales-6
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, 'Según Gellner, ¿cuál es la relación entre nación y nacionalismo?', 'Es la inversión modernista del planteamiento romántico. Anderson añadió el papel del capitalismo impreso en la imaginación de la simultaneidad.', 3, true
+  from public.topics where slug = 'revoluciones-liberales'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La nación preexiste y el nacionalismo la despierta', false, 0),
+  ('El nacionalismo crea las naciones: la sociedad industrial necesita una población homogénea y alfabetizada que solo la escuela estatal produce', true, 1),
+  ('Ambos son fenómenos independientes entre sí', false, 2),
+  ('El nacionalismo es una consecuencia tardía de las guerras napoleónicas', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revoluciones-liberales-7
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué objeción plantea Anthony D. Smith al modernismo?', 'La objeción obliga a explicar por qué unas comunidades resultaron nacionalizables y otras no, en lugar de suponer que cualquier material sirve.', 3, true
+  from public.topics where slug = 'revoluciones-liberales'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que las naciones son eternas e inmutables', false, 0),
+  ('Que el nacionalismo no tuvo importancia política antes de 1914', false, 1),
+  ('Que las naciones modernas se apoyan en *ethnies* previas con mitos, memorias y símbolos que el nacionalismo reorganiza pero no inventa de la nada', true, 2),
+  ('Que la escuela y el ejército no influyeron en la formación nacional', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revoluciones-liberales-8
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cómo definió Renan la nación en 1882?', 'Renan negó expresamente que raza, lengua, religión o geografía definan la nación, y señaló el olvido —e incluso el error histórico— como factor esencial.', 3, true
+  from public.topics where slug = 'revoluciones-liberales'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Por la raza y la lengua comunes', false, 0),
+  ('Como un plebiscito de todos los días, que además exige olvidar los conflictos que la fundaron', true, 1),
+  ('Como la comunidad de quienes comparten religión', false, 2),
+  ('Como el territorio delimitado por fronteras naturales', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revoluciones-liberales-9
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué demuestra el informe francés de 1863 que cita Eugen Weber?', 'La nacionalización de la Francia rural la hicieron escuela, cuartel, ferrocarril y mercado entre 1870 y 1914, un siglo después de la Revolución hecha en su nombre.', 3, true
+  from public.topics where slug = 'revoluciones-liberales'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que la alfabetización era universal en Francia', false, 0),
+  ('Que alrededor de la cuarta parte de la población de Francia no hablaba francés', true, 1),
+  ('Que el servicio militar era voluntario', false, 2),
+  ('Que la mayoría de los franceses votaba en las elecciones', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revoluciones-liberales-10
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué texto sirvió de modelo común a los revolucionarios de la oleada de 1820?', 'Se tradujo y adoptó en Nápoles, Piamonte y Portugal por revolucionarios que nunca habían pisado España.', 3, true
+  from public.topics where slug = 'revoluciones-liberales'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La Constitución de Cádiz de 1812', true, 0),
+  ('La Declaración de Derechos del Hombre y del Ciudadano de 1789', false, 1),
+  ('El Acta Final del Congreso de Viena', false, 2),
+  ('La Carta Otorgada francesa de 1814', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revoluciones-liberales-11
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cuál de estos factores NO explica el fracaso de las revoluciones de 1848?', 'No hubo intervención estadounidense. Los tres primeros factores, sumados a la lealtad de los ejércitos a sus soberanos, explican el desenlace.', 3, true
+  from public.topics where slug = 'revoluciones-liberales'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La ruptura entre liberales moderados y radicales al aparecer la cuestión social', false, 0),
+  ('El choque entre movimientos nacionales rivales dentro del mismo territorio', false, 1),
+  ('La desmovilización campesina tras obtener la abolición de las cargas señoriales', false, 2),
+  ('La intervención militar de Estados Unidos en apoyo de los antiguos regímenes', true, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revoluciones-liberales-12
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Por qué rechazó Federico Guillermo IV la corona imperial que le ofreció el Parlamento de Fráncfort en 1849?', 'El episodio resume el problema de 1848: una constitución sin ejército ni administración detrás no obliga a nadie.', 3, true
+  from public.topics where slug = 'revoluciones-liberales'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Porque prefería que la corona la ostentara Austria', false, 0),
+  ('Porque procedía de una asamblea elegida y no de los príncipes alemanes', true, 1),
+  ('Porque la constitución de Fráncfort abolía la monarquía', false, 2),
+  ('Porque Rusia se lo prohibió expresamente', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revoluciones-liberales-13
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, 'Frente a la sentencia de Trevelyan sobre 1848, ¿qué resultados duraderos señala la revisión historiográfica?', '1848 no consiguió sus objetivos declarados, pero cambió el terreno de juego: después ningún régimen pudo gobernar ignorando a la opinión pública organizada.', 3, true
+  from public.topics where slug = 'revoluciones-liberales'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La unificación inmediata de Alemania e Italia', false, 0),
+  ('La abolición definitiva de la servidumbre en las tierras de los Habsburgo, el estreno del sufragio masculino universal en Francia y la instalación de la política de masas', true, 1),
+  ('La disolución del Imperio austríaco', false, 2),
+  ('La implantación del sufragio femenino en Europa central', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revoluciones-liberales-14
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué pactó Cavour en Plombières en 1858?', 'La unificación italiana fue una operación diplomática y militar del Piamonte, que administró el resultado como anexión y no como federación.', 3, true
+  from public.topics where slug = 'revoluciones-liberales'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La federación de los Estados italianos bajo el papado', false, 0),
+  ('Una guerra contra Austria junto a Napoleón III a cambio de ceder Saboya y Niza', true, 1),
+  ('La cesión de Venecia por parte de Austria sin guerra', false, 2),
+  ('El apoyo británico a la expedición de Garibaldi', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revoluciones-liberales-15
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué desajuste institucional caracterizó al Imperio alemán de 1871?', 'El sufragio del Reichstag era más amplio que el británico de la época. Sufragio amplio y poder parlamentario nulo podían convivir.', 3, true
+  from public.topics where slug = 'revoluciones-liberales'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Un Reichstag elegido por sufragio masculino universal que no controlaba a un canciller responsable solo ante el emperador', true, 0),
+  ('Un parlamento con plenos poderes frente a un emperador simbólico', false, 1),
+  ('La ausencia de cualquier cámara elegida', false, 2),
+  ('El sufragio femenino aplicado solo en Prusia', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: revoluciones-liberales-16
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cuál es la crítica de Blackbourn y Eley (1984) a la tesis del Sonderweg?', 'La versión fuerte del Sonderweg está abandonada; persiste como descripción de un desajuste concreto, no como explicación teleológica del siglo XX alemán.', 3, true
+  from public.topics where slug = 'revoluciones-liberales'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que Alemania se democratizó antes que Francia', false, 0),
+  ('Que el Imperio alemán no llegó a industrializarse', false, 1),
+  ('Que presupone un camino normal a la modernidad que ningún país recorrió, y convierte 1933 en destino inscrito en 1871', true, 2),
+  ('Que las élites agrarias prusianas nunca tuvieron poder político', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: roma-imperio-1
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cómo resolvió Augusto el problema de ejercer un poder monárquico en Roma?', 'Imperium proconsular, potestad tribunicia y pontificado máximo le daban el poder real. Las formas republicanas seguían intactas: Tácito dijo que cambiaron las cosas, no los nombres.', 3, true
+  from public.topics where slug = 'roma-imperio'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Proclamándose rey con apoyo del Senado', false, 0),
+  ('Acumulando poderes republicanos existentes sin crear ningún cargo nuevo y llamándose princeps', true, 1),
+  ('Aboliendo el Senado y las magistraturas', false, 2),
+  ('Trasladando la capital fuera de Italia', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: roma-imperio-2
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cuál era el «secreto del imperio» que reveló el año 69 según Tácito?', 'El principado nunca resolvió la sucesión. Cuatro emperadores en doce meses dejaron al descubierto quién ostentaba el poder decisivo.', 3, true
+  from public.topics where slug = 'roma-imperio'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que el emperador podía ser depuesto por el Senado', false, 0),
+  ('Que se podía proclamar emperador fuera de Roma y que quien decidía era el ejército', true, 1),
+  ('Que las provincias eran más ricas que Italia', false, 2),
+  ('Que la sucesión estaba fijada por ley', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: roma-imperio-3
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿En qué descansaba la administración cotidiana del imperio?', 'Unos pocos centenares de altos funcionarios para cincuenta millones de habitantes. El sistema funcionaba porque las élites locales asumían cargos costosos a cambio de estatus.', 3, true
+  from public.topics where slug = 'roma-imperio'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('En una burocracia imperial de decenas de miles de funcionarios', false, 0),
+  ('En las ciudades y en las élites locales cooptadas, con muy pocos altos funcionarios imperiales', true, 1),
+  ('En el ejército, que gobernaba cada provincia', false, 2),
+  ('En el Senado, que administraba directamente cada región', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: roma-imperio-4
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Por qué se ha revisado el concepto clásico de «romanización»?', 'Hoy se habla de negociación e hibridación: las élites adoptaron selectivamente lo romano por interés, y la experiencia fue muy distinta para un aristócrata galo que para un campesino.', 3, true
+  from public.topics where slug = 'roma-imperio'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Porque Roma no influyó en las provincias', false, 0),
+  ('Porque presentaba una difusión unidireccional de una cultura superior, modelo formulado en pleno imperialismo europeo', true, 1),
+  ('Porque las provincias eran ya latinas antes de la conquista', false, 2),
+  ('Porque no existen restos romanos fuera de Italia', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: roma-imperio-5
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué evidencia material demuestra la intensidad económica del alto imperio?', 'Los niveles de contaminación por plomo no se igualaron hasta la Revolución Industrial. Los naufragios son un buen indicador indirecto del volumen de tráfico marítimo.', 3, true
+  from public.topics where slug = 'roma-imperio'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La ausencia de moneda', false, 0),
+  ('Los picos de plomo en los núcleos de hielo de Groenlandia y la máxima frecuencia de pecios mediterráneos', true, 1),
+  ('La desaparición de la cerámica producida en serie', false, 2),
+  ('El abandono generalizado de las ciudades', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: roma-imperio-6
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué distinción sustituyó a la de ciudadano y peregrino tras el edicto de 212?', 'Al generalizarse la ciudadanía, dejó de ser un privilegio distintivo. La jerarquía jurídica pasó a apoyarse abiertamente en la posición socioeconómica.', 3, true
+  from public.topics where slug = 'roma-imperio'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Patricios y plebeyos', false, 0),
+  ('Honestiores y humiliores: acomodados y pobres, con penas distintas por el mismo delito', true, 1),
+  ('Itálicos y provinciales', false, 2),
+  ('Cristianos y paganos', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: roma-imperio-7
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué ocurrió con el contenido de plata del denario durante el siglo III?', 'La devaluación servía para pagar al ejército. Provocó inflación, vuelta parcial a pagos en especie y ruptura de circuitos comerciales.', 3, true
+  from public.topics where slug = 'roma-imperio'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Se mantuvo estable', false, 0),
+  ('Cayó de un 90 % en época de Augusto a menos del 5 %, con inflación descontrolada', true, 1),
+  ('Aumentó por la conquista de nuevas minas', false, 2),
+  ('El denario fue sustituido por el oro puro', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: roma-imperio-8
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué nuevo adversario apareció en la frontera oriental en 224?', 'Era un adversario estatal de primer orden, no una confederación tribal. En 260 capturó vivo al emperador Valeriano.', 3, true
+  from public.topics where slug = 'roma-imperio'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('El reino de Palmira', false, 0),
+  ('El Imperio sasánida', true, 1),
+  ('Los alamanes', false, 2),
+  ('El reino de Armenia', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: roma-imperio-9
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué pretendía la tetrarquía de Diocleciano?', 'Junto con la duplicación de provincias y la separación de mando militar y administración civil, buscaba estabilizar el poder tras medio siglo de anarquía militar.', 3, true
+  from public.topics where slug = 'roma-imperio'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Dividir el imperio en cuatro Estados independientes', false, 0),
+  ('Repartir el gobierno entre dos augustos y dos césares y planificar la sucesión', true, 1),
+  ('Sustituir al ejército por milicias provinciales', false, 2),
+  ('Restaurar la República', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: roma-imperio-10
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué factores explican mejor la expansión del cristianismo antes de Constantino?', 'Las persecuciones fueron episódicas; solo las de Decio y Diocleciano tuvieron alcance imperial. Lo notable es el crecimiento sostenido, no la represión.', 3, true
+  from public.topics where slug = 'roma-imperio'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La conversión forzosa impuesta por el ejército', false, 0),
+  ('Asistencia mutua efectiva, salvación universal sin requisitos de nacimiento, posición favorable entre las mujeres y exclusividad', true, 1),
+  ('El apoyo del Senado romano', false, 2),
+  ('La prohibición de los cultos tradicionales', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: roma-imperio-11
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué inauguró la convocatoria del concilio de Nicea por Constantino en 325?', 'El emperador convocó y presidió un concilio para resolver la disputa arriana. La relación entre poder político y autoridad religiosa quedó entrelazada durante siglos.', 3, true
+  from public.topics where slug = 'roma-imperio'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La separación entre Iglesia y Estado', false, 0),
+  ('La intervención imperial en cuestiones doctrinales y una dependencia mutua entre Iglesia e Imperio', true, 1),
+  ('La prohibición del cristianismo', false, 2),
+  ('La creación del papado', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: roma-imperio-12
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué mecanismo acumulativo señalan Ward-Perkins y Heather para explicar el siglo V?', 'La pérdida de África en 439, la provincia más rica y granero de Roma, fue probablemente el golpe decisivo de esa espiral.', 3, true
+  from public.topics where slug = 'roma-imperio'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La conversión al cristianismo de los emperadores', false, 0),
+  ('Menos territorio implica menos ingresos, menos ingresos implica menos ejército, y menos ejército implica perder más territorio', true, 1),
+  ('La despoblación por emigración a Oriente', false, 2),
+  ('El agotamiento de las minas de plata', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: roma-imperio-13
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué hizo Odoacro en 476 tras deponer a Rómulo Augústulo?', 'Los contemporáneos no percibieron el fin de nada. La fecha de 476 como «caída» es una construcción historiográfica posterior.', 3, true
+  from public.topics where slug = 'roma-imperio'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Se proclamó emperador de Occidente', false, 0),
+  ('Envió las insignias imperiales a Constantinopla y gobernó Italia como representante nominal del emperador de Oriente', true, 1),
+  ('Destruyó la ciudad de Roma', false, 2),
+  ('Restauró la República romana', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: roma-imperio-14
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Por qué la supervivencia del Imperio de Oriente es un problema para las explicaciones globales de la caída?', 'Oriente tenía fronteras más cortas y defendibles, una base fiscal más rica —Egipto y Siria— y una capital inexpugnable. Es el mejor test de cualquier hipótesis.', 3, true
+  from public.topics where slug = 'roma-imperio'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Porque Oriente también cayó en 476', false, 0),
+  ('Porque cualquier causa invocada —cristianismo, decadencia, presión bárbara— debería explicar por qué Oriente resistió mil años más', true, 1),
+  ('Porque Oriente no era cristiano', false, 2),
+  ('Porque Oriente no tenía fronteras', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: roma-imperio-15
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué defiende el paradigma de la «Antigüedad tardía» de Peter Brown?', 'Ward-Perkins reaccionó después aportando evidencia material de regresión económica severa en Occidente. Hoy se acepta que hubo ambas cosas, con gran variación regional.', 3, true
+  from public.topics where slug = 'roma-imperio'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que el imperio se hundió de forma súbita y catastrófica', false, 0),
+  ('Que hubo una larga transformación creativa, con continuidad de estructuras romanas dentro de los reinos germánicos', true, 1),
+  ('Que los bárbaros exterminaron a la población romana', false, 2),
+  ('Que el imperio nunca existió como unidad', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: roma-imperio-16
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cuál es el legado romano más estructural en la Europa continental actual?', 'Categorías como propiedad, contrato, obligación o persona jurídica son la base de los sistemas jurídicos continentales europeos y latinoamericanos.', 3, true
+  from public.topics where slug = 'roma-imperio'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La organización militar', false, 0),
+  ('El derecho romano, recopilado por Justiniano y redescubierto en Bolonia en el siglo XI', true, 1),
+  ('El sistema de calzadas', false, 2),
+  ('La religión pagana tradicional', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: roma-republica-1
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Por qué el relato tradicional sobre los orígenes de Roma debe leerse con cautela?', 'Los elogios fúnebres y las listas familiares exageraban méritos, y el relato proyecta hacia atrás categorías políticas del siglo I a. C. Es memoria cultural, no crónica.', 3, true
+  from public.topics where slug = 'roma-republica'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Porque no existe ninguna evidencia arqueológica de Roma', false, 0),
+  ('Porque Livio y Dionisio escriben cuatro o cinco siglos después sobre una tradición ya elaborada por las familias aristocráticas', true, 1),
+  ('Porque fue escrito en griego', false, 2),
+  ('Porque los romanos no conocían la escritura', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: roma-republica-2
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cómo describió Polibio la constitución romana?', 'Cónsules, Senado y asambleas representarían los tres principios. Polibio atribuía a ese equilibrio la estabilidad y el éxito expansivo de Roma.', 3, true
+  from public.topics where slug = 'roma-republica'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Como una monarquía absoluta', false, 0),
+  ('Como una constitución mixta que combinaba elementos monárquicos, aristocráticos y democráticos', true, 1),
+  ('Como una democracia directa', false, 2),
+  ('Como una teocracia sacerdotal', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: roma-republica-3
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué efecto tenía la organización del voto en los comicios centuriados?', 'Las clases inferiores a menudo ni llegaban a pronunciarse. Que las asambleas fueran soberanas en teoría no implicaba que el pueblo decidiera en la práctica.', 3, true
+  from public.topics where slug = 'roma-republica'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Un ciudadano, un voto', false, 0),
+  ('Las centurias de los más ricos votaban primero y la votación se detenía al alcanzar la mayoría', true, 1),
+  ('Solo votaban los tribunos', false, 2),
+  ('El voto era secreto y ponderado por edad', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: roma-republica-4
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cuál fue el arma más eficaz de la plebe en el conflicto de los órdenes?', 'Roma estaba en guerra permanente y no podía prescindir de sus soldados. La primera secesión, en 494 a. C., arrancó la creación del tribunado.', 3, true
+  from public.topics where slug = 'roma-republica'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('El asesinato de cónsules', false, 0),
+  ('La secesión: retirarse en masa y negarse a combatir', true, 1),
+  ('La alianza con Cartago', false, 2),
+  ('La huelga de impuestos', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: roma-republica-5
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué importancia tuvo la Ley de las Doce Tablas?', 'Su contenido no era especialmente favorable a la plebe, pero la publicidad de la norma limitaba la arbitrariedad de los jueces aristocráticos.', 3, true
+  from public.topics where slug = 'roma-republica'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Concedió la ciudadanía a los itálicos', false, 0),
+  ('Eliminó el monopolio patricio sobre el conocimiento del derecho, hasta entonces interpretado oralmente por los pontífices', true, 1),
+  ('Abolió la esclavitud', false, 2),
+  ('Creó el Senado', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: roma-republica-6
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cuál fue el resultado social del conflicto de los órdenes?', 'La apertura formal de las magistraturas convivió con un cierre sociológico muy estricto. Un homo novus como Cicerón era una rareza señalada.', 3, true
+  from public.topics where slug = 'roma-republica'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La igualdad política plena entre todos los ciudadanos', false, 0),
+  ('La formación de una nueva élite patricio-plebeya, la nobilitas, que monopolizó los cargos', true, 1),
+  ('La abolición del Senado', false, 2),
+  ('La expulsión de los patricios de Roma', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: roma-republica-7
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Por qué la mayoría de los aliados itálicos no se pasó a Aníbal?', 'Colonias latinas, municipios y aliados con distintos grados de derechos daban a las élites locales intereses propios en el sistema romano.', 3, true
+  from public.topics where slug = 'roma-republica'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Porque temían a los cartagineses más que a Roma', false, 0),
+  ('Porque Roma había integrado a las élites locales mediante un mosaico de estatutos jurídicos', true, 1),
+  ('Porque Aníbal no llegó a entrar en Italia', false, 2),
+  ('Porque estaban desarmados', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: roma-republica-8
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué argumenta William Harris contra el «imperialismo defensivo»?', 'La guerra era la actividad normal de casi todos los años. La estructura de incentivos empujaba a la expansión al margen de las provocaciones externas.', 3, true
+  from public.topics where slug = 'roma-republica'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que Roma nunca fue atacada', false, 0),
+  ('Que el prestigio militar era requisito del ascenso político y el botín enriquecía a generales y soldados, lo que generaba incentivos internos para la guerra', true, 1),
+  ('Que las guerras las decidían las asambleas populares', false, 2),
+  ('Que Roma solo luchó contra Cartago', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: roma-republica-9
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué problema militar pretendía resolver la reforma agraria de Tiberio Graco?', 'La reforma tenía una dimensión militar además de social: sin pequeños propietarios no había base de reclutamiento para las legiones.', 3, true
+  from public.topics where slug = 'roma-republica'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La falta de caballería', false, 0),
+  ('Que solo los propietarios podían ser reclutados, y el campesinado estaba desapareciendo', true, 1),
+  ('El exceso de soldados voluntarios', false, 2),
+  ('La deserción de los aliados griegos', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: roma-republica-10
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué consecuencia decisiva tuvo la reforma militar de Mario?', 'A partir de ahí, quien mandaba legiones disponía de un instrumento político propio, y las guerras civiles se hicieron posibles.', 3, true
+  from public.topics where slug = 'roma-republica'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Redujo el tamaño del ejército', false, 0),
+  ('Los soldados sin propiedad esperaban tierra de su general, no del Estado: la lealtad militar se personalizó', true, 1),
+  ('Prohibió el reclutamiento de itálicos', false, 2),
+  ('Sustituyó la infantería por la caballería', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: roma-republica-11
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cómo terminó la Guerra Social de 91-88 a. C.?', 'Roma perdió en buena medida militarmente y resolvió el conflicto integrando por la fuerza de los hechos, no por generosidad.', 3, true
+  from public.topics where slug = 'roma-republica'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Con la expulsión de los itálicos de Italia', false, 0),
+  ('Con la concesión de la ciudadanía a Italia al sur del Po, es decir, cediendo lo que los aliados exigían', true, 1),
+  ('Con la victoria total de Roma sin concesiones', false, 2),
+  ('Con la independencia de los aliados itálicos', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: roma-republica-12
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué precedente estableció Sila que resultó más duradero que sus reformas?', 'Marchar sobre Roma con un ejército era impensable antes de 88 a. C. Después, dejó de serlo.', 3, true
+  from public.topics where slug = 'roma-republica'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La limitación del tribunado', false, 0),
+  ('Tomar el poder marchando con las legiones sobre Roma y reorganizar el Estado desde la victoria militar', true, 1),
+  ('El refuerzo del Senado', false, 2),
+  ('La creación del cursus honorum', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: roma-republica-13
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué eran realmente populares y optimates?', 'Un mismo aristócrata podía usar métodos populares en una coyuntura y defender al Senado en otra. Eran estrategias, no ideologías.', 3, true
+  from public.topics where slug = 'roma-republica'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Partidos políticos con programa y afiliación', false, 0),
+  ('Métodos de acción política: buscar apoyo en las asambleas o en el Senado', true, 1),
+  ('Clases sociales legalmente definidas', false, 2),
+  ('Facciones religiosas', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: roma-republica-14
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué representa el pacto de 60 a. C. entre César, Pompeyo y Craso?', 'El llamado primer triunvirato no fue una institución. Su existencia misma muestra el grado de descomposición del sistema republicano.', 3, true
+  from public.topics where slug = 'roma-republica'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Una magistratura creada por ley', false, 0),
+  ('Un acuerdo privado para repartirse elecciones y mandos, señal de que las instituciones habían dejado de decidir', true, 1),
+  ('Una alianza militar contra Cartago', false, 2),
+  ('Un tratado con el Senado', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: roma-republica-15
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué tesis defiende Ronald Syme en The Roman Revolution?', 'Syme desmonta la retórica de la restauración augústea. Tácito ya había resumido la operación: se conservaron los nombres y cambió la sustancia.', 3, true
+  from public.topics where slug = 'roma-republica'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que Augusto restauró genuinamente la República', false, 0),
+  ('Que lo ocurrido fue la sustitución de una oligarquía por otra mediante violencia, clientelismo y propaganda', true, 1),
+  ('Que la República cayó por invasión extranjera', false, 2),
+  ('Que el pueblo romano derrocó a la aristocracia', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: roma-republica-16
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, 'En el debate abierto por Fergus Millar, ¿qué sostiene la posición hoy dominante?', 'Se acepta la dimensión pública y retórica que Millar subrayó, sin conceder que la asamblea decidiera realmente: la estructura de voto y las clientelas lo impedían.', 3, true
+  from public.topics where slug = 'roma-republica'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que Roma fue una democracia plena', false, 0),
+  ('Que fue una oligarquía que necesitaba legitimación popular, con política pública y persuasiva pero sin soberanía popular efectiva', true, 1),
+  ('Que el pueblo no participaba en absoluto', false, 2),
+  ('Que las asambleas nunca se reunieron', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: rumania-1
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué emperador romano conquistó Dacia?', 'Trajano la conquistó en dos guerras, en 101-102 y 105-106. La Columna Trajana de Roma conmemora la campaña.', 3, true
+  from public.topics where slug = 'rumania'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Augusto', false, 0),
+  ('Trajano', true, 1),
+  ('Adriano', false, 2),
+  ('Constantino', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: rumania-2
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Quién era Decébalo?', 'Decébalo derrotó a Domiciano, pero fue vencido por Trajano y se suicidó en 106 para no ser capturado.', 3, true
+  from public.topics where slug = 'rumania'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Un gobernador romano de Dacia', false, 0),
+  ('El último rey de los dacios', true, 1),
+  ('Un príncipe de Valaquia', false, 2),
+  ('Un obispo de Transilvania', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: rumania-3
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Por qué el rumano es una lengua romance?', 'Es hermana del español, el italiano o el francés. Dónde se formó exactamente, al norte o al sur del Danubio, sigue en discusión.', 3, true
+  from public.topics where slug = 'rumania'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Porque la impusieron los fanariotas', false, 0),
+  ('Porque procede del latín hablado en la provincia romana de Dacia y en los Balcanes', true, 1),
+  ('Porque la adoptó la Iglesia greco-católica en el siglo XVIII', false, 2),
+  ('Porque la trajeron colonos italianos en la Edad Media', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: rumania-4
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿En qué año retiró Aureliano a Roma de Dacia?', 'Presionado por godos y carpos, Aureliano trasladó ejército y administración al sur del Danubio. Dacia fue romana solo 165 años.', 3, true
+  from public.topics where slug = 'rumania'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('106', false, 0),
+  ('212', false, 1),
+  ('271', true, 2),
+  ('476', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: rumania-5
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cuáles eran los tres territorios históricos de los rumanos?', 'Valaquia y Moldavia fueron principados independientes y luego vasallos otomanos; Transilvania perteneció a Hungría y a los Habsburgo hasta 1918.', 3, true
+  from public.topics where slug = 'rumania'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Valaquia, Moldavia y Transilvania', true, 0),
+  ('Dacia, Tracia y Macedonia', false, 1),
+  ('Besarabia, Bucovina y Dobruja', false, 2),
+  ('Banato, Crișana y Maramureș', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: rumania-6
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué príncipe valaco inspiró, siglos después, el personaje de Drácula?', 'Vlad III gobernó Valaquia en 1448, 1456-1462 y 1476. Los panfletos alemanes sobre su crueldad llegaron a Bram Stoker, pero el Vlad histórico nada tiene de vampiro.', 3, true
+  from public.topics where slug = 'rumania'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Mircea el Viejo', false, 0),
+  ('Miguel el Valiente', false, 1),
+  ('Vlad III el Empalador', true, 2),
+  ('Constantin Brâncoveanu', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: rumania-7
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué hizo Esteban el Grande de Moldavia en Vaslui en 1475?', 'Fue una de las mayores derrotas otomanas del siglo XV. El papa Sixto IV le llamó «atleta de Cristo».', 3, true
+  from public.topics where slug = 'rumania'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Firmar la paz con Polonia', false, 0),
+  ('Derrotar a un gran ejército otomano', true, 1),
+  ('Convertirse al catolicismo', false, 2),
+  ('Unir Moldavia con Valaquia', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: rumania-8
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué logró Miguel el Valiente en 1600?', 'La unión duró unos meses y Miguel fue asesinado en 1601, pero en el siglo XIX se convirtió en el símbolo de la unidad nacional.', 3, true
+  from public.topics where slug = 'rumania'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La independencia definitiva frente al sultán', false, 0),
+  ('Reunir por primera vez Valaquia, Transilvania y Moldavia bajo un solo príncipe', true, 1),
+  ('Fundar la ciudad de Bucarest', false, 2),
+  ('Expulsar a los Habsburgo de Transilvania para siempre', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: rumania-9
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Quiénes eran los fanariotas?', 'Gobernaron de 1711 a 1821. Compraban el cargo y lo amortizaban con impuestos, aunque algunos hicieron reformas.', 3, true
+  from public.topics where slug = 'rumania'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Monjes ortodoxos de Moldavia', false, 0),
+  ('Griegos de Constantinopla nombrados príncipes de Valaquia y Moldavia por el sultán', true, 1),
+  ('Colonos alemanes de Transilvania', false, 2),
+  ('Guardias de frontera austriacos', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: rumania-10
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cómo consiguieron unirse Valaquia y Moldavia en 1859?', 'Las potencias habían prohibido un príncipe común. La doble elección de enero de 1859 fue un hecho consumado que acabaron aceptando.', 3, true
+  from public.topics where slug = 'rumania'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Por una guerra contra Rusia', false, 0),
+  ('Por decisión del sultán', false, 1),
+  ('Eligiendo las dos asambleas por separado al mismo príncipe, Alexandru Ioan Cuza', true, 2),
+  ('Por un tratado firmado en Viena', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: rumania-11
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cuándo fue reconocida internacionalmente la independencia de Rumanía?', 'Rumanía la proclamó en 1877 y combatió junto a Rusia contra los otomanos. En 1881 se convirtió en reino con Carol I.', 3, true
+  from public.topics where slug = 'rumania'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('En el Congreso de Viena de 1815', false, 0),
+  ('En el Congreso de Berlín de 1878', true, 1),
+  ('En el Tratado de Versalles de 1919', false, 2),
+  ('En la Conferencia de Yalta de 1945', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: rumania-12
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué se celebra el 1 de diciembre, fiesta nacional de Rumanía?', 'Con Transilvania, Besarabia y Bucovina nació la Gran Rumanía, que casi dobló el territorio del país.', 3, true
+  from public.topics where slug = 'rumania'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La caída de Ceaușescu', false, 0),
+  ('La coronación de Carol I', false, 1),
+  ('La unión de Transilvania con Rumanía en Alba Iulia en 1918', true, 2),
+  ('La entrada en la Unión Europea', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: rumania-13
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué ocurrió el 23 de agosto de 1944?', 'Con el Ejército Rojo en la frontera, el rey hizo arrestar al dictador. Antonescu fue juzgado y fusilado en 1946.', 3, true
+  from public.topics where slug = 'rumania'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Hitler invadió Rumanía', false, 0),
+  ('El rey Miguel destituyó a Antonescu y Rumanía se pasó al bando aliado', true, 1),
+  ('Se proclamó la República Popular', false, 2),
+  ('Rumanía entró en la guerra contra la URSS', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: rumania-14
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué gesto de Ceaușescu en 1968 le dio fama en Occidente?', 'Rumanía no participó en la invasión. Por eso Occidente lo trató durante años como un comunista independiente, mientras en el interior endurecía la dictadura.', 3, true
+  from public.topics where slug = 'rumania'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Retirar a Rumanía del Pacto de Varsovia', false, 0),
+  ('Condenar la invasión de Checoslovaquia por el Pacto de Varsovia', true, 1),
+  ('Legalizar los partidos de la oposición', false, 2),
+  ('Pedir la entrada en la OTAN', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: rumania-15
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Dónde empezó la revolución rumana de diciembre de 1989?', 'Empezó el 16 de diciembre en defensa del pastor László Tőkés. Nueve días después Ceaușescu fue fusilado.', 3, true
+  from public.topics where slug = 'rumania'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Bucarest', false, 0),
+  ('Cluj', false, 1),
+  ('Timișoara', true, 2),
+  ('Iași', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: rumania-16
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿En qué año entró Rumanía en la Unión Europea?', 'Entró el 1 de enero de 2007, junto con Bulgaria. En la OTAN estaba desde 2004.', 3, true
+  from public.topics where slug = 'rumania'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('1995', false, 0),
+  ('2004', false, 1),
+  ('2007', true, 2),
+  ('2013', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: segunda-guerra-1
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Por qué los historiadores militares desconfían hoy del término guerra relámpago?', 'La etiqueta fue periodística. El éxito inicial dependió tanto de los errores del adversario como de la innovación propia.', 3, true
+  from public.topics where slug = 'segunda-guerra'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Porque las campañas de 1939 y 1940 fueron en realidad muy lentas', false, 0),
+  ('Porque no existía tal doctrina en los manuales alemanes y buena parte del ejército se movía a pie y con tracción animal', true, 1),
+  ('Porque la inventaron los soviéticos en 1943', false, 2),
+  ('Porque solo se aplicó en el frente del Pacífico', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: segunda-guerra-2
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué explica mejor la derrota francesa de 1940?', 'Francia tenía más carros que Alemania y de mejor blindaje. Marc Bloch, oficial e historiador, dejó la mejor autopsia del desastre.', 3, true
+  from public.topics where slug = 'segunda-guerra'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La inferioridad numérica y de calidad de los carros franceses', false, 0),
+  ('Un colapso de mando: carros dispersos entre divisiones de infantería, doctrina defensiva y ruptura por las Ardenas', true, 1),
+  ('La falta de apoyo militar británico en el continente', false, 2),
+  ('La rendición inmediata del ejército tras la declaración de guerra', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: segunda-guerra-3
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué preveía el Plan del Hambre elaborado en 1941?', 'Es anterior a la invasión, igual que la Orden de los Comisarios: la guerra en el este fue criminal por diseño.', 3, true
+  from public.topics where slug = 'segunda-guerra'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('El racionamiento de alimentos en las ciudades alemanas', false, 0),
+  ('Desviar los alimentos soviéticos a Alemania asumiendo la muerte por inanición de decenas de millones de personas', true, 1),
+  ('La compra de trigo a Estados Unidos mediante Préstamo y Arriendo', false, 2),
+  ('El bloqueo naval de los puertos británicos', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: segunda-guerra-4
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cuál fue la consecuencia estratégica del ataque a Pearl Harbor?', 'Alemania declaró la guerra a Estados Unidos cuatro días después, lo que selló la formación de la Gran Alianza.', 3, true
+  from public.topics where slug = 'segunda-guerra'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La destrucción de los portaaviones estadounidenses del Pacífico', false, 0),
+  ('Un éxito táctico que no alcanzó a los portaaviones y convirtió a Estados Unidos en beligerante', true, 1),
+  ('La conquista inmediata de Hawái por Japón', false, 2),
+  ('La firma de un armisticio entre Japón y Estados Unidos', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: segunda-guerra-5
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué papel tuvo Ultra en la batalla del Atlántico?', 'Se obtuvo en Bletchley Park a partir del trabajo previo de los criptógrafos polacos y se combinó con escoltas, aviación de largo alcance y radar.', 3, true
+  from public.topics where slug = 'segunda-guerra'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Fue el nombre en clave del programa de construcción de escoltas', false, 0),
+  ('Fue la inteligencia obtenida al leer los cifrados alemanes, decisiva para desviar los convoyes', true, 1),
+  ('Fue el radar de superficie instalado en los submarinos alemanes', false, 2),
+  ('Fue el plan de bombardeo de las bases submarinas francesas', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: segunda-guerra-6
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué proporción de sus bajas mortales sufrió la Wehrmacht en el frente oriental?', 'Cualquier relato que sitúe el centro de gravedad de la guerra europea en Normandía falsea la escala del esfuerzo militar.', 3, true
+  from public.topics where slug = 'segunda-guerra'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Alrededor de una cuarta parte', false, 0),
+  ('Alrededor de la mitad', false, 1),
+  ('Alrededor del ochenta por ciento', true, 2),
+  ('Prácticamente ninguna hasta 1944', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: segunda-guerra-7
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué fue la operación Bagration de 1944?', 'Coincidió deliberadamente con Normandía y mostró la madurez del arte operativo soviético, con engaño estratégico y explotación en profundidad.', 3, true
+  from public.topics where slug = 'segunda-guerra'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('El desembarco aliado en el sur de Francia', false, 0),
+  ('La ofensiva soviética que destruyó el Grupo de Ejércitos Centro, un desastre alemán mayor que Stalingrado', true, 1),
+  ('El plan alemán de contraataque en las Ardenas', false, 2),
+  ('La campaña de bombardeo sobre las refinerías rumanas', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: segunda-guerra-8
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué sostiene el llamado mito de la Wehrmacht limpia y por qué se ha desmontado?', 'El mito lo crearon memorias de posguerra escritas por oficiales que buscaban exculparse. La investigación desde los años ochenta lo ha desarmado.', 3, true
+  from public.topics where slug = 'segunda-guerra'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que el ejército alemán no combatió en el este, lo que contradicen las bajas', false, 0),
+  ('Que el ejército regular actuó al margen de los crímenes de las SS, cuando participó en el hambre planificada, en el trato criminal a prisioneros y en represalias', true, 1),
+  ('Que la Wehrmacht se opuso a Hitler desde 1938', false, 2),
+  ('Que sus generales planificaron el atentado de julio de 1944', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: segunda-guerra-9
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué demostró Robert Paxton sobre el régimen de Vichy?', 'Trabajó con archivos alemanes en 1972 y su libro obligó a reescribir la memoria francesa de la guerra.', 3, true
+  from public.topics where slug = 'segunda-guerra'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que fue un escudo que protegió a Francia de una ocupación peor', false, 0),
+  ('Que tuvo iniciativa política propia y legisló contra los judíos antes de que se lo exigieran', true, 1),
+  ('Que careció de toda autoridad efectiva sobre el territorio', false, 2),
+  ('Que colaboró únicamente en materia económica', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: segunda-guerra-10
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué fueron los Einsatzgruppen?', 'Actuaron aldea por aldea entre 1941 y 1942 con apoyo de batallones de policía y auxiliares locales. Babi Yar es el caso más conocido.', 3, true
+  from public.topics where slug = 'segunda-guerra'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Las unidades de propaganda del ejército alemán', false, 0),
+  ('Unidades móviles de las SS y la policía que fusilaron a más de un millón y medio de personas en el este', true, 1),
+  ('Los batallones de trabajo forzoso de los campos de concentración', false, 2),
+  ('Las brigadas antipartisanas creadas en 1944', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: segunda-guerra-11
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué decidió realmente la conferencia de Wannsee de enero de 1942?', 'Los fusilamientos masivos en el este llevaban medio año ejecutándose. Wannsee es una reunión de coordinación burocrática, no de decisión.', 3, true
+  from public.topics where slug = 'segunda-guerra'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Ordenó por primera vez el exterminio de los judíos europeos', false, 0),
+  ('Coordinó administrativamente entre organismos un proceso de exterminio ya en marcha', true, 1),
+  ('Aprobó el traslado de los judíos alemanes a Madagascar', false, 2),
+  ('Estableció el sistema de guetos en Polonia', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: segunda-guerra-12
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Cuál es hoy la explicación mayoritaria sobre la decisión de exterminio?', 'Es la síntesis de Browning entre intencionalistas y funcionalistas, y la discusión se ha desplazado al papel de periferias y auxiliares locales.', 3, true
+  from public.topics where slug = 'segunda-guerra'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Un plan escrito y fechado en 1933', false, 0),
+  ('Decisiones tomadas entre el verano y el otoño de 1941, con impulso desde arriba y propuestas desde abajo', true, 1),
+  ('Una orden dictada por Himmler sin conocimiento de Hitler', false, 2),
+  ('Una improvisación posterior a la derrota de Stalingrado', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: segunda-guerra-13
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué concluyó Christopher Browning al estudiar el Batallón 101 de policía?', 'Goldhagen respondió atribuyéndolo a un antisemitismo eliminacionista específicamente alemán, tesis muy criticada por su selección de fuentes.', 3, true
+  from public.topics where slug = 'segunda-guerra'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Que sus miembros eran fanáticos seleccionados por su historial en el partido', false, 0),
+  ('Que hombres corrientes con posibilidad real de negarse se convirtieron en asesinos por presión de grupo, obediencia y deshumanización', true, 1),
+  ('Que la unidad se negó en bloque a participar en los fusilamientos', false, 2),
+  ('Que solo participaron auxiliares no alemanes', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: segunda-guerra-14
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué efecto militar tuvo la campaña de bombardeo estratégico sobre Alemania?', 'La producción siguió creciendo hasta 1944, pero la falta de combustible fue lo que finalmente paralizó a la Luftwaffe y a los blindados.', 3, true
+  from public.topics where slug = 'segunda-guerra'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Detuvo la producción bélica alemana ya en 1942', false, 0),
+  ('Desvió artillería, cazas e industria a la defensa del territorio y destruyó la producción de combustible sintético', true, 1),
+  ('No tuvo ningún efecto sobre el esfuerzo de guerra alemán', false, 2),
+  ('Provocó el hundimiento inmediato de la moral civil', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: segunda-guerra-15
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, 'Según Hasegawa, ¿qué pesó más en la decisión japonesa de rendirse?', 'La investigación reciente tiende a explicar la rendición por la combinación de las bombas y la entrada soviética en tres días.', 3, true
+  from public.topics where slug = 'segunda-guerra'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('El bombardeo incendiario de Tokio de marzo de 1945', false, 0),
+  ('La declaración de guerra soviética del 8 de agosto, que cerró la vía de una mediación negociada', true, 1),
+  ('El bloqueo submarino estadounidense', false, 2),
+  ('La pérdida de Okinawa', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: segunda-guerra-16
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué principio jurídico estableció el proceso de Núremberg?', 'De ahí derivan la Convención sobre el Genocidio de 1948 y el derecho penal internacional posterior.', 3, true
+  from public.topics where slug = 'segunda-guerra'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La responsabilidad colectiva del pueblo alemán', false, 0),
+  ('La responsabilidad penal individual por crímenes de guerra y contra la humanidad, sin que valga la obediencia debida', true, 1),
+  ('La prohibición del bombardeo de ciudades', false, 2),
+  ('La indemnización obligatoria a los Estados ocupados', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: segunda-guerra-17
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué fue la política de apaciguamiento?', 'Su momento culminante fue Múnich, en 1938, cuando Chamberlain y Daladier entregaron los Sudetes a Hitler. Terminó cuando Alemania ocupó el resto de Checoslovaquia en marzo de 1939.', 3, true
+  from public.topics where slug = 'segunda-guerra'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('La alianza militar de Francia y la URSS contra Alemania en 1935', false, 0),
+  ('La estrategia británica y francesa de ceder ante las exigencias de Hitler para evitar otra guerra', true, 1),
+  ('El desarme voluntario de Alemania tras Versalles', false, 2),
+  ('La neutralidad de Estados Unidos en la guerra de España', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: segunda-guerra-18
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Por qué fue decisivo el pacto germano-soviético de agosto de 1939?', 'Firmado por Ribbentrop y Mólotov el 23 de agosto, precedió en nueve días a la invasión de Polonia. El 17 de septiembre el Ejército Rojo ocupó la parte oriental del país.', 3, true
+  from public.topics where slug = 'segunda-guerra'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Porque Stalin prometió enviar tropas contra Francia', false, 0),
+  ('Porque obligó a Italia a entrar en la guerra', false, 1),
+  ('Porque, al neutralizar a la URSS y repartirse Polonia en secreto, Hitler ya no temía una guerra en dos frentes', true, 2),
+  ('Porque puso fin a la guerra civil española', false, 3)
+) as opcion(label, is_correct, position);
+
+-- Pregunta: segunda-guerra-19
+with nueva as (
+  insert into public.questions (topic_id, prompt, explanation, difficulty, published)
+  select id, '¿Qué papel tuvo la crisis de 1929 en el camino hacia la guerra?', 'Con seis millones de parados en 1932, el partido nazi pasó del 2,6 % de los votos en 1928 al 37 % en julio de 1932. Hitler fue nombrado canciller en enero de 1933.', 3, true
+  from public.topics where slug = 'segunda-guerra'
+  returning id
+)
+insert into public.question_options (question_id, label, is_correct, position)
+select nueva.id, opcion.label, opcion.is_correct, opcion.position from nueva, (values
+  ('Ninguno: Alemania salió de la crisis antes que nadie', false, 0),
+  ('Hundió la economía alemana, disparó el paro y dio a los nazis los votos que los llevaron al poder', true, 1),
+  ('Obligó a Gran Bretaña a rearmarse de inmediato', false, 2),
+  ('Provocó la caída de Mussolini', false, 3)
 ) as opcion(label, is_correct, position);
 
 commit;

@@ -414,13 +414,13 @@
     "alt": "Fotografía nocturna del edificio del Reichstag con la cúpula ardiendo y humo saliendo del tejado",
     "caption": "El incendio del Reichstag, 27 de febrero de 1933. Al día siguiente se suspendieron los derechos fundamentales por decreto, y ya no se restablecieron." },
 
-  { "slug": "segunda-guerra", "file": "RIAN archive 2383 The ruins of Stalingrad.jpg", "name": "stalingrado", "role": "figura", "section": 2,
+  { "slug": "segunda-guerra", "file": "RIAN archive 2383 The ruins of Stalingrad.jpg", "name": "stalingrado", "role": "figura", "section": 3,
     "alt": "Fotografía de una ciudad arrasada: fachadas vacías, escombros en las calles y ni un edificio intacto",
     "caption": "Stalingrado tras la batalla, 1943. El frente oriental concentró la mayor parte de las bajas militares alemanas de toda la guerra." },
-  { "slug": "segunda-guerra", "file": "Selection on the ramp at Auschwitz-Birkenau, 1944 (Auschwitz Album) 1b.jpg", "name": "auschwitz", "role": "figura", "section": 4,
+  { "slug": "segunda-guerra", "file": "Selection on the ramp at Auschwitz-Birkenau, 1944 (Auschwitz Album) 1b.jpg", "name": "auschwitz", "role": "figura", "section": 5,
     "alt": "Fotografía de un andén con centenares de personas recién bajadas de un tren siendo separadas en dos filas por guardias",
     "caption": "Selección en la rampa de Auschwitz-Birkenau, 1944, del llamado Álbum de Auschwitz. Son fotografías tomadas por las SS: casi todo el registro visual del exterminio procede de sus autores." },
-  { "slug": "segunda-guerra", "file": "Atomic cloud over Hiroshima.jpg", "name": "hiroshima", "role": "figura", "section": 5,
+  { "slug": "segunda-guerra", "file": "Atomic cloud over Hiroshima.jpg", "name": "hiroshima", "role": "figura", "section": 6,
     "alt": "Fotografía aérea de una columna de humo en forma de hongo elevándose muy por encima de la capa de nubes",
     "caption": "La nube sobre Hiroshima, 6 de agosto de 1945. Si las bombas eran necesarias para acabar la guerra sigue siendo objeto de discusión historiográfica." },
 
