@@ -217,7 +217,7 @@ select 'estados-unidos',
   (select id from public.eras where slug = 'edad-contemporanea'),
   (select id from public.countries where slug = 'estados-unidos'),
   'Historia de Estados Unidos', 'De trece colonias británicas a primera potencia mundial: la independencia, la expansión hacia el oeste, la esclavitud y la guerra civil, y el siglo en que Estados Unidos se convirtió en superpotencia.', 'universidad',
-  65, '1607–hoy', '★', 'blue', null, true
+  65, '1607–hoy', '★', 'blue', '{"src":"/img/estados-unidos/portada.jpg","alt":"Pintura de una sala con decenas de hombres de levita; cinco de ellos entregan un documento a un hombre sentado","width":1200,"height":788,"role":"portada","caption":"La Declaración de Independencia, de John Trumbull (1819): el comité de redacción presenta el texto al Congreso Continental.","author":"John Trumbull","title":"Declaration of Independence","year":"1819","source":"Wikimedia Commons","license":"Public domain","url":"https://commons.wikimedia.org/wiki/File:Declaration_of_Independence_(1819)%2C_by_John_Trumbull.jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
   summary = excluded.summary, education_level = excluded.education_level,
@@ -553,7 +553,7 @@ select 'rumania',
   (select id from public.eras where slug = 'edad-contemporanea'),
   (select id from public.countries where slug = 'rumania'),
   'Historia de Rumanía', 'De la Dacia de Decébalo a la Unión Europea: una lengua latina en el este de Europa, tres principados que tardaron siglos en unirse y un siglo XX de guerras, dictaduras y revolución.', 'universidad',
-  65, 'c. 80 a. C.–hoy', 'Ω', 'gold', null, true
+  65, 'c. 80 a. C.–hoy', 'Ω', 'gold', '{"src":"/img/rumania/portada.jpg","alt":"Relieve de piedra con soldados romanos y guerreros dacios en escenas superpuestas","width":1200,"height":800,"role":"portada","caption":"Escena de las guerras dacias de la Columna Trajana (113), en el vaciado del Museo Nacional de Historia de Rumanía, en Bucarest.","author":"Joe Mabel","title":"Trajan''s Column - NMR - panel 022 A","year":"2024","source":"Wikimedia Commons","license":"Public domain","url":"https://commons.wikimedia.org/wiki/File:Trajan''s_Column_-_NMR_-_panel_022_A.jpg"}'::jsonb, true
 on conflict (slug) do update set
   era_id = excluded.era_id, country_id = excluded.country_id, title = excluded.title,
   summary = excluded.summary, education_level = excluded.education_level,

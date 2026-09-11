@@ -539,4 +539,4 @@ Los 142 países del globo tienen una historia breve propia —tres párrafos y d
 - **Dónde se ve:** la ficha de país (`/pais/:nombre`) la muestra entera para todos los países; el panel del globo, el primer párrafo con el botón «Leer su historia». Siempre con interpolación `{{ }}`, nunca `v-html`.
 - **Texto propio**, no copiado de Wikipedia (CC BY-SA, §13). Viaja en el paquete: la PWA funciona sin red y no toca la base de datos.
 - **Test:** `npm test` comprueba que todo país del atlas tiene historia con texto y fechas, y que no hay historias de países que el atlas no conoce.
-- **Lecciones completas de país:** `rumania` y `estados-unidos` son temas de biblioteca completos (7 apartados, debates, bibliografía y 16 preguntas cada uno). Todavía no tienen imágenes.
+- **Lecciones completas de país:** `rumania` y `estados-unidos` son temas de biblioteca completos (7 apartados, debates, bibliografía y 16 preguntas cada uno). Llevan portada y figuras con licencia comprobada (156 imágenes en total).
