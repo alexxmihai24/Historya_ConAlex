@@ -543,6 +543,6 @@ Los 142 países del globo tienen una historia breve propia —tres párrafos y d
 
 ## 19. Portada de cada país (11/09/2026)
 
-La ficha de país muestra una imagen histórica o monumental representativa de cada uno de los 142 países del atlas, con pie y atribución completa. Mismas reglas que las imágenes de los temas (§14.2 y §14.3): solo dominio público o licencia libre comprobada por la API de Commons, archivos locales bajo `/img/paises/`, validación con `safeImage` antes de pintarse. Manifiesto `scripts/country-images.json`, descarga con `npm run images:paises` y salida `src/data/country-images.ts`. `npm test` exige portada válida para todos los países del atlas.
+La ficha de país usa como fondo de su cabecera una imagen histórica o monumental representativa de cada uno de los 142 países del atlas, con una sombra para que el texto se lea y el pie y la atribución completa al final de la cabecera. Mismas reglas que las imágenes de los temas (§14.2 y §14.3): solo dominio público o licencia libre comprobada por la API de Commons, archivos locales bajo `/img/paises/`, validación con `safeImage` antes de pintarse. Manifiesto `scripts/country-images.json`, descarga con `npm run images:paises` y salida `src/data/country-images.ts`. `npm test` exige portada válida para todos los países del atlas.
 
 Arreglo de maquetación asociado: `globe.js` fijaba estilos en línea (`position`, `width`, `height`) que anulaban `.globe-canvas`; ahora solo lo hace si el elemento no tiene clase, y el globo se muestra entero y centrado.

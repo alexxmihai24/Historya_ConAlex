@@ -82,7 +82,11 @@ const otherCountries = computed(() =>
 
 <template>
   <section v-if="countryTopics.length || isAtlasCountry" class="country-page shell">
-    <header class="country-hero">
+    <header class="country-hero" :class="{ 'has-cover': cover }">
+      <template v-if="cover">
+        <img class="country-hero-bg" :src="cover.src" alt="" :width="cover.width" :height="cover.height" decoding="async" />
+        <div class="country-hero-shade" aria-hidden="true"></div>
+      </template>
       <div class="country-hero-top">
         <RouterLink class="country-back" to="/">← Globo</RouterLink>
         <span class="country-tag">{{ countryTopics.length ? `${countryTopics.length} lecciones` : 'Historia breve' }}</span>
@@ -114,15 +118,11 @@ const otherCountries = computed(() =>
           <span class="stat-key">{{ stat.k }}</span>
         </div>
       </div>
-    </header>
-
-    <figure v-if="cover" class="country-cover">
-      <img :src="cover.src" :alt="cover.alt" :width="cover.width" :height="cover.height" decoding="async" />
-      <figcaption>
+      <p v-if="cover" class="country-hero-credit">
         <span v-if="cover.caption">{{ cover.caption }}</span>
         <small>{{ imageCredit(cover) }}</small>
-      </figcaption>
-    </figure>
+      </p>
+    </header>
 
     <section v-if="history" class="country-history">
       <div>

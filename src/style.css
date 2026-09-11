@@ -900,15 +900,26 @@ h1, h2, h3, h4 { margin: 0; font-family: var(--serif); font-weight: 400; letter-
 .country-stats .stat-key { color: rgb(255 255 255 / 80%); letter-spacing: 0.18em; }
 
 .country-body { display: grid; gap: 30px; grid-template-columns: minmax(0, 1fr) 400px; align-items: start; margin-top: 30px; }
-/* Portada de la ficha de país: una imagen histórica por país, con su crédito. */
-.country-cover { margin: 30px 0 0; }
-.country-cover img {
-  display: block; width: 100%; height: auto; max-height: 460px; object-fit: cover;
-  border-radius: var(--r-lg); border: 1px solid var(--line);
+/* Ficha de país con foto: la imagen histórica ocupa el fondo de la cabecera en
+   lugar del degradado naranja, con una sombra para que el texto blanco se lea.
+   El crédito va al pie de la cabecera porque varias licencias lo exigen. */
+.country-hero.has-cover { background: #120d0a; }
+.country-hero.has-cover::after { opacity: 0.25; }
+.country-hero > .country-hero-bg {
+  position: absolute; inset: 0; z-index: 0;
+  width: 100%; height: 100%; object-fit: cover; max-width: none;
 }
-.country-cover figcaption { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; max-width: 80ch; }
-.country-cover figcaption span { font-size: 13.5px; line-height: 1.5; color: var(--text-70); }
-.country-cover figcaption small { font-family: var(--mono); font-size: 10.5px; line-height: 1.5; color: var(--text-45); overflow-wrap: anywhere; }
+.country-hero > .country-hero-shade {
+  position: absolute; inset: 0; z-index: 0;
+  background:
+    linear-gradient(90deg, rgb(10 8 6 / 72%) 0%, rgb(10 8 6 / 35%) 55%, rgb(10 8 6 / 12%) 100%),
+    linear-gradient(0deg, rgb(10 8 6 / 80%) 0%, transparent 45%);
+}
+.country-hero.has-cover .country-facts,
+.country-hero.has-cover .country-stats > div { background: rgb(10 8 6 / 45%); backdrop-filter: blur(6px); }
+.country-hero-credit { margin-top: 18px; display: flex; flex-direction: column; gap: 3px; max-width: 90ch; }
+.country-hero-credit span { font-size: 12.5px; line-height: 1.5; color: rgb(255 255 255 / 85%); }
+.country-hero-credit small { font-family: var(--mono); font-size: 10px; line-height: 1.5; color: rgb(255 255 255 / 60%); overflow-wrap: anywhere; }
 
 /* Historia breve del país: texto propio para los 142 del atlas. */
 .country-history { display: grid; gap: 30px; grid-template-columns: minmax(0, 1fr) 400px; align-items: start; margin-top: 30px; }
