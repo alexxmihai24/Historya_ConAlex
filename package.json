@@ -11,6 +11,7 @@
     "seed": "node --experimental-strip-types scripts/generate-seed.mjs",
     "flags": "node --experimental-strip-types scripts/copy-flags.mjs",
     "images": "node --experimental-strip-types scripts/fetch-images.mjs",
+    "images:paises": "node --experimental-strip-types scripts/fetch-images.mjs --paises",
     "check:backend": "node scripts/check-backend.mjs",
     "countries": "node --experimental-strip-types scripts/fetch-countries.mjs",
     "check:security": "node --experimental-strip-types scripts/check-security.mjs",

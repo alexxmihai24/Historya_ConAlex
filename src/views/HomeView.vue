@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { eraColor, eras, findTopic } from '../data/history.ts'
+import { eraColor, eras, findTopic, quizQuestions } from '../data/history.ts'
 import { useTopics } from '../composables/useTopics.ts'
 import { atlasCountries, coveredCountries } from '../lib/regions.ts'
 import CountryFlag from '../components/CountryFlag.vue'
@@ -44,7 +44,7 @@ const selectedStats = computed(() => {
   const years = list.map((topic) => topic.years).filter(Boolean)
   return [
     { k: 'Lecciones', v: String(list.length) },
-    { k: 'Época', v: list[0].era },
+    { k: 'Preguntas', v: String(quizQuestions.filter((q) => list.some((t) => t.id === q.topicId)).length) },
     { k: 'Periodo', v: years.length === 1 ? years[0] : `${years.length} tramos` },
   ]
 })

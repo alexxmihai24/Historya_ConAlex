@@ -21,7 +21,14 @@ import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
-const manifestPath = join(root, 'scripts', 'images.json')
+
+/* `--paises` usa el mismo proceso para las portadas de las fichas de país: otro
+   manifiesto, otro archivo de salida y las imágenes agrupadas por `country` en
+   vez de por tema. Sin la opción, el comportamiento es el de siempre. */
+const PAISES = process.argv.includes('--paises')
+const manifestPath = join(root, 'scripts', PAISES ? 'country-images.json' : 'images.json')
+const salidaPath = join(root, 'src', 'data', PAISES ? 'country-images.ts' : 'topic-images.ts')
+const exportName = PAISES ? 'COUNTRY_IMAGES' : 'TOPIC_IMAGES'
 const API = 'https://commons.wikimedia.org/w/api.php'
 const UA = 'HistoryaConAlex/1.0 (proyecto educativo; contacto vía repositorio)'
 
@@ -234,25 +241,28 @@ for (const entrada of manifiesto) {
     license: licencia,
     url: `https://commons.wikimedia.org/wiki/File:${encodeURIComponent(entrada.file.replaceAll(' ', '_'))}`,
   }
-  if (!porTema.has(entrada.slug)) porTema.set(entrada.slug, [])
-  porTema.get(entrada.slug).push(imagen)
+  const clave = PAISES ? entrada.country : entrada.slug
+  if (!porTema.has(clave)) porTema.set(clave, [])
+  porTema.get(clave).push(imagen)
 }
 
 const salida = [
   '// ARCHIVO GENERADO. No editar a mano: los cambios se pierden.',
-  '// Fuente: scripts/images.json. Regenerar con `npm run images`.',
+  PAISES
+    ? '// Fuente: scripts/country-images.json. Regenerar con `npm run images:paises`.'
+    : '// Fuente: scripts/images.json. Regenerar con `npm run images`.',
   '//',
   '// Las imágenes viven aparte de los archivos de tema a propósito: su',
   '// procedencia y su licencia se revisan por su cuenta, y así una imagen se',
   '// puede sustituir sin tocar el texto de la lección.',
   "import type { TopicImage } from './types'",
   '',
-  'export const TOPIC_IMAGES: Record<string, TopicImage[]> = ',
+  `export const ${exportName}: Record<string, TopicImage[]> = `,
   JSON.stringify(Object.fromEntries([...porTema].sort()), null, 2),
   '',
 ].join('\n')
 
-await writeFile(join(root, 'src', 'data', 'topic-images.ts'), salida, 'utf8')
+await writeFile(salidaPath, salida, 'utf8')
 
 const total = [...porTema.values()].reduce((n, lista) => n + lista.length, 0)
 console.log(`imágenes: ${total} descargadas en ${porTema.size} temas.`)

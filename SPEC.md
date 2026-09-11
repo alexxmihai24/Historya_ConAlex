@@ -540,3 +540,9 @@ Los 142 países del globo tienen una historia breve propia —tres párrafos y d
 - **Texto propio**, no copiado de Wikipedia (CC BY-SA, §13). Viaja en el paquete: la PWA funciona sin red y no toca la base de datos.
 - **Test:** `npm test` comprueba que todo país del atlas tiene historia con texto y fechas, y que no hay historias de países que el atlas no conoce.
 - **Lecciones completas de país:** `rumania` y `estados-unidos` son temas de biblioteca completos (7 apartados, debates, bibliografía y 16 preguntas cada uno). Llevan portada y figuras con licencia comprobada (156 imágenes en total).
+
+## 19. Portada de cada país (11/09/2026)
+
+La ficha de país muestra una imagen histórica o monumental representativa de cada uno de los 142 países del atlas, con pie y atribución completa. Mismas reglas que las imágenes de los temas (§14.2 y §14.3): solo dominio público o licencia libre comprobada por la API de Commons, archivos locales bajo `/img/paises/`, validación con `safeImage` antes de pintarse. Manifiesto `scripts/country-images.json`, descarga con `npm run images:paises` y salida `src/data/country-images.ts`. `npm test` exige portada válida para todos los países del atlas.
+
+Arreglo de maquetación asociado: `globe.js` fijaba estilos en línea (`position`, `width`, `height`) que anulaban `.globe-canvas`; ahora solo lo hace si el elemento no tiene clase, y el globo se muestra entero y centrado.

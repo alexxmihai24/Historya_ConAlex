@@ -31,6 +31,7 @@ import { atlasCountries } from '../src/lib/regions.ts'
 import { countryFacts, factRows, formatPopulation, formatArea } from '../src/lib/countries.ts'
 import { ES_NAMES } from '../src/lib/country-names.ts'
 import { COUNTRY_HISTORIES, countryHistory } from '../src/data/country-histories/index.ts'
+import { COUNTRY_IMAGES } from '../src/data/country-images.ts'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const fallos = []
@@ -178,6 +179,18 @@ for (const nombre of atlasEs) {
 for (const nombre of Object.keys(COUNTRY_HISTORIES)) {
   ok(atlasEs.has(nombre), `hay historia de «${nombre}», que no es un país del atlas`)
 }
+// Portadas de país: misma validación que las de los temas, archivo en disco y
+// clave que exista en el atlas.
+for (const [nombre, lista] of Object.entries(COUNTRY_IMAGES)) {
+  ok(atlasEs.has(nombre), `hay portada de «${nombre}», que no es un país del atlas`)
+  for (const imagen of lista) {
+    const problema = imageProblem(imagen)
+    ok(problema === null, `portada de ${nombre}: ${problema}`)
+    ok(await existe(join(root, 'public', imagen.src)), `portada de ${nombre}: falta ${imagen.src}`)
+  }
+}
+for (const nombre of atlasEs) ok(COUNTRY_IMAGES[nombre]?.length > 0, `${nombre} no tiene foto de portada`)
+
 ok(countryHistory('constructor') === null, 'countryHistory no debe devolver propiedades heredadas')
 
 ok(countryFacts('Europa') === null, '«Europa» no es un país del atlas y no debe tener ficha')

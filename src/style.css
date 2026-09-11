@@ -285,9 +285,11 @@ h1, h2, h3, h4 { margin: 0; font-family: var(--serif); font-weight: 400; letter-
     linear-gradient(158deg, #0a1420 0%, #070a12 62%, #0c0810 100%);
   box-shadow: var(--shadow-screen);
 }
+/* El globo ocupa el hueco libre a la izquierda del panel, entero y centrado:
+   antes sobresalía un 11 % por arriba y se veía cortado. */
 .globe-canvas {
-  position: absolute; left: -14%; top: -11%;
-  width: 78%; height: 122%; min-width: 460px;
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: calc(100% - min(472px, 42%) - 26px); min-width: 360px;
 }
 
 .globe-readout { position: absolute; left: 44px; bottom: 38px; z-index: 3; pointer-events: none; max-width: 44%; }
@@ -379,9 +381,12 @@ h1, h2, h3, h4 { margin: 0; font-family: var(--serif); font-weight: 400; letter-
 .panel-outline { display: block; width: 84px; height: 84px; flex: none; filter: drop-shadow(0 0 16px rgb(255 74 28 / 55%)); }
 .panel-outline.faded { opacity: 0.28; filter: none; }
 
-.panel-stats { display: flex; gap: 8px; margin-top: 20px; }
+.panel-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-top: 20px; }
+/* Valores de texto como «c. 80 a. C.–hoy»: parten por los espacios en vez de
+   salirse de la tarjeta. */
+.panel-stats .stat-value { font-size: 18px; line-height: 1.15; overflow-wrap: break-word; }
 .panel-stats > div {
-  flex: 1; min-width: 0; padding: 13px 14px; border-radius: 16px;
+  min-width: 0; padding: 13px 14px; border-radius: 16px;
   border: 1px solid var(--line-soft); background: var(--fill);
 }
 .stat-value { display: block; font-family: var(--mono); font-weight: 500; font-size: 20px; line-height: 1; }
@@ -895,6 +900,16 @@ h1, h2, h3, h4 { margin: 0; font-family: var(--serif); font-weight: 400; letter-
 .country-stats .stat-key { color: rgb(255 255 255 / 80%); letter-spacing: 0.18em; }
 
 .country-body { display: grid; gap: 30px; grid-template-columns: minmax(0, 1fr) 400px; align-items: start; margin-top: 30px; }
+/* Portada de la ficha de país: una imagen histórica por país, con su crédito. */
+.country-cover { margin: 30px 0 0; }
+.country-cover img {
+  display: block; width: 100%; height: auto; max-height: 460px; object-fit: cover;
+  border-radius: var(--r-lg); border: 1px solid var(--line);
+}
+.country-cover figcaption { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; max-width: 80ch; }
+.country-cover figcaption span { font-size: 13.5px; line-height: 1.5; color: var(--text-70); }
+.country-cover figcaption small { font-family: var(--mono); font-size: 10.5px; line-height: 1.5; color: var(--text-45); overflow-wrap: anywhere; }
+
 /* Historia breve del país: texto propio para los 142 del atlas. */
 .country-history { display: grid; gap: 30px; grid-template-columns: minmax(0, 1fr) 400px; align-items: start; margin-top: 30px; }
 .country-history .panel-label { margin-top: 0; }

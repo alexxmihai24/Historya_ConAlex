@@ -7,6 +7,8 @@ import { atlasCountries, coveredCountries } from '../lib/regions.ts'
 import CountryFlag from '../components/CountryFlag.vue'
 import { countryFacts, factRows } from '../lib/countries.ts'
 import { countryHistory } from '../data/country-histories/index.ts'
+import { COUNTRY_IMAGES } from '../data/country-images.ts'
+import { imageCredit, safeImage } from '../lib/images.ts'
 import '../lib/globe.js'
 
 const route = useRoute()
@@ -66,6 +68,10 @@ const facts = computed(() => countryFacts(country.value))
 const factList = computed(() => factRows(facts.value))
 const isAtlasCountry = computed(() => facts.value !== null)
 const history = computed(() => countryHistory(country.value))
+/** Portada del país. Validada como cualquier imagen antes de pintarse (SPEC §10.10). */
+const cover = computed(() =>
+  Object.hasOwn(COUNTRY_IMAGES, country.value) ? safeImage(COUNTRY_IMAGES[country.value][0]) : null,
+)
 
 const otherCountries = computed(() =>
   coveredCountries(topics.value.map((topic) => topic.country))
@@ -109,6 +115,14 @@ const otherCountries = computed(() =>
         </div>
       </div>
     </header>
+
+    <figure v-if="cover" class="country-cover">
+      <img :src="cover.src" :alt="cover.alt" :width="cover.width" :height="cover.height" decoding="async" />
+      <figcaption>
+        <span v-if="cover.caption">{{ cover.caption }}</span>
+        <small>{{ imageCredit(cover) }}</small>
+      </figcaption>
+    </figure>
 
     <section v-if="history" class="country-history">
       <div>

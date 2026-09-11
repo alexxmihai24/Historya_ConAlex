@@ -88,9 +88,13 @@ function emit(el, type, detail) {
       if (this.__up) return;
       this.__up = true;
       this.style.display = 'block';
-      if (!this.style.position) this.style.position = 'relative';
-      if (!this.style.height) this.style.height = '100%';
-      if (!this.style.width) this.style.width = '100%';
+      // Tamaño por defecto solo si nadie lo da por CSS: con una clase, el estilo
+      // en línea pisaba la hoja de estilos y el globo ignoraba .globe-canvas.
+      if (!this.className) {
+        if (!this.style.position) this.style.position = 'relative';
+        if (!this.style.height) this.style.height = '100%';
+        if (!this.style.width) this.style.width = '100%';
+      }
       this.canvas = document.createElement('canvas');
       this.canvas.style.cssText = 'display:block;width:100%;height:100%;touch-action:none;cursor:grab';
       this.appendChild(this.canvas);
@@ -393,7 +397,8 @@ function emit(el, type, detail) {
     flyTo(f, silent) {
       var self = this;
       var target = [shortLon(this.rot[0], -f.__c[0]), -f.__c[1]];
-      var z = Math.max(1.35, Math.min(2.4, 0.36 / Math.sqrt(f.__area + 0.004)));
+      // Zoom moderado: por encima de ~2 el globo desborda la caja y se ve cortado.
+      var z = Math.max(1.15, Math.min(2, 0.3 / Math.sqrt(f.__area + 0.004)));
       this.flying = {
         a: this.rot.slice(), b: target, z0: this.zoom, z1: z,
         t0: performance.now(), dur: silent ? 480 : 760,
