@@ -4,6 +4,7 @@ import { RouterLink, useRoute } from 'vue-router'
 import { useLesson } from '../composables/useLesson.ts'
 import { useProgress } from '../composables/useProgress.ts'
 import { imageCredit } from '../lib/images.ts'
+import { countryLabel, eraLabel, t } from '../lib/i18n.ts'
 import type { Concept, TopicImage } from '../data/types.ts'
 
 const route = useRoute()
@@ -104,31 +105,31 @@ function scrollToSection(index: number) {
 <template>
   <section v-if="topic" class="study-page">
     <div class="shell study-crumbs">
-      <RouterLink to="/biblioteca">Biblioteca</RouterLink><span>→</span><span>{{ topic.era }}</span><span>→</span><strong>{{ topic.title }}</strong>
+      <RouterLink to="/biblioteca">{{ t('study.library') }}</RouterLink><span>→</span><span>{{ eraLabel(topic.era) }}</span><span>→</span><strong>{{ topic.title }}</strong>
     </div>
 
     <header class="shell study-hero">
       <div class="study-hero-copy">
-        <p class="eyebrow"><span class="eyebrow-dot"></span> {{ topic.era }} · {{ topic.country }}</p>
+        <p class="eyebrow"><span class="eyebrow-dot"></span> {{ eraLabel(topic.era) }} · {{ countryLabel(topic.country) }}</p>
         <h1>{{ topic.title }}</h1>
         <p>{{ topic.summary }}</p>
-        <div class="study-meta"><span>{{ topic.years }}</span><span>{{ topic.duration }} de lectura</span><span>{{ visibleSections.length }} apartados</span></div>
+        <div class="study-meta"><span>{{ topic.years }}</span><span>{{ t('study.readingTime', { duration: topic.duration }) }}</span><span>{{ t('study.sections', { n: visibleSections.length }) }}</span></div>
       </div>
       <figure v-if="cover" class="study-cover">
         <img :src="cover.src" :alt="cover.alt" :width="cover.width" :height="cover.height" decoding="async" />
         <figcaption>
           <span v-if="cover.caption">{{ cover.caption }}</span>
-          <small>{{ imageCredit(cover) }}<template v-if="cover.generated"> · Ilustración generada, no es un documento histórico</template></small>
+          <small>{{ imageCredit(cover) }}<template v-if="cover.generated"> · {{ t('common.generated') }}</template></small>
         </figcaption>
       </figure>
-      <div v-else class="study-visual topic-visual" :class="`visual-${topic.color}`" role="img" :aria-label="`Ilustración editorial de ${topic.title}`"><span>{{ topic.visual }}</span><small>{{ topic.country.toUpperCase() }}</small></div>
+      <div v-else class="study-visual topic-visual" :class="`visual-${topic.color}`" role="img" :aria-label="t('study.illustration', { title: topic.title })"><span>{{ topic.visual }}</span><small>{{ countryLabel(topic.country).toUpperCase() }}</small></div>
     </header>
 
     <div class="shell study-layout">
       <aside class="study-aside">
-        <strong>En esta lección</strong>
+        <strong>{{ t('study.inLesson') }}</strong>
         <ol><li v-for="(entry, position) in visibleSections" :key="entry.section.title" :class="{ done: completedSections.includes(entry.index) }"><button type="button" @click="scrollToSection(entry.index)">{{ String(position + 1).padStart(2, '0') }} · {{ entry.section.title }}</button></li></ol>
-        <button class="bookmark-button" :class="{ saved: isBookmarked }" type="button" @click="isBookmarked = !isBookmarked">{{ isBookmarked ? '★ Guardado' : '☆ Guardar tema' }}</button>
+        <button class="bookmark-button" :class="{ saved: isBookmarked }" type="button" @click="isBookmarked = !isBookmarked">{{ isBookmarked ? t('study.saved') : t('study.save') }}</button>
       </aside>
 
       <article class="lesson-article">
@@ -142,7 +143,7 @@ function scrollToSection(index: number) {
                 <img :src="block.image.src" :alt="block.image.alt" :width="block.image.width" :height="block.image.height" loading="lazy" decoding="async" />
                 <figcaption>
                   <span v-if="block.image.caption">{{ block.image.caption }}</span>
-                  <small>{{ imageCredit(block.image) }}<template v-if="block.image.generated"> · Ilustración generada, no es un documento histórico</template></small>
+                  <small>{{ imageCredit(block.image) }}<template v-if="block.image.generated"> · {{ t('common.generated') }}</template></small>
                 </figcaption>
               </figure>
               <aside v-else class="margin-note" :class="`float-${block.side}`">
@@ -153,7 +154,7 @@ function scrollToSection(index: number) {
           </div>
           <figure v-if="documentOf(entry.index)" class="lesson-document">
             <figcaption class="lesson-document-head">
-              <span class="lesson-document-tag">Documento</span>
+              <span class="lesson-document-tag">{{ t('study.document') }}</span>
               <strong>{{ documentOf(entry.index)!.title }}</strong>
             </figcaption>
             <blockquote>
@@ -166,34 +167,34 @@ function scrollToSection(index: number) {
             <p class="lesson-document-question"><span>?</span>{{ documentOf(entry.index)!.question }}</p>
           </figure>
           <aside v-if="entry.section.callout" class="history-callout"><span>✦</span><p>{{ entry.section.callout }}</p></aside>
-          <button class="section-complete" type="button" :class="{ complete: completedSections.includes(entry.index) }" @click="toggleSection(entry.index)">{{ completedSections.includes(entry.index) ? '✓ Apartado completado' : 'Marcar como leído' }}</button>
+          <button class="section-complete" type="button" :class="{ complete: completedSections.includes(entry.index) }" @click="toggleSection(entry.index)">{{ completedSections.includes(entry.index) ? t('study.sectionDone') : t('study.markRead') }}</button>
         </section>
 
         <section v-if="topic.concepts.length" class="concepts-card">
-          <p class="eyebrow">CONCEPTOS CLAVE</p><h2>Vocabulario del tema</h2>
+          <p class="eyebrow">{{ t('study.concepts') }}</p><h2>{{ t('study.vocabulary') }}</h2>
           <dl><template v-for="concept in topic.concepts" :key="concept.term"><dt>{{ concept.term }}</dt><dd>{{ concept.definition }}</dd></template></dl>
         </section>
 
         <section v-if="topic.debates.length" class="debate-card">
-          <p class="eyebrow">DEBATE HISTORIOGRÁFICO</p><h2>Lo que los historiadores discuten</h2>
+          <p class="eyebrow">{{ t('study.debate') }}</p><h2>{{ t('study.debateTitle') }}</h2>
           <article v-for="debate in topic.debates" :key="debate.question" class="debate-item">
             <h3>{{ debate.question }}</h3>
             <div v-for="position in debate.positions" :key="position.school" class="debate-position"><strong>{{ position.school }}</strong><p>{{ position.argument }}</p></div>
-            <p class="debate-state"><span>Estado de la cuestión ·</span> {{ debate.state }}</p>
+            <p class="debate-state"><span>{{ t('study.debateState') }}</span> {{ debate.state }}</p>
           </article>
         </section>
 
-        <section class="timeline-card"><p class="eyebrow">LÍNEA TEMPORAL</p><h2>Fechas para orientarte</h2><ol><li v-for="item in topic.keyDates" :key="item.date"><strong>{{ item.date }}</strong><span>{{ item.event }}</span></li></ol></section>
+        <section class="timeline-card"><p class="eyebrow">{{ t('study.timeline') }}</p><h2>{{ t('study.timelineTitle') }}</h2><ol><li v-for="item in topic.keyDates" :key="item.date"><strong>{{ item.date }}</strong><span>{{ item.event }}</span></li></ol></section>
         <section v-if="topic.sources.length" class="sources-card">
-          <p class="eyebrow">FUENTES Y BIBLIOGRAFÍA</p><h2>Para seguir leyendo</h2>
-          <ul><li v-for="source in topic.sources" :key="source.title"><span class="source-kind" :class="`kind-${source.kind}`">{{ source.kind === 'primaria' ? 'Fuente primaria' : 'Estudio' }}</span><p><strong>{{ source.author }}</strong>, <em>{{ source.title }}</em> ({{ source.year }}).<template v-if="source.note"> {{ source.note }}</template></p></li></ul>
+          <p class="eyebrow">{{ t('study.sources') }}</p><h2>{{ t('study.sourcesTitle') }}</h2>
+          <ul><li v-for="source in topic.sources" :key="source.title"><span class="source-kind" :class="`kind-${source.kind}`">{{ source.kind === 'primaria' ? t('study.primary') : t('study.secondary') }}</span><p><strong>{{ source.author }}</strong>, <em>{{ source.title }}</em> ({{ source.year }}).<template v-if="source.note"> {{ source.note }}</template></p></li></ul>
         </section>
 
-        <section class="study-finish"><p class="eyebrow"><span class="eyebrow-dot"></span> Lectura terminada</p><h2>¿Quieres ponerlo a prueba?</h2><p>Repasa este tema con preguntas y explicaciones que conectan cada respuesta con la lección.</p><RouterLink class="button button-primary" :to="{ name: 'quiz', query: { topic: topic.id } }">Quiz de este tema <span>→</span></RouterLink></section>
+        <section class="study-finish"><p class="eyebrow"><span class="eyebrow-dot"></span> {{ t('study.finished') }}</p><h2>{{ t('study.testTitle') }}</h2><p>{{ t('study.testLead') }}</p><RouterLink class="button button-primary" :to="{ name: 'quiz', query: { topic: topic.id } }">{{ t('study.topicQuiz') }} <span>→</span></RouterLink></section>
       </article>
     </div>
   </section>
 
-  <section v-else-if="isLoading" class="not-found shell"><p class="eyebrow"><span class="eyebrow-dot"></span> Cargando</p><h1>Preparando esta lección…</h1></section>
-  <section v-else class="not-found shell"><p class="eyebrow"><span class="eyebrow-dot"></span> Tema no encontrado</p><h1>Este capítulo todavía no existe.</h1><RouterLink class="button button-primary" to="/biblioteca">Volver a la biblioteca <span>→</span></RouterLink></section>
+  <section v-else-if="isLoading" class="not-found shell"><p class="eyebrow"><span class="eyebrow-dot"></span> {{ t('study.loading') }}</p><h1>{{ t('study.preparing') }}</h1></section>
+  <section v-else class="not-found shell"><p class="eyebrow"><span class="eyebrow-dot"></span> {{ t('study.notFound') }}</p><h1>{{ t('study.notExists') }}</h1><RouterLink class="button button-primary" to="/biblioteca">{{ t('study.backLibrary') }} <span>→</span></RouterLink></section>
 </template>

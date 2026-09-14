@@ -9,12 +9,16 @@ import { countryFacts, factRows } from '../lib/countries.ts'
 import { countryHistory } from '../data/country-histories/index.ts'
 import { COUNTRY_IMAGES } from '../data/country-images.ts'
 import { imageCredit, safeImage } from '../lib/images.ts'
+import { continentLabel, countryLabel, eraLabel, locale, t } from '../lib/i18n.ts'
 import '../lib/globe.js'
 
 const route = useRoute()
 const { topics } = useTopics()
 
+/** Nombre en español: es la clave de la ruta, los datos y la bandera. */
 const country = computed(() => decodeURIComponent(String(route.params.country ?? '')))
+/** Nombre para pintar, en el idioma elegido. */
+const countryName = computed(() => countryLabel(country.value))
 
 const countryTopics = computed(() =>
   topics.value.filter((topic) => atlasCountries(topic.country).includes(country.value)),
@@ -36,14 +40,18 @@ const countryEras = computed(() => {
   return eras.filter((era) => present.has(era.name)).map((era) => era.name)
 })
 
+function lessonCount(n: number) {
+  return t(n === 1 ? 'common.lesson' : 'common.lessons', { n })
+}
+
 const stats = computed(() => {
   const list = countryTopics.value
   const minutes = list.reduce((acc, topic) => acc + (parseInt(topic.duration, 10) || 0), 0)
   return [
-    { k: list.length === 1 ? 'Lección' : 'Lecciones', v: String(list.length) },
-    { k: totalQuestions.value === 1 ? 'Pregunta' : 'Preguntas', v: String(totalQuestions.value) },
-    { k: 'Lectura', v: `${minutes} min` },
-    { k: countryEras.value.length === 1 ? 'Época' : 'Épocas', v: String(countryEras.value.length) },
+    { k: t(list.length === 1 ? 'stat.lesson' : 'stat.lessons'), v: String(list.length) },
+    { k: t(totalQuestions.value === 1 ? 'stat.question' : 'stat.questions'), v: String(totalQuestions.value) },
+    { k: t('stat.reading'), v: `${minutes} min` },
+    { k: t(countryEras.value.length === 1 ? 'stat.era' : 'stat.eras'), v: String(countryEras.value.length) },
   ]
 })
 
@@ -51,7 +59,7 @@ const stats = computed(() => {
 const eraTrack = computed(() =>
   eras.map((era) => {
     const count = countryTopics.value.filter((topic) => topic.era === era.name).length
-    return { ...era, count, mark: count ? `${count} lección${count > 1 ? 'es' : ''}` : 'Sin lección' }
+    return { ...era, count, mark: count ? lessonCount(count) : t('country.noLesson') }
   }),
 )
 
@@ -65,13 +73,17 @@ const milestones = computed(() =>
 /* Datos de Wikidata. Existen para los 142 países del atlas, tengan lección o
    no: sin ellos, pinchar en cualquiera de los 120 sin lección no mostraba nada. */
 const facts = computed(() => countryFacts(country.value))
-const factList = computed(() => factRows(facts.value))
+const factList = computed(() => factRows(facts.value, locale.value))
 const isAtlasCountry = computed(() => facts.value !== null)
 const history = computed(() => countryHistory(country.value))
 /** Portada del país. Validada como cualquier imagen antes de pintarse (SPEC §10.10). */
 const cover = computed(() =>
   Object.hasOwn(COUNTRY_IMAGES, country.value) ? safeImage(COUNTRY_IMAGES[country.value][0]) : null,
 )
+
+function factValue(fact: { id: string; v: string }) {
+  return fact.id === 'continent' ? continentLabel(fact.v) : fact.v
+}
 
 const otherCountries = computed(() =>
   coveredCountries(topics.value.map((topic) => topic.country))
@@ -88,15 +100,15 @@ const otherCountries = computed(() =>
         <div class="country-hero-shade" aria-hidden="true"></div>
       </template>
       <div class="country-hero-top">
-        <RouterLink class="country-back" to="/">← Globo</RouterLink>
-        <span class="country-tag">{{ countryTopics.length ? `${countryTopics.length} lecciones` : 'Historia breve' }}</span>
+        <RouterLink class="country-back" to="/">{{ t('country.back') }}</RouterLink>
+        <span class="country-tag">{{ countryTopics.length ? lessonCount(countryTopics.length) : t('common.briefHistory') }}</span>
       </div>
 
       <div class="country-hero-main">
         <div>
-          <p class="eyebrow">Ficha de país</p>
+          <p class="eyebrow">{{ t('common.countrySheet') }}</p>
           <CountryFlag class="country-hero-flag" :country="country" size="lg" />
-          <h1>{{ country }}</h1>
+          <h1>{{ countryName }}</h1>
           <p v-if="countryTopics.length" class="country-lead">{{ countryTopics[0].description }}</p>
         </div>
         <div class="country-outline-frame">
@@ -105,11 +117,11 @@ const otherCountries = computed(() =>
       </div>
 
       <div v-if="factList.length" class="country-facts">
-        <div v-for="fact in factList" :key="fact.k">
-          <span class="stat-key">{{ fact.k }}</span>
-          <span class="stat-value">{{ fact.v }}</span>
+        <div v-for="fact in factList" :key="fact.id">
+          <span class="stat-key">{{ t(`fact.${fact.id}`) }}</span>
+          <span class="stat-value">{{ factValue(fact) }}</span>
         </div>
-        <p class="country-facts-source">Datos de Wikidata (CC0)</p>
+        <p class="country-facts-source">{{ t('common.factsSource') }}</p>
       </div>
 
       <div v-if="countryTopics.length" class="country-stats">
@@ -126,11 +138,11 @@ const otherCountries = computed(() =>
 
     <section v-if="history" class="country-history">
       <div>
-        <p class="panel-label">Historia de {{ country }}</p>
+        <p class="panel-label">{{ t('country.historyOf', { country: countryName }) }}</p>
         <p v-for="(paragraph, index) in history.text" :key="index">{{ paragraph }}</p>
       </div>
       <div>
-        <p class="panel-label">Fechas clave</p>
+        <p class="panel-label">{{ t('country.keyDates') }}</p>
         <div class="country-timeline">
           <div v-for="[date, event] in history.dates" :key="date">
             <span class="country-timeline-date">{{ date }}</span>
@@ -142,7 +154,7 @@ const otherCountries = computed(() =>
 
     <div v-if="countryTopics.length" class="country-body">
       <div class="country-main">
-        <p class="panel-label">Línea de tiempo de épocas</p>
+        <p class="panel-label">{{ t('country.eraTrack') }}</p>
         <div class="era-track">
           <div
             v-for="era in eraTrack"
@@ -151,13 +163,13 @@ const otherCountries = computed(() =>
             :class="[`era-${era.color}`, { off: !era.count }]"
           >
             <span class="era-track-dot"></span>
-            <span class="era-track-name">{{ era.name }}</span>
+            <span class="era-track-name">{{ eraLabel(era.name) }}</span>
             <span class="era-track-range">{{ era.range }}</span>
             <span class="era-track-mark">{{ era.mark }}</span>
           </div>
         </div>
 
-        <p class="panel-label">Lecciones de {{ country }}</p>
+        <p class="panel-label">{{ t('country.lessonsOf', { country: countryName }) }}</p>
         <div class="panel-topics">
           <RouterLink
             v-for="topic in countryTopics"
@@ -169,14 +181,14 @@ const otherCountries = computed(() =>
             <span class="panel-topic-bar"></span>
             <span class="panel-topic-body">
               <span class="panel-topic-title">{{ topic.title }}</span>
-              <span class="panel-topic-meta">{{ topic.years }} · {{ topic.duration }} · {{ questionCount(topic.id) }} preguntas</span>
+              <span class="panel-topic-meta">{{ topic.years }} · {{ topic.duration }} · {{ t('common.questions', { n: questionCount(topic.id) }) }}</span>
             </span>
             <span class="starter-arrow">→</span>
           </RouterLink>
         </div>
 
         <template v-if="milestones.length">
-          <p class="panel-label">Hitos clave</p>
+          <p class="panel-label">{{ t('common.keyMilestones') }}</p>
           <div class="country-timeline">
             <div v-for="(item, index) in milestones" :key="`${item.date}-${index}`">
               <span class="country-timeline-date">{{ item.date }}</span>
@@ -188,21 +200,21 @@ const otherCountries = computed(() =>
 
       <aside class="country-side">
         <div class="country-quiz">
-          <p class="eyebrow eyebrow-light">Quiz de {{ country }}</p>
-          <p class="country-quiz-count">{{ totalQuestions }} preguntas<br /><i>con explicación</i></p>
+          <p class="eyebrow eyebrow-light">{{ t('country.quizOf', { country: countryName }) }}</p>
+          <p class="country-quiz-count">{{ t('common.questions', { n: totalQuestions }) }}<br /><i>{{ t('country.withExplanation') }}</i></p>
           <div class="era-legend">
-            <span v-for="era in countryEras" :key="era" class="chip-button">{{ era }}</span>
+            <span v-for="era in countryEras" :key="era" class="chip-button">{{ eraLabel(era) }}</span>
           </div>
           <RouterLink
             class="button button-primary country-quiz-cta"
             :to="{ name: 'quiz', query: { topic: countryTopics[0].id } }"
           >
-            Jugar ahora
+            {{ t('country.playNow') }}
           </RouterLink>
         </div>
 
         <div>
-          <p class="panel-label">Salta a otro país</p>
+          <p class="panel-label">{{ t('country.jump') }}</p>
           <div class="era-legend">
             <RouterLink
               v-for="name in otherCountries"
@@ -210,7 +222,7 @@ const otherCountries = computed(() =>
               class="chip-button"
               :to="`/pais/${encodeURIComponent(name)}`"
             >
-              {{ name }}
+              {{ countryLabel(name) }}
             </RouterLink>
           </div>
         </div>
@@ -218,7 +230,7 @@ const otherCountries = computed(() =>
     </div>
 
     <div v-else class="country-empty">
-      <p class="panel-label">Países con lección completa</p>
+      <p class="panel-label">{{ t('common.countriesWithLesson') }}</p>
       <div class="era-legend">
         <RouterLink
           v-for="name in otherCountries"
@@ -226,16 +238,16 @@ const otherCountries = computed(() =>
           class="chip-button"
           :to="`/pais/${encodeURIComponent(name)}`"
         >
-          {{ name }}
+          {{ countryLabel(name) }}
         </RouterLink>
       </div>
-      <RouterLink class="button button-primary" to="/biblioteca">Ver toda la biblioteca →</RouterLink>
+      <RouterLink class="button button-primary" to="/biblioteca">{{ t('country.seeLibrary') }}</RouterLink>
     </div>
   </section>
 
   <section v-else class="not-found shell">
-    <p class="eyebrow"><span class="eyebrow-dot"></span> Sin lección todavía</p>
-    <h1>{{ country || 'Este país' }} está en la lista.</h1>
-    <RouterLink class="button button-primary" to="/">Volver al globo</RouterLink>
+    <p class="eyebrow"><span class="eyebrow-dot"></span> {{ t('country.notFoundEyebrow') }}</p>
+    <h1>{{ t('country.notFoundTitle', { country: country ? countryName : t('country.thisCountry') }) }}</h1>
+    <RouterLink class="button button-primary" to="/">{{ t('common.backGlobe') }}</RouterLink>
   </section>
 </template>

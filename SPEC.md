@@ -546,3 +546,13 @@ Los 142 países del globo tienen una historia breve propia —tres párrafos y d
 La ficha de país usa como fondo de su cabecera una imagen histórica o monumental representativa de cada uno de los 142 países del atlas, con una sombra para que el texto se lea y el pie y la atribución completa al final de la cabecera. Mismas reglas que las imágenes de los temas (§14.2 y §14.3): solo dominio público o licencia libre comprobada por la API de Commons, archivos locales bajo `/img/paises/`, validación con `safeImage` antes de pintarse. Manifiesto `scripts/country-images.json`, descarga con `npm run images:paises` y salida `src/data/country-images.ts`. `npm test` exige portada válida para todos los países del atlas.
 
 Arreglo de maquetación asociado: `globe.js` fijaba estilos en línea (`position`, `width`, `height`) que anulaban `.globe-canvas`; ahora solo lo hace si el elemento no tiene clase, y el globo se muestra entero y centrado.
+
+## 20. Segundo idioma: rumano (desde el 14/09/2026)
+
+Petición del cliente: la PWA en **español y rumano, solo esos dos**, con selector de idioma y el contenido en el idioma elegido. La traducción es propia (no un servicio automático) y se hace por fases; lo que aún no está traducido se muestra en español.
+
+- **Fase 1 · Interfaz (hecha).** `src/lib/i18n.ts` sin dependencias: `locale`, `setLocale`, `t`, `countryLabel`, `eraLabel`, `continentLabel`. Diccionarios `src/i18n/es.ts` y `src/i18n/ro.ts`; el tipo del rumano exige todas las claves del español. Nombres de países, regiones, épocas y continentes en `src/i18n/names-ro.ts`. Selector `ES | RO` en el menú; el idioma se guarda en `localStorage` y, la primera vez, se toma del navegador.
+- **Regla:** los datos se siguen identificando por su nombre o slug en español (rutas, banderas, preferencias guardadas en Supabase). La traducción solo cambia lo que se pinta, así que ningún enlace ni dato guardado se rompe al cambiar de idioma.
+- **Seguridad:** todos los textos traducidos se pintan con interpolación `{{ }}`; ninguno con `v-html`. La interpolación de `t` solo sustituye marcadores `{nombre}` y usa `Object.hasOwn`.
+- **Fase 2 (pendiente):** historias de los 142 países y pies de las portadas.
+- **Fase 3 (pendiente):** lecciones, documentos y preguntas, tema a tema, empezando por `rumania`. Hay que decidir cómo se sirve el contenido rumano, porque el de Supabase está en español.

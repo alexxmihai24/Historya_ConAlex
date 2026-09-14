@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router'
 import { useTopics } from '../composables/useTopics.ts'
 import { useQuiz, type AnswerResult, type QuizQuestionUI } from '../composables/useQuiz.ts'
 import { useAuthStore } from '../stores/auth.ts'
+import { countryLabel, eraLabel, t } from '../lib/i18n.ts'
 /* Las reglas de la partida viven en src/lib/scoring.ts para poder comprobarlas
    sin montar el componente, y porque harán falta también en el servidor cuando
    se persistan los puntos (SPEC §10.4). */
@@ -50,7 +51,7 @@ const percentage = computed(() =>
 )
 const selectedTopicInfo = computed(() => topics.value.find((topic) => topic.id === selectedTopic.value))
 const scopeLabel = computed(() =>
-  selectedMode.value === 'global' ? 'Historia completa' : (selectedTopicInfo.value?.title ?? ''),
+  selectedMode.value === 'global' ? t('quiz.scopeAll') : (selectedTopicInfo.value?.title ?? ''),
 )
 const multiplier = computed(() => multiplierFor(streak.value))
 const timeColor = computed(() =>
@@ -58,17 +59,17 @@ const timeColor = computed(() =>
 )
 
 const resultStats = computed(() => [
-  { k: 'Puntos', v: String(score.value) },
-  { k: 'Aciertos', v: `${rightCount.value}/${results.value.length}` },
-  { k: 'Mejor racha', v: String(bestStreak.value) },
-  { k: 'Vidas restantes', v: String(lives.value) },
+  { k: t('quiz.points'), v: String(score.value) },
+  { k: t('quiz.right'), v: `${rightCount.value}/${results.value.length}` },
+  { k: t('quiz.bestStreak'), v: String(bestStreak.value) },
+  { k: t('quiz.livesLeft'), v: String(lives.value) },
 ])
 
 const resultTitle = computed(() => {
-  if (!lives.value) return 'Te has quedado sin vidas.'
-  if (percentage.value >= 80) return 'Tienes muy buen ojo histórico.'
-  if (percentage.value >= 50) return 'Vas por buen camino.'
-  return 'Cada fallo es una pista para volver a la lección.'
+  if (!lives.value) return t('quiz.resultNoLives')
+  if (percentage.value >= 80) return t('quiz.resultGreat')
+  if (percentage.value >= 50) return t('quiz.resultGood')
+  return t('quiz.resultRetry')
 })
 
 function stopTimer() {
@@ -99,7 +100,7 @@ async function startQuiz() {
   activeQuestions.value = await loadQuestions(slug, 10)
   isLoadingQuiz.value = false
   if (!activeQuestions.value.length) {
-    quizError.value = 'No hay preguntas disponibles todavía para esta opción. Prueba con otro tema.'
+    quizError.value = t('quiz.noQuestions')
     return
   }
   hasStarted.value = true
@@ -138,7 +139,7 @@ function onTimeout() {
   currentFeedback.value = {
     isCorrect: false,
     correctOptionId: '',
-    explanation: 'Se acabó el tiempo. Sigue con la siguiente y vuelve a esta al repasar.',
+    explanation: t('quiz.timeoutExplanation'),
   }
 }
 
@@ -192,12 +193,9 @@ function backToModes() {
     <div class="shell quiz-shell">
       <!-- elegir partida -->
       <section v-if="!hasStarted" class="quiz-setup">
-        <p class="eyebrow"><span class="eyebrow-dot"></span> Elige cómo repasar</p>
-        <h1>Quiz contrarreloj.</h1>
-        <p>
-          Diez preguntas, {{ SECONDS_PER_QUESTION }} segundos cada una y {{ LIVES }} vidas.
-          Acertar seguido multiplica los puntos; el tiempo que sobra también suma.
-        </p>
+        <p class="eyebrow"><span class="eyebrow-dot"></span> {{ t('quiz.setupEyebrow') }}</p>
+        <h1>{{ t('quiz.setupTitle') }}</h1>
+        <p>{{ t('quiz.setupLead', { seconds: SECONDS_PER_QUESTION, lives: LIVES }) }}</p>
         <div class="quiz-mode-grid">
           <button
             class="quiz-mode-card"
@@ -206,8 +204,8 @@ function backToModes() {
             @click="selectedMode = 'global'"
           >
             <span class="mode-icon">✦</span>
-            <strong>Historia completa</strong>
-            <small>Diez preguntas de cualquier época</small>
+            <strong>{{ t('quiz.scopeAll') }}</strong>
+            <small>{{ t('quiz.modeAllSub') }}</small>
             <span class="mode-check">{{ selectedMode === 'global' ? '✓' : '' }}</span>
           </button>
           <button
@@ -217,16 +215,16 @@ function backToModes() {
             @click="selectedMode = 'topic'"
           >
             <span class="mode-icon">◌</span>
-            <strong>Por lección</strong>
-            <small>Repasa un tema concreto</small>
+            <strong>{{ t('quiz.modeTopic') }}</strong>
+            <small>{{ t('quiz.modeTopicSub') }}</small>
             <span class="mode-check">{{ selectedMode === 'topic' ? '✓' : '' }}</span>
           </button>
         </div>
         <label v-if="selectedMode === 'topic'" class="quiz-topic-select">
-          Lección para repasar
+          {{ t('quiz.topicLabel') }}
           <select v-model="selectedTopic">
             <option v-for="topic in topics" :key="topic.id" :value="topic.id">
-              {{ topic.title }} · {{ topic.country }}
+              {{ topic.title }} · {{ countryLabel(topic.country) }}
             </option>
           </select>
         </label>
@@ -236,7 +234,7 @@ function backToModes() {
           :disabled="isLoadingQuiz"
           @click="startQuiz"
         >
-          {{ isLoadingQuiz ? 'Cargando…' : 'Empezar partida' }}
+          {{ isLoadingQuiz ? t('quiz.loading') : t('quiz.start') }}
         </button>
         <p v-if="quizError" class="form-message" role="status">{{ quizError }}</p>
       </section>
@@ -250,19 +248,19 @@ function backToModes() {
             <span class="quiz-bar-scope">{{ scopeLabel }}</span>
           </div>
           <div class="quiz-bar-stats">
-            <div class="quiz-lives" :aria-label="`${lives} vidas`">
+            <div class="quiz-lives" :aria-label="t('quiz.livesAria', { n: lives })">
               <span v-for="n in LIVES" :key="n" :class="{ spent: n > lives }"></span>
-              <small>Vidas</small>
+              <small>{{ t('quiz.lives') }}</small>
             </div>
             <div class="quiz-stat">
               <span class="quiz-stat-value" :class="{ hot: streak >= 2 }">{{ streak }}</span>
-              <small>Racha ×{{ multiplier }}</small>
+              <small>{{ t('quiz.streak', { m: multiplier }) }}</small>
             </div>
             <div class="quiz-stat">
               <span class="quiz-stat-value">{{ score }}</span>
-              <small>Puntos</small>
+              <small>{{ t('quiz.points') }}</small>
             </div>
-            <button class="text-button" type="button" @click="backToModes">Salir</button>
+            <button class="text-button" type="button" @click="backToModes">{{ t('quiz.exit') }}</button>
           </div>
         </div>
 
@@ -279,7 +277,7 @@ function backToModes() {
         <div class="quiz-play">
           <article v-if="currentQuestion" class="question-card">
             <div class="question-tag">
-              <span>{{ currentQuestion.era }}</span>
+              <span>{{ eraLabel(currentQuestion.era) }}</span>
               <span>{{ currentQuestion.topic }}</span>
             </div>
             <h2>{{ currentQuestion.prompt }}</h2>
@@ -302,18 +300,18 @@ function backToModes() {
             </div>
             <div v-if="currentFeedback" class="answer-feedback" :class="{ good: currentFeedback.isCorrect }">
               <strong>
-                {{ currentFeedback.isCorrect ? '¡Bien visto!' : timedOut ? 'Se acabó el tiempo.' : 'Casi.' }}
+                {{ currentFeedback.isCorrect ? t('quiz.feedbackGood') : timedOut ? t('quiz.feedbackTimeout') : t('quiz.feedbackAlmost') }}
               </strong>
               <p>{{ currentFeedback.explanation }}</p>
               <button class="button button-primary quiz-next" type="button" @click="nextQuestion">
-                {{ !lives || currentIndex === activeQuestions.length - 1 ? 'Ver resultado' : 'Siguiente' }}
+                {{ !lives || currentIndex === activeQuestions.length - 1 ? t('quiz.seeResult') : t('quiz.next') }}
               </button>
             </div>
           </article>
 
           <aside class="quiz-side">
             <div>
-              <p class="panel-label">Progreso de la partida</p>
+              <p class="panel-label">{{ t('quiz.progress') }}</p>
               <div class="quiz-dots">
                 <span
                   v-for="n in activeQuestions.length"
@@ -322,27 +320,25 @@ function backToModes() {
                 ></span>
               </div>
               <div class="quiz-dots-legend">
-                <span>{{ rightCount }} aciertos</span><span>{{ wrongCount }} fallos</span>
+                <span>{{ t('quiz.rightCount', { n: rightCount }) }}</span><span>{{ t('quiz.wrongCount', { n: wrongCount }) }}</span>
               </div>
             </div>
 
             <div>
-              <p class="panel-label">Cómo puntúa</p>
+              <p class="panel-label">{{ t('quiz.howScores') }}</p>
               <ul class="quiz-rules">
-                <li>{{ BASE_POINTS }} puntos por acierto</li>
-                <li>Cada dos aciertos seguidos suben el multiplicador, hasta ×4</li>
-                <li>{{ TIME_BONUS }} puntos por cada segundo que sobre</li>
-                <li>Un fallo, o quedarse sin tiempo, cuesta una vida</li>
+                <li>{{ t('quiz.rule1', { n: BASE_POINTS }) }}</li>
+                <li>{{ t('quiz.rule2') }}</li>
+                <li>{{ t('quiz.rule3', { n: TIME_BONUS }) }}</li>
+                <li>{{ t('quiz.rule4') }}</li>
               </ul>
             </div>
 
             <div class="alex-card">
               <span class="alex-avatar" aria-hidden="true">AL</span>
               <div>
-                <p class="alex-name">Alex te dice</p>
-                <p class="alex-quote">
-                  «Lee la explicación aunque aciertes: ahí está la mitad de la lección.»
-                </p>
+                <p class="alex-name">{{ t('common.alexSays') }}</p>
+                <p class="alex-quote">{{ t('quiz.alexQuote') }}</p>
               </div>
             </div>
           </aside>
@@ -352,17 +348,16 @@ function backToModes() {
       <!-- resultado -->
       <section v-else class="quiz-result">
         <div class="quiz-result-copy">
-          <p class="eyebrow eyebrow-light">Partida terminada · {{ scopeLabel }}</p>
+          <p class="eyebrow eyebrow-light">{{ t('quiz.finished', { scope: scopeLabel }) }}</p>
           <h1>{{ resultTitle }}</h1>
           <p>
-            Has acertado <strong>{{ rightCount }} de {{ results.length }}</strong> preguntas.
-            {{ auth.isAuthenticated
-              ? 'Hemos guardado los aciertos en tu perfil; los puntos son de esta partida.'
-              : 'Con una cuenta guardarías tus resultados y podrías retomar donde lo dejaste.' }}
+            {{ t('quiz.scoreBefore') }} <strong>{{ t('quiz.scoreCount', { right: rightCount, total: results.length }) }}</strong>
+            {{ t('quiz.scoreAfter') }}
+            {{ auth.isAuthenticated ? t('quiz.savedNote') : t('quiz.accountNote') }}
           </p>
           <div class="result-actions">
-            <button class="button button-primary" type="button" @click="startQuiz">Jugar de nuevo</button>
-            <RouterLink class="button button-quiet" to="/biblioteca">Repasar en la biblioteca</RouterLink>
+            <button class="button button-primary" type="button" @click="startQuiz">{{ t('quiz.again') }}</button>
+            <RouterLink class="button button-quiet" to="/biblioteca">{{ t('quiz.review') }}</RouterLink>
           </div>
         </div>
         <div class="quiz-result-stats">

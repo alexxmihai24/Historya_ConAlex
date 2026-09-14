@@ -4,9 +4,11 @@ import { RouterLink } from 'vue-router'
 import { supabase } from '../lib/supabase.ts'
 import { useAuthStore } from '../stores/auth.ts'
 import { useTopics } from '../composables/useTopics.ts'
+import { intlLocale, locale, t } from '../lib/i18n.ts'
+import type { MessageKey } from '../i18n/es.ts'
 
 interface RecentProgress { title: string; slug: string; percent: number }
-interface QuizHistoryItem { scope: string; correct: number; total: number; points: number; streak: number; date: string }
+interface QuizHistoryItem { scope: string; correct: number; total: number; points: number; streak: number; completedAt: string }
 
 const auth = useAuthStore()
 const { topics } = useTopics()
@@ -21,7 +23,11 @@ const overallProgress = ref(0)
 const recentProgress = ref<RecentProgress | null>(null)
 const quizHistory = ref<QuizHistoryItem[]>([])
 
+/* El interés se guarda en la base de datos por su slug en español, que no cambia
+   con el idioma; solo la etiqueta que se pinta se traduce. */
 function interestSlug(interest: string) { return interest.toLowerCase().replaceAll(' ', '-') }
+function interestLabel(interest: string) { return t(`interest.${interestSlug(interest)}` as MessageKey) }
+function formatDate(iso: string) { return new Date(iso).toLocaleDateString(intlLocale(locale.value)) }
 function toggleInterest(interest: string) { selectedInterests.value = selectedInterests.value.includes(interest) ? selectedInterests.value.filter((item) => item !== interest) : [...selectedInterests.value, interest] }
 async function loadPreferences() {
   if (!auth.user || !supabase) return
@@ -30,13 +36,13 @@ async function loadPreferences() {
 }
 async function savePreferences() {
   saveMessage.value = ''
-  if (!auth.user || !supabase) { saveMessage.value = 'Crea una cuenta para guardar tus preferencias en todos tus dispositivos.'; return }
+  if (!auth.user || !supabase) { saveMessage.value = t('profile.saveNeedAccount'); return }
   isSaving.value = true
   const { error } = await supabase.rpc('replace_user_preferences', {
     p_preferences: selectedInterests.value.map(interestSlug),
   })
   isSaving.value = false
-  saveMessage.value = error ? 'No se han podido guardar los cambios. Vuelve a intentarlo.' : 'Preferencias guardadas.'
+  saveMessage.value = error ? t('profile.saveFailed') : t('profile.saved')
 }
 
 async function loadDashboard() {
@@ -86,7 +92,7 @@ async function loadDashboard() {
       // cliente (SPEC §10.4). Nulos en los intentos anteriores a la migración.
       points: row.points ?? 0,
       streak: row.best_streak ?? 0,
-      date: new Date(row.completed_at).toLocaleDateString('es-ES'),
+      completedAt: row.completed_at,
     }))
   } catch (err) {
     console.error('ProfileView: no se pudo cargar el progreso real', err)
@@ -109,29 +115,29 @@ watch(() => auth.user?.id, () => { void loadPreferences(); void loadDashboard() 
 </script>
 
 <template>
-  <section class="profile-header"><div class="shell profile-heading"><div class="profile-avatar">{{ displayName.charAt(0).toUpperCase() }}</div><div><p class="eyebrow"><span class="eyebrow-dot"></span> Tu espacio</p><h1>Hola, {{ displayName }}.</h1></div><RouterLink v-if="!auth.isAuthenticated" class="button button-quiet" to="/acceso">Crear cuenta</RouterLink><button v-else class="button button-quiet" type="button" @click="handleSignOut">Cerrar sesión</button></div></section>
+  <section class="profile-header"><div class="shell profile-heading"><div class="profile-avatar">{{ displayName.charAt(0).toUpperCase() }}</div><div><p class="eyebrow"><span class="eyebrow-dot"></span> {{ t('profile.space') }}</p><h1>{{ t('profile.hello', { name: displayName }) }}</h1></div><RouterLink v-if="!auth.isAuthenticated" class="button button-quiet" to="/acceso">{{ t('profile.createAccount') }}</RouterLink><button v-else class="button button-quiet" type="button" @click="handleSignOut">{{ t('profile.signOut') }}</button></div></section>
   <section class="shell dashboard-grid"><div class="dashboard-main">
       <article class="dashboard-card progress-summary">
-        <div><p class="eyebrow">TU CAMINO</p><h2>Estás construyendo una visión global.</h2><p>Has empezado {{ studiedCount }} de {{ topics.length }} temas disponibles.</p></div>
-        <div class="circle-progress" :style="{ '--progress': `${overallProgress * 3.6}deg` }"><strong>{{ overallProgress }}%</strong><span>avance</span></div>
+        <div><p class="eyebrow">{{ t('profile.path') }}</p><h2>{{ t('profile.pathTitle') }}</h2><p>{{ t('profile.started', { n: studiedCount, total: topics.length }) }}</p></div>
+        <div class="circle-progress" :style="{ '--progress': `${overallProgress * 3.6}deg` }"><strong>{{ overallProgress }}%</strong><span>{{ t('profile.progress') }}</span></div>
       </article>
 
       <article v-if="recentProgress" class="dashboard-card">
-        <div class="card-title-row"><div><p class="eyebrow">SIGUE DESDE AQUÍ</p><h2>{{ recentProgress.title }}</h2></div></div>
+        <div class="card-title-row"><div><p class="eyebrow">{{ t('profile.continueHere') }}</p><h2>{{ recentProgress.title }}</h2></div></div>
         <div class="dashboard-progress"><i :style="{ width: `${recentProgress.percent}%` }"></i></div>
-        <div class="dashboard-card-footer"><span>{{ recentProgress.percent }}% completado</span><RouterLink class="button button-primary" :to="`/estudiar/${recentProgress.slug}`">Continuar <span>→</span></RouterLink></div>
+        <div class="dashboard-card-footer"><span>{{ t('profile.completed', { n: recentProgress.percent }) }}</span><RouterLink class="button button-primary" :to="`/estudiar/${recentProgress.slug}`">{{ t('profile.continue') }} <span>→</span></RouterLink></div>
       </article>
       <article v-else class="dashboard-card">
-        <div class="card-title-row"><div><p class="eyebrow">EMPIEZA POR AQUÍ</p><h2>Todavía no has abierto ninguna lección.</h2></div></div>
-        <p>Elige un tema en la biblioteca y tu progreso aparecerá aquí.</p>
-        <div class="dashboard-card-footer"><RouterLink class="button button-primary" to="/biblioteca">Ir a la biblioteca <span>→</span></RouterLink></div>
+        <div class="card-title-row"><div><p class="eyebrow">{{ t('profile.startHere') }}</p><h2>{{ t('profile.noLesson') }}</h2></div></div>
+        <p>{{ t('profile.noLessonLead') }}</p>
+        <div class="dashboard-card-footer"><RouterLink class="button button-primary" to="/biblioteca">{{ t('profile.goLibrary') }} <span>→</span></RouterLink></div>
       </article>
 
       <article class="dashboard-card">
-        <p class="eyebrow">ÚLTIMOS QUIZZES</p>
-        <ul v-if="quizHistory.length" class="quiz-history"><li v-for="(attempt, index) in quizHistory" :key="index"><strong>{{ attempt.scope }}</strong><span>{{ attempt.correct }}/{{ attempt.total }}</span><span v-if="attempt.points" class="quiz-history-points">{{ attempt.points }} pts<template v-if="attempt.streak > 1"> · racha {{ attempt.streak }}</template></span><small>{{ attempt.date }}</small></li></ul>
-        <p v-else>Aquí verás tus resultados cuando completes un quiz con la sesión iniciada.</p>
+        <p class="eyebrow">{{ t('profile.lastQuizzes') }}</p>
+        <ul v-if="quizHistory.length" class="quiz-history"><li v-for="(attempt, index) in quizHistory" :key="index"><strong>{{ attempt.scope }}</strong><span>{{ attempt.correct }}/{{ attempt.total }}</span><span v-if="attempt.points" class="quiz-history-points">{{ t('profile.points', { n: attempt.points }) }}<template v-if="attempt.streak > 1">{{ t('profile.streak', { n: attempt.streak }) }}</template></span><small>{{ formatDate(attempt.completedAt) }}</small></li></ul>
+        <p v-else>{{ t('profile.noQuizzes') }}</p>
       </article>
     </div>
-    <aside class="dashboard-side"><article class="preferences-card"><p class="eyebrow">PERSONALIZA TU CONTENIDO</p><h2>¿Qué te interesa?</h2><p>Usaremos estas preferencias para recomendarte rutas y quizzes.</p><div class="interest-list"><button v-for="interest in availableInterests" :key="interest" type="button" :class="{ active: selectedInterests.includes(interest) }" @click="toggleInterest(interest)"><span>{{ selectedInterests.includes(interest) ? '✓' : '+' }}</span>{{ interest }}</button></div><button class="save-preferences" type="button" :disabled="isSaving" @click="savePreferences">{{ isSaving ? 'Guardando…' : 'Guardar intereses' }}</button><p v-if="saveMessage" class="preferences-message" role="status">{{ saveMessage }}</p></article><article class="daily-quiz-card"><p class="eyebrow eyebrow-light">RETO DEL DÍA</p><h2>5 preguntas para activar la memoria.</h2><RouterLink to="/quiz">Empezar ahora <span>→</span></RouterLink></article></aside></section>
+    <aside class="dashboard-side"><article class="preferences-card"><p class="eyebrow">{{ t('profile.customize') }}</p><h2>{{ t('profile.interests') }}</h2><p>{{ t('profile.interestsLead') }}</p><div class="interest-list"><button v-for="interest in availableInterests" :key="interest" type="button" :class="{ active: selectedInterests.includes(interest) }" @click="toggleInterest(interest)"><span>{{ selectedInterests.includes(interest) ? '✓' : '+' }}</span>{{ interestLabel(interest) }}</button></div><button class="save-preferences" type="button" :disabled="isSaving" @click="savePreferences">{{ isSaving ? t('profile.saving') : t('profile.saveInterests') }}</button><p v-if="saveMessage" class="preferences-message" role="status">{{ saveMessage }}</p></article><article class="daily-quiz-card"><p class="eyebrow eyebrow-light">{{ t('profile.daily') }}</p><h2>{{ t('profile.dailyTitle') }}</h2><RouterLink to="/quiz">{{ t('profile.startNow') }} <span>→</span></RouterLink></article></aside></section>
 </template>

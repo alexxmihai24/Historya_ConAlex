@@ -4,6 +4,7 @@ import { RouterLink } from 'vue-router'
 import { eraColor, eras, type Era } from '../data/history.ts'
 import { useTopics } from '../composables/useTopics.ts'
 import CountryFlag from '../components/CountryFlag.vue'
+import { countryLabel, eraLabel, t } from '../lib/i18n.ts'
 
 const { topics, isLoading } = useTopics()
 const selectedEra = ref<Era | 'Todas'>('Todas')
@@ -22,27 +23,24 @@ const totalProgress = computed(() => {
   <section class="page-intro shell library-intro">
     <div class="library-intro-grid">
       <div>
-        <p class="eyebrow eyebrow-light">Aprender y leer</p>
-        <h1>Biblioteca</h1>
-        <p>
-          {{ topics.length }} lecciones con fuentes, conceptos y debates historiográficos.
-          Filtra por época o entra desde el globo.
-        </p>
+        <p class="eyebrow eyebrow-light">{{ t('library.eyebrow') }}</p>
+        <h1>{{ t('library.title') }}</h1>
+        <p>{{ t('library.lead', { n: topics.length }) }}</p>
       </div>
       <div class="library-progress">
         <span class="library-progress-value">{{ totalProgress }}%</span>
-        <span class="library-progress-label">Tu progreso total</span>
+        <span class="library-progress-label">{{ t('library.progress') }}</span>
         <span class="progress-line"><i :style="{ width: `${totalProgress}%` }"></i></span>
       </div>
     </div>
   </section>
 
   <section class="library-content shell">
-    <div class="filter-row" aria-label="Filtros de la biblioteca">
+    <div class="filter-row" :aria-label="t('library.filters')">
       <div class="filter-group">
-        <span>Época</span>
+        <span>{{ t('library.era') }}</span>
         <div class="filter-pills">
-          <button :class="{ active: selectedEra === 'Todas' }" type="button" @click="selectedEra = 'Todas'">Todas</button>
+          <button :class="{ active: selectedEra === 'Todas' }" type="button" @click="selectedEra = 'Todas'">{{ t('library.all') }}</button>
           <button
             v-for="era in eras"
             :key="era.name"
@@ -50,14 +48,14 @@ const totalProgress = computed(() => {
             type="button"
             @click="selectedEra = era.name"
           >
-            {{ era.name }}
+            {{ eraLabel(era.name) }}
           </button>
         </div>
       </div>
     </div>
 
     <p class="results-count">
-      {{ isLoading ? 'Cargando temas…' : `${filteredTopics.length} lecciones` }}
+      {{ isLoading ? t('library.loading') : t('common.lessons', { n: filteredTopics.length }) }}
     </p>
 
     <div class="library-grid">
@@ -80,8 +78,8 @@ const totalProgress = computed(() => {
         />
         <div class="library-card-body">
           <div class="topic-meta">
-            <span>{{ topic.era }}</span>
-            <span class="topic-country"><CountryFlag :country="topic.country" size="sm" />{{ topic.country }}</span>
+            <span>{{ eraLabel(topic.era) }}</span>
+            <span class="topic-country"><CountryFlag :country="topic.country" size="sm" />{{ countryLabel(topic.country) }}</span>
           </div>
           <h2>{{ topic.title }}</h2>
           <div class="card-numbers">
@@ -89,7 +87,7 @@ const totalProgress = computed(() => {
           </div>
           <span class="progress-line"><i :style="{ width: `${topic.progress}%` }"></i></span>
           <div class="library-card-footer">
-            <span class="card-cta">{{ topic.progress ? 'Seguir' : 'Empezar' }} →</span>
+            <span class="card-cta">{{ topic.progress ? t('library.continue') : t('library.start') }} →</span>
           </div>
         </div>
       </RouterLink>

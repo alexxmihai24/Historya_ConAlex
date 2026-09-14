@@ -32,6 +32,11 @@ import { countryFacts, factRows, formatPopulation, formatArea } from '../src/lib
 import { ES_NAMES } from '../src/lib/country-names.ts'
 import { COUNTRY_HISTORIES, countryHistory } from '../src/data/country-histories/index.ts'
 import { COUNTRY_IMAGES } from '../src/data/country-images.ts'
+import { ES as MENSAJES_ES } from '../src/i18n/es.ts'
+import { RO as MENSAJES_RO } from '../src/i18n/ro.ts'
+import { COUNTRY_NAMES_RO, ERA_NAMES_RO, CONTINENT_NAMES_RO } from '../src/i18n/names-ro.ts'
+import { t, countryLabel, eraLabel, continentLabel } from '../src/lib/i18n.ts'
+import { COUNTRY_FACTS } from '../src/data/country-facts.ts'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const fallos = []
@@ -190,6 +195,31 @@ for (const [nombre, lista] of Object.entries(COUNTRY_IMAGES)) {
   }
 }
 for (const nombre of atlasEs) ok(COUNTRY_IMAGES[nombre]?.length > 0, `${nombre} no tiene foto de portada`)
+
+// Idioma rumano (14/09/2026). El tipo ya obliga a que existan todas las claves;
+// aquí se comprueba lo que el tipo no ve: textos vacíos, marcadores `{x}` que no
+// coinciden entre idiomas y nombres de país sin traducir.
+for (const [clave, texto] of Object.entries(MENSAJES_ES)) {
+  const ro = MENSAJES_RO[clave]
+  ok(typeof ro === 'string' && ro.trim().length > 0, `falta el rumano de «${clave}»`)
+  const marcas = (s) => [...String(s).matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort().join()
+  ok(marcas(texto) === marcas(ro), `«${clave}»: los marcadores no coinciden entre español y rumano`)
+}
+ok(Object.keys(MENSAJES_RO).every((clave) => Object.hasOwn(MENSAJES_ES, clave)), 'el rumano tiene claves que no existen en español')
+for (const nombre of atlasEs) ok(Object.hasOwn(COUNTRY_NAMES_RO, nombre), `${nombre} no tiene nombre en rumano`)
+for (const topic of topics) ok(Object.hasOwn(COUNTRY_NAMES_RO, topic.country), `${topic.id}: «${topic.country}» no tiene nombre en rumano`)
+for (const era of eras) ok(Object.hasOwn(ERA_NAMES_RO, era.name), `la época ${era.name} no tiene nombre en rumano`)
+for (const datos of Object.values(COUNTRY_FACTS)) {
+  if (datos.continent) ok(Object.hasOwn(CONTINENT_NAMES_RO, datos.continent), `el continente «${datos.continent}» no tiene nombre en rumano`)
+}
+ok(t('home.lead', { n: 5 }, 'ro').includes('5'), 't() sustituye los marcadores')
+ok(t('home.title1', undefined, 'es') === 'Gira el globo.', 't() devuelve el español')
+ok(countryLabel('España', 'ro') === 'Spania', 'España se pinta como Spania en rumano')
+ok(countryLabel('España', 'es') === 'España', 'en español el nombre no cambia')
+ok(countryLabel('constructor', 'ro') === 'constructor', 'countryLabel no devuelve propiedades heredadas')
+ok(eraLabel('Edad Media', 'ro') === 'Evul Mediu', 'las épocas se traducen')
+ok(continentLabel('Oceanía', 'ro') === 'Oceania', 'los continentes se traducen')
+ok(formatPopulation(5_500, 'ro').endsWith('mii'), 'en rumano los miles se escriben «mii»')
 
 ok(countryHistory('constructor') === null, 'countryHistory no debe devolver propiedades heredadas')
 

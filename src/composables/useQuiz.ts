@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase.ts'
 import { quizQuestions } from '../data/history.ts'
 import { useAuthStore } from '../stores/auth.ts'
 import { shuffled } from '../lib/shuffle.ts'
+import { t } from '../lib/i18n.ts'
 
 export interface QuizOption {
   id: string
@@ -83,7 +84,7 @@ export function useQuiz() {
       const answer = demoAnswers.get(questionId)
       return answer
         ? { isCorrect: optionId === answer.correctOptionId, correctOptionId: answer.correctOptionId, explanation: answer.explanation }
-        : { isCorrect: false, correctOptionId: optionId, explanation: 'No se ha encontrado esta pregunta de demostración.' }
+        : { isCorrect: false, correctOptionId: optionId, explanation: t('quiz.demoMissing') }
     }
     try {
       const { data, error } = await supabase!.rpc('check_quiz_answer', { p_question_id: questionId, p_option_id: optionId })
@@ -97,7 +98,7 @@ export function useQuiz() {
       return { isCorrect: result.is_correct, correctOptionId: result.correct_option_id, explanation: result.explanation }
     } catch (err) {
       console.error('useQuiz: no se pudo comprobar la respuesta', err)
-      return { isCorrect: false, correctOptionId: optionId, explanation: 'No hemos podido comprobar esta respuesta ahora mismo.' }
+      return { isCorrect: false, correctOptionId: optionId, explanation: t('quiz.checkFailed') }
     }
   }
 

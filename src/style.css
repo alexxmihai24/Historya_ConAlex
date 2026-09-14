@@ -179,6 +179,15 @@ h1, h2, h3, h4 { margin: 0; font-family: var(--serif); font-weight: 400; letter-
 }
 .main-nav .nav-login:hover { box-shadow: var(--ember-glow-strong); }
 
+/* Selector de idioma ES/RO dentro del menú. */
+.lang-switch { display: flex; gap: 2px; padding: 3px; margin-inline: 4px; border: 1px solid var(--line-soft); border-radius: var(--r-pill); }
+.lang-switch button {
+  padding: 6px 9px; border-radius: var(--r-pill);
+  font-weight: 700; font-size: 9px; line-height: 1; letter-spacing: 0.12em; color: var(--text-55);
+}
+.lang-switch button:hover { color: var(--text-strong); }
+.lang-switch button.active { color: var(--text-strong); background: rgb(255 255 255 / 12%); }
+
 .menu-toggle {
   display: none; width: 42px; height: 42px; border-radius: var(--r-pill);
   border: 1px solid var(--line); background: var(--glass);
@@ -1262,6 +1271,8 @@ h1, h2, h3, h4 { margin: 0; font-family: var(--serif); font-weight: 400; letter-
   }
   .main-nav.is-open { display: flex; }
   .main-nav a { text-align: center; padding: 13px; }
+  .main-nav .lang-switch { margin: 2px 0; }
+  .main-nav .lang-switch button { flex: 1; padding: 11px; }
   .study-hero, .lesson-section, .concepts-card, .debate-card, .timeline-card, .sources-card, .study-finish,
   .dashboard-card, .access-aside, .access-form { padding-inline: 20px; }
   .quiz-setup, .question-card, .quiz-result, .quiz-header { padding-inline: 20px; }

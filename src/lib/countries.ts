@@ -24,31 +24,33 @@ export function countryFacts(name: string): CountryFacts | null {
 }
 
 /** «41454761» → «41,5 M». Las cifras de población no se leen con nueve dígitos. */
-export function formatPopulation(value: number | null): string | null {
+export function formatPopulation(value: number | null, lang: 'es' | 'ro' = 'es'): string | null {
   if (value === null || !Number.isFinite(value) || value <= 0) return null
-  if (value >= 1_000_000) return `${(value / 1_000_000).toLocaleString('es', { maximumFractionDigits: 1 })} M`
-  if (value >= 1_000) return `${Math.round(value / 1_000).toLocaleString('es')} mil`
-  return value.toLocaleString('es')
+  if (value >= 1_000_000) return `${(value / 1_000_000).toLocaleString(lang, { maximumFractionDigits: 1 })} M`
+  if (value >= 1_000) return `${Math.round(value / 1_000).toLocaleString(lang)} ${lang === 'ro' ? 'mii' : 'mil'}`
+  return value.toLocaleString(lang)
 }
 
 /** «652230» → «652.230 km²». */
-export function formatArea(value: number | null): string | null {
+export function formatArea(value: number | null, lang: 'es' | 'ro' = 'es'): string | null {
   if (value === null || !Number.isFinite(value) || value <= 0) return null
-  return `${Math.round(value).toLocaleString('es')} km²`
+  return `${Math.round(value).toLocaleString(lang)} km²`
 }
 
 /** Las filas de datos que la ficha pinta, sin los campos que Wikidata no tiene.
  *
  *  Devolver solo lo que existe evita que la ficha muestre huecos o guiones:
- *  un país sin capital registrada simplemente no enseña esa fila. */
-export function factRows(facts: CountryFacts | null): Array<{ k: string; v: string }> {
+ *  un país sin capital registrada simplemente no enseña esa fila. `id` es la
+ *  clave de la etiqueta traducida (`fact.<id>`); el continente va en español y
+ *  la vista lo traduce. */
+export function factRows(facts: CountryFacts | null, lang: 'es' | 'ro' = 'es'): Array<{ id: 'capital' | 'population' | 'area' | 'continent'; v: string }> {
   if (!facts) return []
-  const rows: Array<{ k: string; v: string }> = []
-  if (facts.capital) rows.push({ k: 'Capital', v: facts.capital })
-  const population = formatPopulation(facts.population)
-  if (population) rows.push({ k: 'Población', v: population })
-  const area = formatArea(facts.area)
-  if (area) rows.push({ k: 'Superficie', v: area })
-  if (facts.continent) rows.push({ k: 'Continente', v: facts.continent })
+  const rows: Array<{ id: 'capital' | 'population' | 'area' | 'continent'; v: string }> = []
+  if (facts.capital) rows.push({ id: 'capital', v: facts.capital })
+  const population = formatPopulation(facts.population, lang)
+  if (population) rows.push({ id: 'population', v: population })
+  const area = formatArea(facts.area, lang)
+  if (area) rows.push({ id: 'area', v: area })
+  if (facts.continent) rows.push({ id: 'continent', v: facts.continent })
   return rows
 }

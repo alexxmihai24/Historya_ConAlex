@@ -7,6 +7,7 @@ import { atlasCountries, coveredCountries } from '../lib/regions.ts'
 import CountryFlag from '../components/CountryFlag.vue'
 import { countryFacts, factRows } from '../lib/countries.ts'
 import { countryHistory } from '../data/country-histories/index.ts'
+import { continentLabel, countryLabel, eraLabel, locale, t } from '../lib/i18n.ts'
 import '../lib/globe.js'
 
 const { topics } = useTopics()
@@ -29,7 +30,7 @@ function topicsOf(country: string) {
 const selectedTopics = computed(() => (selected.value ? topicsOf(selected.value) : []))
 const hasLesson = computed(() => selectedTopics.value.length > 0)
 
-const readout = computed(() => hovered.value ?? selected.value ?? 'Gira el globo')
+const readoutCountry = computed(() => hovered.value ?? selected.value)
 
 /** Hitos del primer tema del país. El contenido vive en el repositorio, así que
  *  se leen de ahí en lugar de pedir la lección entera solo para el panel. */
@@ -43,9 +44,9 @@ const selectedStats = computed(() => {
   if (!list.length) return []
   const years = list.map((topic) => topic.years).filter(Boolean)
   return [
-    { k: 'Lecciones', v: String(list.length) },
-    { k: 'Preguntas', v: String(quizQuestions.filter((q) => list.some((t) => t.id === q.topicId)).length) },
-    { k: 'Periodo', v: years.length === 1 ? years[0] : `${years.length} tramos` },
+    { k: t('stat.lessons'), v: String(list.length) },
+    { k: t('stat.questions'), v: String(quizQuestions.filter((q) => list.some((topic) => topic.id === q.topicId)).length) },
+    { k: t('stat.period'), v: years.length === 1 ? years[0] : t('stat.stretches', { n: years.length }) },
   ]
 })
 
@@ -59,14 +60,18 @@ const starters = computed(() =>
       country,
       n: String(index + 1).padStart(2, '0'),
       era: eraColor(list[0].era),
-      meta: list.length === 1 ? list[0].era : `${list.length} lecciones`,
+      meta: list.length === 1 ? eraLabel(list[0].era) : t('common.lessons', { n: list.length }),
     })),
 )
 
 /* Datos de Wikidata del país elegido. Los 142 del atlas los tienen, así que el
    panel nunca se queda vacío aunque el país no tenga lección escrita. */
-const selectedFacts = computed(() => (selected.value ? factRows(countryFacts(selected.value)) : []))
+const selectedFacts = computed(() => (selected.value ? factRows(countryFacts(selected.value), locale.value) : []))
 const selectedHistory = computed(() => (selected.value ? countryHistory(selected.value) : null))
+
+function factValue(fact: { id: string; v: string }) {
+  return fact.id === 'continent' ? continentLabel(fact.v) : fact.v
+}
 
 function onHover(event: Event) {
   hovered.value = (event as CustomEvent<{ name: string } | null>).detail?.name ?? null
@@ -100,40 +105,37 @@ function back() {
     ></historya-globe>
 
     <div class="globe-readout">
-      <p class="globe-readout-label">Bajo el cursor</p>
-      <p class="globe-readout-name" :class="{ dim: !hovered && !selected }">{{ readout }}</p>
+      <p class="globe-readout-label">{{ t('home.readoutLabel') }}</p>
+      <p class="globe-readout-name" :class="{ dim: !readoutCountry }">
+        {{ readoutCountry ? countryLabel(readoutCountry) : t('home.spin') }}
+      </p>
       <p class="globe-readout-meta">
-        {{ countryTotal }} países · {{ covered.length }} encendidos · arrastra para girar
+        {{ t('home.readoutMeta', { countries: countryTotal, covered: covered.length }) }}
       </p>
     </div>
 
     <aside class="globe-panel">
       <!-- Sin país elegido -->
       <div v-if="!selected" class="globe-panel-body">
-        <p class="eyebrow eyebrow-light">Explora el mundo</p>
-        <h1 class="globe-title">Gira el globo.<br /><i>Elige un país.</i></h1>
-        <p class="globe-lead">
-          Cada país abre sus lecciones, sus hitos y su quiz.
-          Todos tienen su historia; {{ covered.length }} brillan con lección completa y quiz.
-        </p>
+        <p class="eyebrow eyebrow-light">{{ t('home.eyebrow') }}</p>
+        <h1 class="globe-title">{{ t('home.title1') }}<br /><i>{{ t('home.title2') }}</i></h1>
+        <p class="globe-lead">{{ t('home.lead', { n: covered.length }) }}</p>
 
         <div class="alex-card">
           <span class="alex-avatar" aria-hidden="true">AL</span>
           <div>
-            <p class="alex-name">Alex te guía</p>
-            <p class="alex-quote">
-              «No hace falta orden. Pincha donde te dé curiosidad y yo te digo por dónde seguir.»
-            </p>
+            <p class="alex-name">{{ t('common.alexGuide') }}</p>
+            <p class="alex-quote">{{ t('home.alexQuote') }}</p>
           </div>
         </div>
 
         <div class="era-legend">
           <span v-for="era in eras" :key="era.name" class="era-chip" :class="`era-${era.color}`">
-            <i></i>{{ era.name }}
+            <i></i>{{ eraLabel(era.name) }}
           </span>
         </div>
 
-        <p class="panel-label">Empieza por aquí</p>
+        <p class="panel-label">{{ t('home.startHere') }}</p>
         <div class="starter-list">
           <button
             v-for="starter in starters"
@@ -145,7 +147,7 @@ function back() {
           >
             <span class="starter-n">{{ starter.n }}</span>
             <span class="starter-dot"></span>
-            <span class="starter-name">{{ starter.country }}</span>
+            <span class="starter-name">{{ countryLabel(starter.country) }}</span>
             <span class="starter-meta">{{ starter.meta }}</span>
             <span class="starter-arrow">→</span>
           </button>
@@ -154,12 +156,12 @@ function back() {
 
       <!-- País con lecciones -->
       <div v-else-if="hasLesson" class="globe-panel-body">
-        <button class="panel-back" type="button" @click="back">← Volver al globo</button>
+        <button class="panel-back" type="button" @click="back">{{ t('common.backGlobe') }}</button>
         <div class="panel-head">
           <div>
-            <p class="eyebrow eyebrow-light">Ficha de país</p>
+            <p class="eyebrow eyebrow-light">{{ t('common.countrySheet') }}</p>
             <CountryFlag class="panel-flag" :country="selected" size="md" />
-            <h1 class="panel-country">{{ selected }}</h1>
+            <h1 class="panel-country">{{ countryLabel(selected) }}</h1>
           </div>
           <historya-outline :country="selected" tone="ember" class="panel-outline"></historya-outline>
         </div>
@@ -171,7 +173,7 @@ function back() {
           </div>
         </div>
 
-        <p class="panel-label">Lecciones</p>
+        <p class="panel-label">{{ t('home.lessonsLabel') }}</p>
         <div class="panel-topics">
           <RouterLink
             v-for="topic in selectedTopics"
@@ -190,7 +192,7 @@ function back() {
         </div>
 
         <template v-if="selectedDates.length">
-          <p class="panel-label">Hitos clave</p>
+          <p class="panel-label">{{ t('common.keyMilestones') }}</p>
           <div class="panel-dates">
             <div v-for="item in selectedDates" :key="item.date">
               <span>{{ item.date }}</span><span>{{ item.event }}</span>
@@ -200,42 +202,42 @@ function back() {
 
         <div class="panel-actions">
           <RouterLink class="button button-primary panel-grow" :to="`/pais/${encodeURIComponent(selected)}`">
-            Abrir ficha completa
+            {{ t('home.openSheet') }}
           </RouterLink>
           <RouterLink class="button button-quiet" :to="{ name: 'quiz', query: { topic: selectedTopics[0].id } }">
-            Quiz
+            {{ t('home.quiz') }}
           </RouterLink>
         </div>
       </div>
 
       <!-- País sin lección todavía -->
       <div v-else class="globe-panel-body">
-        <button class="panel-back" type="button" @click="back">← Volver al globo</button>
+        <button class="panel-back" type="button" @click="back">{{ t('common.backGlobe') }}</button>
         <div class="panel-head">
           <div>
-            <p class="eyebrow">Historia breve</p>
+            <p class="eyebrow">{{ t('common.briefHistory') }}</p>
             <CountryFlag class="panel-flag" :country="selected" size="md" />
-            <h1 class="panel-country">{{ selected }}</h1>
+            <h1 class="panel-country">{{ countryLabel(selected) }}</h1>
           </div>
           <historya-outline :country="selected" tone="light" class="panel-outline faded"></historya-outline>
         </div>
         <p v-if="selectedHistory" class="globe-lead">{{ selectedHistory.text[0] }}</p>
 
         <div v-if="selectedFacts.length" class="panel-facts">
-          <div v-for="fact in selectedFacts" :key="fact.k">
-            <span class="stat-key">{{ fact.k }}</span>
-            <span class="stat-value">{{ fact.v }}</span>
+          <div v-for="fact in selectedFacts" :key="fact.id">
+            <span class="stat-key">{{ t(`fact.${fact.id}`) }}</span>
+            <span class="stat-value">{{ factValue(fact) }}</span>
           </div>
-          <p class="country-facts-source">Datos de Wikidata (CC0)</p>
+          <p class="country-facts-source">{{ t('common.factsSource') }}</p>
         </div>
 
         <div class="panel-actions">
           <RouterLink class="button button-primary panel-grow" :to="`/pais/${encodeURIComponent(selected)}`">
-            Leer su historia
+            {{ t('home.readHistory') }}
           </RouterLink>
         </div>
 
-        <p class="panel-label">Países con lección completa</p>
+        <p class="panel-label">{{ t('common.countriesWithLesson') }}</p>
         <div class="era-legend">
           <button
             v-for="starter in starters"
@@ -244,7 +246,7 @@ function back() {
             type="button"
             @click="pick(starter.country)"
           >
-            {{ starter.country }}
+            {{ countryLabel(starter.country) }}
           </button>
         </div>
       </div>
