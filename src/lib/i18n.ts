@@ -8,7 +8,7 @@
 import { ref } from 'vue'
 import { ES, type MessageKey } from '../i18n/es.ts'
 import { RO } from '../i18n/ro.ts'
-import { COUNTRY_NAMES_RO, CONTINENT_NAMES_RO, ERA_NAMES_RO } from '../i18n/names-ro.ts'
+import { CAPITAL_NAMES_RO, COUNTRY_NAMES_RO, CONTINENT_NAMES_RO, ERA_NAMES_RO } from '../i18n/names-ro.ts'
 
 export type Locale = 'es' | 'ro'
 export const LOCALES: Locale[] = ['es', 'ro']
@@ -66,6 +66,11 @@ export function eraLabel(name: string, lang: Locale = locale.value): string {
 
 export function continentLabel(name: string, lang: Locale = locale.value): string {
   return fromTable(CONTINENT_NAMES_RO, name, lang)
+}
+
+/** Capital de un país. Wikidata la da en español; en rumano se traduce si cambia. */
+export function capitalLabel(name: string, lang: Locale = locale.value): string {
+  return fromTable(CAPITAL_NAMES_RO, name, lang)
 }
 
 /** Para `toLocaleString` y `toLocaleDateString`. */

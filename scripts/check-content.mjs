@@ -30,12 +30,13 @@ import { flagCode } from '../src/lib/country-names.ts'
 import { atlasCountries } from '../src/lib/regions.ts'
 import { countryFacts, factRows, formatPopulation, formatArea } from '../src/lib/countries.ts'
 import { ES_NAMES } from '../src/lib/country-names.ts'
-import { COUNTRY_HISTORIES, countryHistory } from '../src/data/country-histories/index.ts'
+import { COUNTRY_HISTORIES, COUNTRY_HISTORIES_RO, countryHistory } from '../src/data/country-histories/index.ts'
 import { COUNTRY_IMAGES } from '../src/data/country-images.ts'
 import { ES as MENSAJES_ES } from '../src/i18n/es.ts'
 import { RO as MENSAJES_RO } from '../src/i18n/ro.ts'
-import { COUNTRY_NAMES_RO, ERA_NAMES_RO, CONTINENT_NAMES_RO } from '../src/i18n/names-ro.ts'
-import { t, countryLabel, eraLabel, continentLabel } from '../src/lib/i18n.ts'
+import { COUNTRY_NAMES_RO, ERA_NAMES_RO, CONTINENT_NAMES_RO, CAPITAL_NAMES_RO } from '../src/i18n/names-ro.ts'
+import { COUNTRY_CAPTIONS_RO } from '../src/i18n/country-captions-ro.ts'
+import { t, countryLabel, eraLabel, continentLabel, capitalLabel } from '../src/lib/i18n.ts'
 import { COUNTRY_FACTS } from '../src/data/country-facts.ts'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -218,8 +219,32 @@ ok(countryLabel('España', 'ro') === 'Spania', 'España se pinta como Spania en 
 ok(countryLabel('España', 'es') === 'España', 'en español el nombre no cambia')
 ok(countryLabel('constructor', 'ro') === 'constructor', 'countryLabel no devuelve propiedades heredadas')
 ok(eraLabel('Edad Media', 'ro') === 'Evul Mediu', 'las épocas se traducen')
+ok(capitalLabel('Bucarest', 'ro') === 'București', 'las capitales se traducen')
+ok(capitalLabel('Madrid', 'ro') === 'Madrid', 'una capital que no cambia se deja igual')
+const capitalesAtlas = new Set(Object.values(COUNTRY_FACTS).map((d) => d.capital).filter(Boolean))
+for (const capital of Object.keys(CAPITAL_NAMES_RO)) ok(capitalesAtlas.has(capital), `CAPITAL_NAMES_RO tiene «${capital}», que no es la capital de ningún país del atlas`)
 ok(continentLabel('Oceanía', 'ro') === 'Oceania', 'los continentes se traducen')
 ok(formatPopulation(5_500, 'ro').endsWith('mii'), 'en rumano los miles se escriben «mii»')
+
+// Historias traducidas al rumano: misma forma que la española, y solo de países
+// que existen. Se traducen por fases, así que un país sin traducir no es error.
+for (const [nombre, ro] of Object.entries(COUNTRY_HISTORIES_RO)) {
+  const es = COUNTRY_HISTORIES[nombre]
+  ok(es !== undefined, `hay historia rumana de «${nombre}», que no tiene historia en español`)
+  if (!es) continue
+  ok(ro.text.length === es.text.length, `${nombre}: ${ro.text.length} párrafos en rumano y ${es.text.length} en español`)
+  ok(ro.dates.length === es.dates.length, `${nombre}: ${ro.dates.length} fechas en rumano y ${es.dates.length} en español`)
+  ok(ro.text.every((p) => p.trim().length > 0) && ro.dates.every(([f, e]) => f.trim() && e.trim()), `${nombre}: historia rumana con huecos`)
+}
+// Fase 2 terminada el 14/09/2026: desde aquí la traducción de las fichas es
+// completa, y un país nuevo sin historia o sin pie en rumano es un fallo.
+for (const nombre of atlasEs) {
+  ok(Object.hasOwn(COUNTRY_HISTORIES_RO, nombre), `${nombre} no tiene historia en rumano`)
+  ok(Object.hasOwn(COUNTRY_CAPTIONS_RO, nombre) && COUNTRY_CAPTIONS_RO[nombre].trim().length > 0, `${nombre} no tiene pie de portada en rumano`)
+}
+for (const nombre of Object.keys(COUNTRY_CAPTIONS_RO)) ok(atlasEs.has(nombre), `hay pie rumano de «${nombre}», que no es un país del atlas`)
+ok(countryHistory('España', 'ro') === COUNTRY_HISTORIES_RO['España'], 'en rumano se sirve la historia traducida')
+ok(countryHistory('España', 'es') === COUNTRY_HISTORIES['España'], 'en español se sirve la historia original')
 
 ok(countryHistory('constructor') === null, 'countryHistory no debe devolver propiedades heredadas')
 

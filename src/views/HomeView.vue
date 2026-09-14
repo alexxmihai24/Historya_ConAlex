@@ -7,7 +7,7 @@ import { atlasCountries, coveredCountries } from '../lib/regions.ts'
 import CountryFlag from '../components/CountryFlag.vue'
 import { countryFacts, factRows } from '../lib/countries.ts'
 import { countryHistory } from '../data/country-histories/index.ts'
-import { continentLabel, countryLabel, eraLabel, locale, t } from '../lib/i18n.ts'
+import { capitalLabel, continentLabel, countryLabel, eraLabel, locale, t } from '../lib/i18n.ts'
 import '../lib/globe.js'
 
 const { topics } = useTopics()
@@ -67,10 +67,11 @@ const starters = computed(() =>
 /* Datos de Wikidata del país elegido. Los 142 del atlas los tienen, así que el
    panel nunca se queda vacío aunque el país no tenga lección escrita. */
 const selectedFacts = computed(() => (selected.value ? factRows(countryFacts(selected.value), locale.value) : []))
-const selectedHistory = computed(() => (selected.value ? countryHistory(selected.value) : null))
+const selectedHistory = computed(() => (selected.value ? countryHistory(selected.value, locale.value) : null))
 
 function factValue(fact: { id: string; v: string }) {
-  return fact.id === 'continent' ? continentLabel(fact.v) : fact.v
+  if (fact.id === 'continent') return continentLabel(fact.v)
+  return fact.id === 'capital' ? capitalLabel(fact.v) : fact.v
 }
 
 function onHover(event: Event) {

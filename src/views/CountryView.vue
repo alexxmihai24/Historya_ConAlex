@@ -9,7 +9,8 @@ import { countryFacts, factRows } from '../lib/countries.ts'
 import { countryHistory } from '../data/country-histories/index.ts'
 import { COUNTRY_IMAGES } from '../data/country-images.ts'
 import { imageCredit, safeImage } from '../lib/images.ts'
-import { continentLabel, countryLabel, eraLabel, locale, t } from '../lib/i18n.ts'
+import { capitalLabel, continentLabel, countryLabel, eraLabel, locale, t } from '../lib/i18n.ts'
+import { COUNTRY_CAPTIONS_RO } from '../i18n/country-captions-ro.ts'
 import '../lib/globe.js'
 
 const route = useRoute()
@@ -75,14 +76,20 @@ const milestones = computed(() =>
 const facts = computed(() => countryFacts(country.value))
 const factList = computed(() => factRows(facts.value, locale.value))
 const isAtlasCountry = computed(() => facts.value !== null)
-const history = computed(() => countryHistory(country.value))
+const history = computed(() => countryHistory(country.value, locale.value))
 /** Portada del país. Validada como cualquier imagen antes de pintarse (SPEC §10.10). */
 const cover = computed(() =>
   Object.hasOwn(COUNTRY_IMAGES, country.value) ? safeImage(COUNTRY_IMAGES[country.value][0]) : null,
 )
 
+/** Pie de la portada en el idioma elegido; si no hay traducción, el español. */
+const coverCaption = computed(() =>
+  locale.value === 'ro' && Object.hasOwn(COUNTRY_CAPTIONS_RO, country.value) ? COUNTRY_CAPTIONS_RO[country.value] : cover.value?.caption,
+)
+
 function factValue(fact: { id: string; v: string }) {
-  return fact.id === 'continent' ? continentLabel(fact.v) : fact.v
+  if (fact.id === 'continent') return continentLabel(fact.v)
+  return fact.id === 'capital' ? capitalLabel(fact.v) : fact.v
 }
 
 const otherCountries = computed(() =>
@@ -131,7 +138,7 @@ const otherCountries = computed(() =>
         </div>
       </div>
       <p v-if="cover" class="country-hero-credit">
-        <span v-if="cover.caption">{{ cover.caption }}</span>
+        <span v-if="coverCaption">{{ coverCaption }}</span>
         <small>{{ imageCredit(cover) }}</small>
       </p>
     </header>

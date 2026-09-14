@@ -51,6 +51,31 @@ export const COUNTRY_NAMES_RO: Record<string, string> = {
   'Mediterráneo oriental': 'Mediterana de Est', Arabia: 'Arabia', América: 'America', África: 'Africa',
 }
 
+/* Capitales: Wikidata las da en español. Solo están las que cambian en rumano;
+   las demás (Roma, Madrid, Kabul…) se escriben igual. La clave es el nombre
+   español tal como viene en `src/data/country-facts.ts`. */
+export const CAPITAL_NAMES_RO: Record<string, string> = {
+  Berlín: 'Berlin', Argel: 'Alger', Ereván: 'Erevan', Bakú: 'Baku', Daca: 'Dhaka',
+  Naipyidó: 'Naypyidaw', Brasilia: 'Brasília', Sofía: 'Sofia', Timbu: 'Thimphu',
+  Bruselas: 'Bruxelles', 'Nom Pen': 'Phnom Penh', Yaundé: 'Yaoundé', Yamena: 'N’Djamena',
+  Pekín: 'Beijing', Pionyang: 'Phenian', Seúl: 'Seul', 'La Habana': 'Havana',
+  Copenhague: 'Copenhaga', 'El Cairo': 'Cairo', 'Washington D. C.': 'Washington',
+  Liubliana: 'Ljubljana', Tallin: 'Tallinn', 'Adís Abeba': 'Addis Abeba', París: 'Paris',
+  Tiflis: 'Tbilisi', Acra: 'Accra', Atenas: 'Atena', 'Puerto Príncipe': 'Port-au-Prince',
+  'Nueva Delhi': 'New Delhi', Yakarta: 'Jakarta', Dublín: 'Dublin', Teherán: 'Teheran',
+  Reikiavik: 'Reykjavík', Jerusalén: 'Ierusalim', Tokio: 'Tokyo', Amán: 'Amman',
+  Astaná: 'Astana', Biskek: 'Bișkek', 'Ciudad de Kuwait': 'Kuweit', Vientián: 'Vientiane',
+  Trípoli: 'Tripoli', Vilna: 'Vilnius', Skopie: 'Skopje', Nuakchot: 'Nouakchott',
+  Chisináu: 'Chișinău', 'Ulán Bator': 'Ulan Bator', Katmandú: 'Kathmandu', Abuya: 'Abuja',
+  Mascate: 'Muscat', Ramala: 'Ramallah', 'Ciudad de Panamá': 'Panama',
+  'Puerto Moresby': 'Port Moresby', Ámsterdam: 'Amsterdam', Varsovia: 'Varșovia',
+  Lisboa: 'Lisabona', Londres: 'Londra', Kinsasa: 'Kinshasa', Bucarest: 'București',
+  Moscú: 'Moscova', Belgrado: 'Belgrad', Damasco: 'Damasc', Mogadiscio: 'Mogadishu',
+  Yuba: 'Juba', Jartum: 'Khartoum', Estocolmo: 'Stockholm', Taipéi: 'Taipei',
+  Dusambé: 'Dușanbe', Asjabad: 'Așgabat', Túnez: 'Tunis', Taskent: 'Tașkent',
+  Hanói: 'Hanoi', Saná: 'Sanaa', Luxemburgo: 'Luxemburg', Viena: 'Viena',
+}
+
 export const ERA_NAMES_RO: Record<string, string> = {
   Antigüedad: 'Antichitatea',
   'Edad Media': 'Evul Mediu',
