@@ -3,6 +3,7 @@ import { rumaniaRo } from './rumania.ts'
 import { estadosUnidosRo } from './estados-unidos.ts'
 import { segundaGuerraRo } from './segunda-guerra.ts'
 import { espanaSigloXxRo } from './espana-siglo-xx.ts'
+import { mundoActualRo } from './mundo-actual.ts'
 
 /* Traducciones al rumano de los temas (SPEC §20, fase 3). Se van añadiendo tema
    a tema; lo que no está aquí se muestra en español, que es el original. */
@@ -11,6 +12,7 @@ export const TOPIC_TRANSLATIONS_RO: Record<string, TopicTranslation> = {
   'estados-unidos': estadosUnidosRo,
   'segunda-guerra': segundaGuerraRo,
   'espana-siglo-xx': espanaSigloXxRo,
+  'mundo-actual': mundoActualRo,
 }
 
 /** Traducción de un tema, o `null` si ese tema todavía no está traducido. */
