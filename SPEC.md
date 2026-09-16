@@ -1,7 +1,7 @@
 # Especificación del producto · Historya con Alex
 
-**Última actualización:** 11 de septiembre de 2026
-**Estado:** 37 temas y 590 preguntas (con `rumania` y `estados-unidos`, añadidos el 11/09). Los 142 países del atlas tienen historia breve propia. Rediseño «Atlas Nocturno» implantado, con la lección remaquetada como página de libro de texto. 145 imágenes con licencia comprobada. **Pendiente: ejecutar en el SQL Editor, en este orden, `20260829_topic_cover_image.sql`, `20260910_quiz_score.sql` y después los siete archivos de `supabase/seed/`. No volver a ejecutar `20260826` ni `20260827`: ya están aplicadas. Antes de pegar nada, `npm run check:sql` (§17.1).**
+**Última actualización:** 16 de septiembre de 2026
+**Estado:** 37 temas y 590 preguntas. Los 142 países del atlas tienen historia breve y foto de portada como fondo de su ficha. **Bilingüe español/rumano** desde el 14/09/2026: interfaz y fichas de país traducidas; lecciones y quiz pendientes (§20). Rediseño «Atlas Nocturno» implantado. 156 imágenes de temas y 142 portadas de país, con licencia comprobada. **SQL al día:** migraciones y seed ejecutados por el cliente el 11/09/2026; tras un `npm run seed` solo hay que volver a lanzar los archivos de `supabase/seed/`. No volver a ejecutar `20260826` ni `20260827`. Antes de pegar nada, `npm run check:sql` (§17.1).
 
 > **Carencias señaladas por el cliente y su estado.**
 > 1. **Nivel educativo.** ❌ Retirado el 11/09/2026 a petición del cliente: cada lección tiene un solo texto. Ver §15.
@@ -10,6 +10,8 @@
 > 6. **Faltaban las causas de la Segunda Guerra Mundial.** ✅ Apartado nuevo «Cómo y por qué empezó» (11/09/2026).
 > 4. **La respuesta del quiz era la «b» en el 85 % de las preguntas.** ✅ Corregido con barajado al servir. Ver §16.
 > 5. **Poco tiempo por pregunta.** ✅ 40 s en lugar de 20.
+> 7. **Portada en la ficha de país.** ✅ Foto histórica como fondo de la cabecera de los 142 países (§19).
+> 8. **Segundo idioma, rumano.** ⏳ Interfaz y fichas de país hechas; lecciones y quiz en marcha, tema a tema (§20).
 
 ## 1. Visión
 
@@ -554,5 +556,10 @@ Petición del cliente: la PWA en **español y rumano, solo esos dos**, con selec
 - **Fase 1 · Interfaz (hecha).** `src/lib/i18n.ts` sin dependencias: `locale`, `setLocale`, `t`, `countryLabel`, `eraLabel`, `continentLabel`. Diccionarios `src/i18n/es.ts` y `src/i18n/ro.ts`; el tipo del rumano exige todas las claves del español. Nombres de países, regiones, épocas y continentes en `src/i18n/names-ro.ts`. Selector `ES | RO` en el menú; el idioma se guarda en `localStorage` y, la primera vez, se toma del navegador.
 - **Regla:** los datos se siguen identificando por su nombre o slug en español (rutas, banderas, preferencias guardadas en Supabase). La traducción solo cambia lo que se pinta, así que ningún enlace ni dato guardado se rompe al cambiar de idioma.
 - **Seguridad:** todos los textos traducidos se pintan con interpolación `{{ }}`; ninguno con `v-html`. La interpolación de `t` solo sustituye marcadores `{nombre}` y usa `Object.hasOwn`.
-- **Fase 2 (hecha, 14/09/2026).** Las 142 historias de país en rumano en `src/data/country-histories/ro/` y los 142 pies de portada en `src/i18n/country-captions-ro.ts`. `countryHistory(nombre, lang)` cae al español si falta una traducción. `npm test` exige la traducción completa y con la misma forma que el español.
-- **Fase 3 (pendiente):** lecciones, documentos y preguntas, tema a tema, empezando por `rumania`. Hay que decidir cómo se sirve el contenido rumano, porque el de Supabase está en español.
+- **Fase 2 (hecha, 14/09/2026).** Las 142 historias de país en rumano en `src/data/country-histories/ro/` y los 142 pies de portada en `src/i18n/country-captions-ro.ts`. `countryHistory(nombre, lang)` cae al español si falta una traducción. Las capitales, que Wikidata da en español, se traducen con `CAPITAL_NAMES_RO` y `capitalLabel` (Bucarest → București). `npm test` exige la traducción completa y con la misma forma que el español.
+- **Mantenimiento:** cambiar una historia o un pie en español obliga a cambiar el rumano; el test detecta que falte o que no cuadren párrafos y fechas, no que el contenido difiera.
+- **Fase 3 (en marcha desde el 16/09/2026):** lecciones, documentos y preguntas, tema a tema. Traducido: `rumania`. Diseño aplicado:
+  - Lecciones rumanas empaquetadas en `src/data/topics/ro/<slug>.ts`, con la misma forma que el tema español; `useLesson` las sirve cuando el idioma es rumano y cae al español si un tema no está traducido. Sin migración ni SQL.
+  - Quiz: enunciados, opciones y explicaciones rumanas en el paquete, emparejadas con las opciones de la base de datos por su posición. La corrección sigue en el servidor (`check_quiz_answer`, `submit_quiz_attempt`) con los ids reales, y el navegador sigue sin conocer la respuesta correcta (§10).
+  - Test de forma: mismos apartados, fechas, conceptos, debates, fuentes, preguntas y opciones que el español, mismo número de pies de imagen y las mismas notas destacadas. Un tema sin traducir no es fallo.
+  - Tipo `TopicTranslation` en `src/data/types.ts`; traducciones en `src/data/topics/ro/<slug>.ts` y registro en `src/data/topics/ro/index.ts`. `useLesson` y `useTopics` aplican la traducción al pintar (computed sobre `locale`), así que el idioma se cambia sin volver a pedir nada al servidor. Los apartados solo se sustituyen si hay los mismos que en español: los índices son los que usan figuras, documentos y progreso guardado.

@@ -3,7 +3,8 @@ import { supabase } from '../lib/supabase.ts'
 import { quizQuestions } from '../data/history.ts'
 import { useAuthStore } from '../stores/auth.ts'
 import { shuffled } from '../lib/shuffle.ts'
-import { t } from '../lib/i18n.ts'
+import { locale, t } from '../lib/i18n.ts'
+import { topicTranslation } from '../data/topics/ro/index.ts'
 
 export interface QuizOption {
   id: string
@@ -38,17 +39,54 @@ const demoAnswers = new Map(quizQuestions.map((question) => [
   { correctOptionId: String(question.answer), explanation: question.explanation },
 ]))
 
+/* Traducción del quiz (SPEC §20, fase 3).
+ *
+ *  Las preguntas siguen viniendo de Supabase en español y la corrección la sigue
+ *  haciendo el servidor con los ids reales: aquí solo se cambia el texto que se
+ *  pinta. El emparejamiento es por POSICIÓN, que es lo único estable entre el
+ *  repositorio y la base de datos: `get_quiz_questions` devuelve las opciones
+ *  ordenadas por `question_options.position`, y esa posición es el índice de la
+ *  opción en el tema español, que es de donde se generó el seed.
+ *
+ *  Si algo no cuadra —tema sin traducir, enunciado que no aparece en el banco
+ *  local, distinto número de opciones— se deja el español. */
+interface QuestionTranslation {
+  topicTitle: string
+  question: string
+  options: string[]
+  explanation: string
+}
+
+function questionTranslation(topicSlug: string, spanishPrompt: string, optionCount: number): QuestionTranslation | null {
+  const ro = topicTranslation(topicSlug, locale.value)
+  if (!ro) return null
+  const bank = quizQuestions.filter((question) => question.topicId === topicSlug)
+  const index = bank.findIndex((question) => question.question === spanishPrompt)
+  const translated = index >= 0 ? ro.questions[index] : undefined
+  if (!translated || translated.options.length !== optionCount) return null
+  return { topicTitle: ro.title, ...translated }
+}
+
+/** Explicación traducida de cada pregunta servida, por su id. La corrección
+ *  viene del servidor; esto solo sustituye el texto que se lee después. */
+const translatedExplanations = new Map<string, string>()
+
 function demoQuestions(topicSlug: string | null): QuizQuestionUI[] {
   const source = topicSlug ? quizQuestions.filter((question) => question.topicId === topicSlug) : quizQuestions
-  return source.map((question) => ({
-    id: String(question.id),
-    era: question.era,
-    topic: question.topic,
-    prompt: question.question,
-    // El `id` es el índice original y es lo que compara `checkAnswer`; el orden
-    // en que se pintan lo decide `shuffled`. Ver src/lib/shuffle.ts.
-    options: shuffled(question.options.map((label, index) => ({ id: String(index), label }))),
-  }))
+  return source.map((question) => {
+    const ro = questionTranslation(question.topicId, question.question, question.options.length)
+    if (ro) translatedExplanations.set(String(question.id), ro.explanation)
+    else translatedExplanations.delete(String(question.id))
+    return {
+      id: String(question.id),
+      era: question.era,
+      topic: ro?.topicTitle ?? question.topic,
+      prompt: ro?.question ?? question.question,
+      // El `id` es el índice original y es lo que compara `checkAnswer`; el orden
+      // en que se pintan lo decide `shuffled`. Ver src/lib/shuffle.ts.
+      options: shuffled(question.options.map((label, index) => ({ id: String(index), label: ro?.options[index] ?? label }))),
+    }
+  })
 }
 
 export function useQuiz() {
@@ -63,15 +101,22 @@ export function useQuiz() {
       const { data, error } = await supabase.rpc('get_quiz_questions', { p_topic_slug: topicSlug, p_limit: limit })
       if (error) throw error
       isDemoMode.value = false
-      return ((data ?? []) as unknown as RawQuestionRow[]).map((row) => ({
-        id: row.question_id,
-        era: row.era_title,
-        topic: row.topic_slug.replaceAll('-', ' '),
-        prompt: row.prompt,
-        // El orden que devuelve la base de datos arrastra el mismo sesgo que el
-        // repositorio, porque el seed se genera de ahí. Se baraja igualmente.
-        options: shuffled(row.options),
-      }))
+      return ((data ?? []) as unknown as RawQuestionRow[]).map((row) => {
+        // Las opciones llegan ordenadas por `position`, que es el índice de la
+        // opción en el tema español: por eso la traducción casa por posición.
+        const ro = questionTranslation(row.topic_slug, row.prompt, row.options.length)
+        if (ro) translatedExplanations.set(row.question_id, ro.explanation)
+        else translatedExplanations.delete(row.question_id)
+        return {
+          id: row.question_id,
+          era: row.era_title,
+          topic: ro?.topicTitle ?? row.topic_slug.replaceAll('-', ' '),
+          prompt: ro?.question ?? row.prompt,
+          // El orden que devuelve la base de datos arrastra el mismo sesgo que el
+          // repositorio, porque el seed se genera de ahí. Se baraja igualmente.
+          options: shuffled(row.options.map((option, index) => ({ ...option, label: ro?.options[index] ?? option.label }))),
+        }
+      })
     } catch (err) {
       console.error('useQuiz: no se pudieron cargar preguntas desde Supabase', err)
       isDemoMode.value = true
@@ -83,7 +128,11 @@ export function useQuiz() {
     if (isDemoMode.value) {
       const answer = demoAnswers.get(questionId)
       return answer
-        ? { isCorrect: optionId === answer.correctOptionId, correctOptionId: answer.correctOptionId, explanation: answer.explanation }
+        ? {
+            isCorrect: optionId === answer.correctOptionId,
+            correctOptionId: answer.correctOptionId,
+            explanation: translatedExplanations.get(questionId) ?? answer.explanation,
+          }
         : { isCorrect: false, correctOptionId: optionId, explanation: t('quiz.demoMissing') }
     }
     try {
@@ -95,7 +144,13 @@ export function useQuiz() {
       const rows = (Array.isArray(data) ? data : [data]) as Array<{ is_correct: boolean; correct_option_id: string; explanation: string }>
       const result = rows[0]
       if (!result) throw new Error('check_quiz_answer no ha devuelto ninguna fila')
-      return { isCorrect: result.is_correct, correctOptionId: result.correct_option_id, explanation: result.explanation }
+      // El acierto y la opción correcta vienen SIEMPRE del servidor; lo único que
+      // se cambia aquí es el idioma de la explicación.
+      return {
+        isCorrect: result.is_correct,
+        correctOptionId: result.correct_option_id,
+        explanation: translatedExplanations.get(questionId) ?? result.explanation,
+      }
     } catch (err) {
       console.error('useQuiz: no se pudo comprobar la respuesta', err)
       return { isCorrect: false, correctOptionId: optionId, explanation: t('quiz.checkFailed') }

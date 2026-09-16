@@ -36,6 +36,8 @@ import { ES as MENSAJES_ES } from '../src/i18n/es.ts'
 import { RO as MENSAJES_RO } from '../src/i18n/ro.ts'
 import { COUNTRY_NAMES_RO, ERA_NAMES_RO, CONTINENT_NAMES_RO, CAPITAL_NAMES_RO } from '../src/i18n/names-ro.ts'
 import { COUNTRY_CAPTIONS_RO } from '../src/i18n/country-captions-ro.ts'
+import { TOPIC_TRANSLATIONS_RO, topicTranslation } from '../src/data/topics/ro/index.ts'
+import { TOPIC_IMAGES } from '../src/data/topic-images.ts'
 import { t, countryLabel, eraLabel, continentLabel, capitalLabel } from '../src/lib/i18n.ts'
 import { COUNTRY_FACTS } from '../src/data/country-facts.ts'
 
@@ -263,6 +265,50 @@ ok(
   factRows({ code: 'xx', name: 'X', capital: null, continent: null, population: null, area: null }).length === 0,
   'una ficha sin ningún dato no pinta filas vacías',
 )
+
+// 2.e Temas traducidos al rumano (SPEC §20, fase 3) --------------------------
+// La traducción tiene que tener la MISMA FORMA que el tema español: es lo que
+// permite traducir el quiz sin tocar la base de datos, porque la opción `i`
+// traducida es la opción `i` de `question_options`. Un tema sin traducir no es
+// un fallo: se muestra en español.
+for (const [slug, ro] of Object.entries(TOPIC_TRANSLATIONS_RO)) {
+  const tema = topics.find((topic) => topic.id === slug)
+  ok(tema !== undefined, `hay traducción rumana de «${slug}», que no es ningún tema`)
+  if (!tema) continue
+  const preguntasEs = quizQuestions.filter((pregunta) => pregunta.topicId === slug)
+  ok(ro.sections.length === tema.sections.length, `${slug}: ${ro.sections.length} apartados en rumano y ${tema.sections.length} en español`)
+  ok(ro.keyDates.length === tema.keyDates.length, `${slug}: ${ro.keyDates.length} fechas en rumano y ${tema.keyDates.length} en español`)
+  ok(ro.concepts.length === tema.concepts.length, `${slug}: ${ro.concepts.length} conceptos en rumano y ${tema.concepts.length} en español`)
+  ok(ro.debates.length === tema.debates.length, `${slug}: ${ro.debates.length} debates en rumano y ${tema.debates.length} en español`)
+  ok(ro.sources.length === tema.sources.length, `${slug}: ${ro.sources.length} fuentes en rumano y ${tema.sources.length} en español`)
+  ok(ro.questions.length === preguntasEs.length, `${slug}: ${ro.questions.length} preguntas en rumano y ${preguntasEs.length} en español`)
+  ok((ro.documents ?? []).length === (tema.documents ?? []).length, `${slug}: distinto número de documentos comentados`)
+  ok((ro.images ?? []).length === (TOPIC_IMAGES[slug] ?? []).length, `${slug}: ${(ro.images ?? []).length} pies de imagen en rumano y ${(TOPIC_IMAGES[slug] ?? []).length} imágenes`)
+  for (const [indice, seccion] of ro.sections.entries()) {
+    ok(seccion.title.trim().length > 0 && seccion.body.trim().length > 0, `${slug}: apartado ${indice} sin texto en rumano`)
+    // El callout es opcional, pero si lo tiene el español debe tenerlo el rumano:
+    // es una idea del apartado, no un adorno.
+    ok(Boolean(seccion.callout) === Boolean(tema.sections[indice].callout), `${slug}: el apartado ${indice} no coincide en tener nota destacada`)
+  }
+  for (const [indice, pregunta] of ro.questions.entries()) {
+    ok(pregunta.question.trim().length > 0, `${slug}: pregunta ${indice} sin enunciado en rumano`)
+    ok(pregunta.explanation.trim().length > 0, `${slug}: pregunta ${indice} sin explicación en rumano`)
+    ok(
+      pregunta.options.length === preguntasEs[indice].options.length,
+      `${slug}: la pregunta ${indice} tiene ${pregunta.options.length} opciones en rumano y ${preguntasEs[indice].options.length} en español`,
+    )
+    ok(new Set(pregunta.options).size === pregunta.options.length, `${slug}: la pregunta ${indice} repite opciones en rumano`)
+    ok(pregunta.options.every((opcion) => opcion.trim().length > 0), `${slug}: la pregunta ${indice} tiene una opción vacía en rumano`)
+  }
+  for (const debate of ro.debates) {
+    ok(debate.positions.length === tema.debates[ro.debates.indexOf(debate)].positions.length, `${slug}: un debate no tiene las mismas posiciones que en español`)
+    ok(debate.state.trim().length > 0, `${slug}: un debate rumano sin estado de la cuestión`)
+  }
+  ok(ro.title.trim().length > 0 && ro.summary.trim().length > 0 && ro.description.trim().length > 0, `${slug}: faltan título, resumen o descripción en rumano`)
+}
+ok(topicTranslation('rumania', 'ro') !== null, 'el tema rumania se sirve traducido en rumano')
+ok(topicTranslation('rumania', 'es') === null, 'en español no se aplica traducción')
+ok(topicTranslation('constructor', 'ro') === null, 'topicTranslation no devuelve propiedades heredadas')
 
 // 3. Filtros de la biblioteca ----------------------------------------------
 const EPOCAS = new Set(eras.map((era) => era.name))

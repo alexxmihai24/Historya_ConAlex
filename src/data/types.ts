@@ -135,6 +135,33 @@ export interface CountryHistory {
   dates: Array<[string, string]>
 }
 
+/** Un tema traducido a otro idioma (SPEC §20, fase 3).
+ *
+ *  Tiene la MISMA FORMA que el tema español: mismos apartados en el mismo orden,
+ *  mismas fechas, mismos conceptos y las mismas preguntas con sus opciones en la
+ *  misma posición. Esa correspondencia por posición es lo que permite traducir el
+ *  quiz sin tocar la base de datos: la opción `i` traducida es la opción `i` de
+ *  `question_options`, y la corrección la sigue haciendo el servidor con los ids
+ *  reales (SPEC §10.4).
+ *
+ *  Un tema sin traducción no es un error: se muestra en español. */
+export interface TopicTranslation {
+  title: string
+  description: string
+  summary: string
+  years: string
+  keyDates: Array<{ date: string; event: string }>
+  sections: StudySection[]
+  concepts: Concept[]
+  debates: Debate[]
+  sources: Source[]
+  documents?: TopicDocument[]
+  /** Pie y texto alternativo de cada imagen, en el orden de `TOPIC_IMAGES[slug]`. */
+  images?: Array<{ alt: string; caption?: string }>
+  /** En el mismo orden que el banco español, y con las opciones en la misma posición. */
+  questions: Array<{ question: string; options: string[]; explanation: string }>
+}
+
 /** Datos básicos de un país del atlas, tomados de Wikidata.
  *
  *  Existen para que TODO país del globo tenga ficha, no solo los 22 que tienen

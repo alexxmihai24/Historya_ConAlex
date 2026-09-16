@@ -1,8 +1,10 @@
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { supabase } from '../lib/supabase.ts'
 import { topics as demoTopics } from '../data/history.ts'
 import type { Topic, TopicImage } from '../data/types.ts'
 import { safeImage } from '../lib/images.ts'
+import { topicTranslation } from '../data/topics/ro/index.ts'
+import { locale } from '../lib/i18n.ts'
 
 export type DbEducationLevel = 'eso' | 'bachillerato' | 'universidad' | 'curioso'
 export type EducationLevel = 'ESO' | 'Bachillerato' | 'Universidad' | 'Curioso'
@@ -81,13 +83,21 @@ function mapDemoTopic(topic: Topic): TopicCard {
 
 const demoCards: TopicCard[] = demoTopics.map(mapDemoTopic)
 
+/** Título, resumen y periodo del tema en el idioma elegido (SPEC §20, fase 3).
+ *  El `id` (slug) no cambia: es lo que usan las rutas y la base de datos. */
+function translatedCard(card: TopicCard, lang: 'es' | 'ro'): TopicCard {
+  const ro = topicTranslation(card.id, lang)
+  return ro ? { ...card, title: ro.title, description: ro.description, years: ro.years } : card
+}
+
 export function useTopics() {
-  const topics = ref<TopicCard[]>(demoCards)
+  const rawTopics = ref<TopicCard[]>(demoCards)
+  const topics = computed(() => rawTopics.value.map((card) => translatedCard(card, locale.value)))
   const isLoading = ref(Boolean(supabase))
 
   async function load() {
     if (!supabase) {
-      topics.value = demoCards
+      rawTopics.value = demoCards
       isLoading.value = false
       return
     }
@@ -95,10 +105,10 @@ export function useTopics() {
     try {
       const { data, error } = await supabase.from('topics').select(TOPIC_SELECT)
       if (error) throw error
-      topics.value = ((data ?? []) as unknown as RawTopicRow[]).map(mapTopicRow)
+      rawTopics.value = ((data ?? []) as unknown as RawTopicRow[]).map(mapTopicRow)
     } catch (err) {
       console.error('useTopics: no se pudo cargar el catálogo desde Supabase', err)
-      topics.value = demoCards
+      rawTopics.value = demoCards
     } finally {
       isLoading.value = false
     }
