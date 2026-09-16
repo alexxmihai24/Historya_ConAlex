@@ -7,6 +7,7 @@ import { mundoActualRo } from './mundo-actual.ts'
 import { guerraFriaRo } from './guerra-fria.ts'
 import { entreguerrasRo } from './entreguerras.ts'
 import { granGuerraRo } from './gran-guerra.ts'
+import { revolucionRusaRo } from './revolucion-rusa.ts'
 
 /* Traducciones al rumano de los temas (SPEC §20, fase 3). Se van añadiendo tema
    a tema; lo que no está aquí se muestra en español, que es el original. */
@@ -19,6 +20,7 @@ export const TOPIC_TRANSLATIONS_RO: Record<string, TopicTranslation> = {
   'guerra-fria': guerraFriaRo,
   entreguerras: entreguerrasRo,
   'gran-guerra': granGuerraRo,
+  'revolucion-rusa': revolucionRusaRo,
 }
 
 /** Traducción de un tema, o `null` si ese tema todavía no está traducido. */
