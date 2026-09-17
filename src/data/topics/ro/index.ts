@@ -34,6 +34,7 @@ import { prehistoriaRo } from './prehistoria.ts'
 import { chinaImperialRo } from './china-imperial.ts'
 import { indiaRo } from './india.ts'
 import { japonRo } from './japon.ts'
+import { africaRo } from './africa.ts'
 
 /* Traducciones al rumano de los temas (SPEC §20, fase 3). Se van añadiendo tema
    a tema; lo que no está aquí se muestra en español, que es el original. */
@@ -73,6 +74,7 @@ export const TOPIC_TRANSLATIONS_RO: Record<string, TopicTranslation> = {
   'china-imperial': chinaImperialRo,
   india: indiaRo,
   japon: japonRo,
+  africa: africaRo,
 }
 
 /** Traducción de un tema, o `null` si ese tema todavía no está traducido. */
