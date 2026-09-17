@@ -31,6 +31,7 @@ import { greciaRo } from './grecia.ts'
 import { egiptoRo } from './egipto.ts'
 import { mesopotamiaRo } from './mesopotamia.ts'
 import { prehistoriaRo } from './prehistoria.ts'
+import { chinaImperialRo } from './china-imperial.ts'
 
 /* Traducciones al rumano de los temas (SPEC §20, fase 3). Se van añadiendo tema
    a tema; lo que no está aquí se muestra en español, que es el original. */
@@ -67,6 +68,7 @@ export const TOPIC_TRANSLATIONS_RO: Record<string, TopicTranslation> = {
   egipto: egiptoRo,
   mesopotamia: mesopotamiaRo,
   prehistoria: prehistoriaRo,
+  'china-imperial': chinaImperialRo,
 }
 
 /** Traducción de un tema, o `null` si ese tema todavía no está traducido. */
