@@ -26,6 +26,7 @@ import { islamRo } from './islam.ts'
 import { bizancioRo } from './bizancio.ts'
 import { romaImperioRo } from './roma-imperio.ts'
 import { romaRepublicaRo } from './roma-republica.ts'
+import { helenismoRo } from './helenismo.ts'
 
 /* Traducciones al rumano de los temas (SPEC §20, fase 3). Se van añadiendo tema
    a tema; lo que no está aquí se muestra en español, que es el original. */
@@ -57,6 +58,7 @@ export const TOPIC_TRANSLATIONS_RO: Record<string, TopicTranslation> = {
   bizancio: bizancioRo,
   'roma-imperio': romaImperioRo,
   'roma-republica': romaRepublicaRo,
+  helenismo: helenismoRo,
 }
 
 /** Traducción de un tema, o `null` si ese tema todavía no está traducido. */
