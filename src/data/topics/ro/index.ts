@@ -16,6 +16,7 @@ import { ilustracionRo } from './ilustracion.ts'
 import { absolutismoRo } from './absolutismo.ts'
 import { revolucionCientificaRo } from './revolucion-cientifica.ts'
 import { reformaRo } from './reforma.ts'
+import { descubrimientosRo } from './descubrimientos.ts'
 
 /* Traducciones al rumano de los temas (SPEC §20, fase 3). Se van añadiendo tema
    a tema; lo que no está aquí se muestra en español, que es el original. */
@@ -37,6 +38,7 @@ export const TOPIC_TRANSLATIONS_RO: Record<string, TopicTranslation> = {
   absolutismo: absolutismoRo,
   'revolucion-cientifica': revolucionCientificaRo,
   reforma: reformaRo,
+  descubrimientos: descubrimientosRo,
 }
 
 /** Traducción de un tema, o `null` si ese tema todavía no está traducido. */
