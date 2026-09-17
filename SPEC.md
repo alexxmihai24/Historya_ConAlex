@@ -1,7 +1,7 @@
 # Especificación del producto · Historya con Alex
 
-**Última actualización:** 16 de septiembre de 2026
-**Estado:** 37 temas y 590 preguntas. Los 142 países del atlas tienen historia breve y foto de portada como fondo de su ficha. **Bilingüe español/rumano** desde el 14/09/2026: interfaz y fichas de país traducidas; lecciones y quiz pendientes (§20). Rediseño «Atlas Nocturno» implantado. 156 imágenes de temas y 142 portadas de país, con licencia comprobada. **SQL al día:** migraciones y seed ejecutados por el cliente el 11/09/2026; tras un `npm run seed` solo hay que volver a lanzar los archivos de `supabase/seed/`. No volver a ejecutar `20260826` ni `20260827`. Antes de pegar nada, `npm run check:sql` (§17.1).
+**Última actualización:** 17 de septiembre de 2026
+**Estado:** 37 temas y 590 preguntas. Los 142 países del atlas tienen historia breve y foto de portada como fondo de su ficha. **Bilingüe español/rumano** desde el 14/09/2026, y **completo desde el 17/09/2026**: interfaz, fichas de país, lecciones y quiz traducidos al 100 % (§20). Rediseño «Atlas Nocturno» implantado. 156 imágenes de temas y 142 portadas de país, con licencia comprobada. **SQL al día:** migraciones y seed ejecutados por el cliente el 11/09/2026; tras un `npm run seed` solo hay que volver a lanzar los archivos de `supabase/seed/`. No volver a ejecutar `20260826` ni `20260827`. Antes de pegar nada, `npm run check:sql` (§17.1).
 
 > **Carencias señaladas por el cliente y su estado.**
 > 1. **Nivel educativo.** ❌ Retirado el 11/09/2026 a petición del cliente: cada lección tiene un solo texto. Ver §15.
@@ -11,7 +11,7 @@
 > 4. **La respuesta del quiz era la «b» en el 85 % de las preguntas.** ✅ Corregido con barajado al servir. Ver §16.
 > 5. **Poco tiempo por pregunta.** ✅ 40 s en lugar de 20.
 > 7. **Portada en la ficha de país.** ✅ Foto histórica como fondo de la cabecera de los 142 países (§19).
-> 8. **Segundo idioma, rumano.** ⏳ Interfaz y fichas de país hechas; lecciones y quiz en marcha, tema a tema (§20).
+> 8. **Segundo idioma, rumano.** ✅ Completo el 17/09/2026: interfaz, fichas de país, lecciones y quiz — los 37 temas traducidos (§20). Pendiente solo de probar en producción con dos cuentas reales y dar el visto bueno al tono.
 
 ## 1. Visión
 
