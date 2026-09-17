@@ -11,6 +11,7 @@ import { revolucionRusaRo } from './revolucion-rusa.ts'
 import { imperialismoRo } from './imperialismo.ts'
 import { industrializacionRo } from './industrializacion.ts'
 import { revolucionesLiberalesRo } from './revoluciones-liberales.ts'
+import { revolucionFrancesaRo } from './revolucion-francesa.ts'
 
 /* Traducciones al rumano de los temas (SPEC §20, fase 3). Se van añadiendo tema
    a tema; lo que no está aquí se muestra en español, que es el original. */
@@ -27,6 +28,7 @@ export const TOPIC_TRANSLATIONS_RO: Record<string, TopicTranslation> = {
   imperialismo: imperialismoRo,
   industrializacion: industrializacionRo,
   'revoluciones-liberales': revolucionesLiberalesRo,
+  'revolucion-francesa': revolucionFrancesaRo,
 }
 
 /** Traducción de un tema, o `null` si ese tema todavía no está traducido. */
