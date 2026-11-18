@@ -1,8 +1,28 @@
 # Historya con Alex
 
-Plataforma educativa de historia construida con Vue 3, TypeScript y Vite. Incluye una biblioteca filtrable, lecciones de lectura, quiz global o por tema, perfil personalizable y acceso preparado para Supabase.
+> Plataforma para estudiar historia universal en español y rumano: lecciones, quiz y un globo interactivo para entrar por país.
 
-Consulta [SPEC.md](./SPEC.md) para el alcance completo, el modelo de datos, decisiones de seguridad y el plan para retomar el desarrollo.
+**🔗 Demo:** https://historya-con-alex.vercel.app
+
+| | |
+| --- | --- |
+| **Contenido** | 37 temas escritos a nivel universitario, 590 preguntas y 142 países con ficha propia |
+| **Stack** | Vue 3 · TypeScript · Vite · Supabase (PostgreSQL, RLS, funciones RPC) · d3-geo + topojson |
+| **Formato** | PWA instalable que sigue funcionando sin conexión tras la primera visita |
+
+## Qué hay detrás
+
+- **El quiz no se puede trampear desde el navegador.** Las respuestas correctas nunca se envían al cliente: la corrección y la puntuación se calculan dentro de PostgreSQL mediante funciones RPC.
+- **RLS en todas las tablas.** Cada usuario solo lee y modifica su perfil, sus intereses y su progreso; los roles de administración viven fuera del perfil y no se pueden tocar desde la web.
+- **Contenido versionado en Git.** Un archivo TypeScript por tema y un script que genera el seed SQL a partir de ellos, en lugar de editar datos a mano en la base de datos.
+- **Imágenes con licencia comprobada.** Un script descarga de Wikimedia Commons y rechaza cualquier archivo que no sea de dominio público o con licencia libre; la CSP no admite imágenes de terceros.
+- **Corrección de un sesgo real.** La respuesta correcta era la «b» en el 85 % de las preguntas; ahora las opciones se barajan al servirlas.
+- **Globo propio.** Proyección ortográfica con d3-geo sobre el atlas de Natural Earth, empaquetado en el bundle y sin dependencias en tiempo de ejecución.
+- **Comprobaciones automáticas** de contenido, seguridad y SQL (`npm test`, `npm run check:security`, `npm run check:sql`).
+
+El alcance completo, el modelo de datos y las decisiones registradas están en [SPEC.md](./SPEC.md).
+
+---
 
 ## Ejecutar el proyecto
 
